@@ -1,0 +1,6 @@
+st7789==1.0.1
+Pillow==12.3.0
+spidev==3.8
+numpy==2.5.3
+gpiod==2.5.0
+gpiodevice==0.1.0
