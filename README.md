@@ -6,6 +6,23 @@ Dashboard compacto para Raspberry Pi com display TFT ST7789 1.3" 240×240 via SP
 
 O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit, e exibe informações de sistema em três páginas.
 
+## Visão do produto
+
+O projeto evoluirá de um monitor fixo de recursos para um **microdashboard modular, offline-first e controlado por dois botões**. O núcleo continuará leve e funcional sem internet, enquanto páginas opcionais poderão acrescentar monitoramento de homelab, relógio, Pomodoro, meteorologia e integrações de IoT.
+
+Uma interface web responsiva está planejada para permitir que o usuário, pelo computador ou celular:
+
+- escolha quais páginas e recursos aparecem no display;
+- altere a ordem das páginas e o intervalo do carrossel;
+- configure limites de alerta e integrações opcionais;
+- visualize uma prévia fiel de 240×240 gerada pelo mesmo renderizador Pillow usado no ST7789;
+- aplique mudanças sem editar o código-fonte.
+
+O MVP físico descrito abaixo está validado. A interface web e os módulos adicionais ainda fazem parte do roadmap.
+
+- [Roadmap do produto](ROADMAP.md)
+- [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)
+
 ## Recursos
 
 ### 1. STATUS
@@ -188,6 +205,17 @@ Depois reinicie para testar o autostart:
 sudo reboot
 ```
 
+## Próximas evoluções
+
+O próximo ciclo prioriza a confiabilidade do núcleo antes da interface web:
+
+- detectar automaticamente a interface de rede ativa, sem depender de `wlan0` ou `wlan1`;
+- ajustar, truncar ou quebrar textos que excedam os 240 pixels;
+- representar falhas como `SEM DADOS`, sem confundi-las com valor zero;
+- separar páginas, provedores de dados, botões e renderização em módulos testáveis;
+- gerar screenshots de teste sem exigir o display físico;
+- introduzir configuração persistente e prévia web antes das integrações externas.
+
 ## Comandos úteis
 
 Reiniciar o dashboard:
@@ -265,9 +293,12 @@ Isso é normal quando o Tailscale não está instalado, não está conectado ou 
 ├── requirements.txt
 ├── LICENSE
 ├── README.md
+├── ROADMAP.md
+├── project-status.json
 ├── systemd/
 │   └── bench-display.service
 └── docs/
+    ├── WEB_CONTROL_PANEL.md
     └── images/
         ├── hero.jpg
         ├── status.jpg

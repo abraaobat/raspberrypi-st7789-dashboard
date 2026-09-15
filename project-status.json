@@ -1,28 +1,31 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-15T17:12:00-04:00",
-  "status": "MVP operacional e documentado",
-  "statusClass": "ops",
-  "progress": 90,
-  "roadmap": "MVP v1 • display + navegação + systemd",
-  "current": "Dashboard validado em Raspberry Pi 3 Model B V1.2 com ST7789 1.3\" 240×240 SPI. As páginas STATUS, REDE e HARDWARE estão funcionais, a navegação por dois botões físicos foi validada e o serviço systemd/autostart está documentado.",
-  "architecture": "Raspberry Pi OS → Python → ST7789 SPI → páginas de sistema/rede/hardware + GPIO23/GPIO24 → systemd",
-  "next": "Executar uma rodada final de robustez após reboot e consolidar configuração/documentação para facilitar reutilização em outros Raspberry Pi.",
-  "action": "Validar autostart após reboot, navegação contínua e coleta de métricas por período prolongado.",
+  "updatedAt": "2026-09-15T18:17:00-04:00",
+  "status": "MVP v1 operacional • evolução modular em construção",
+  "statusClass": "build",
+  "progress": 34,
+  "roadmap": "D0–D6 • MVP v1 concluído • foco atual D1/D2",
+  "current": "O MVP v1 está operacional e documentado: ST7789 240×240 validado no Raspberry Pi 3 com páginas STATUS, REDE e HARDWARE, dois botões, autostart por systemd e fotos reais. O escopo ampliado foi consolidado como microdashboard modular com configuração web responsiva e prévia fiel pelo mesmo renderizador Pillow.",
+  "architecture": "Browser → Web API → Config/Secrets → Providers → Page Registry → Pillow Renderer → ST7789 + Preview PNG",
+  "next": "Concluir D1/D2: validar robustez após reboot, detectar rede automaticamente, ajustar textos, representar erros, modularizar páginas e criar testes de renderização sem hardware antes do Web Control Panel.",
+  "action": "Refatorar o MVP em núcleo modular e configurável preservando o comportamento físico já validado.",
   "subprojects": [
-    "ST7789 240×240 SPI ✓",
-    "STATUS page ✓",
-    "REDE page ✓",
-    "HARDWARE page ✓",
+    "ST7789 240×240 physical MVP ✓",
+    "STATUS / REDE / HARDWARE pages ✓",
     "GPIO23/GPIO24 navigation ✓",
     "systemd/autostart ✓",
     "Documentação + fotos ✓",
-    "Robustez/reuso"
+    "Reliability and text fitting",
+    "Page Registry + Providers",
+    "Preview Renderer",
+    "Web Control Panel",
+    "SysOps / Homelab Pack",
+    "Desk / IoT Packs"
   ],
   "activity": {
     "date": "2026-09-15",
-    "type": "project_added",
-    "text": "Raspberry Pi ST7789 Dashboard publicado no Project Command Center como MVP operacional: três páginas, navegação física e autostart systemd validados/documentados."
+    "type": "roadmap",
+    "text": "Após o MVP físico ser publicado como operacional, a visão de produto, o roadmap D0–D6 e a especificação do Web Control Panel foram consolidados; o próximo gate é modularizar coleta e renderização sem regredir o display real."
   }
 }
