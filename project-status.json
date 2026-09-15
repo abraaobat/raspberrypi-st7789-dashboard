@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "projectId": "raspberrypi-st7789-dashboard",
+  "updatedAt": "2026-09-15T17:12:00-04:00",
+  "status": "MVP operacional e documentado",
+  "statusClass": "ops",
+  "progress": 90,
+  "roadmap": "MVP v1 • display + navegação + systemd",
+  "current": "Dashboard validado em Raspberry Pi 3 Model B V1.2 com ST7789 1.3\" 240×240 SPI. As páginas STATUS, REDE e HARDWARE estão funcionais, a navegação por dois botões físicos foi validada e o serviço systemd/autostart está documentado.",
+  "architecture": "Raspberry Pi OS → Python → ST7789 SPI → páginas de sistema/rede/hardware + GPIO23/GPIO24 → systemd",
+  "next": "Executar uma rodada final de robustez após reboot e consolidar configuração/documentação para facilitar reutilização em outros Raspberry Pi.",
+  "action": "Validar autostart após reboot, navegação contínua e coleta de métricas por período prolongado.",
+  "subprojects": [
+    "ST7789 240×240 SPI ✓",
+    "STATUS page ✓",
+    "REDE page ✓",
+    "HARDWARE page ✓",
+    "GPIO23/GPIO24 navigation ✓",
+    "systemd/autostart ✓",
+    "Documentação + fotos ✓",
+    "Robustez/reuso"
+  ],
+  "activity": {
+    "date": "2026-09-15",
+    "type": "project_added",
+    "text": "Raspberry Pi ST7789 Dashboard publicado no Project Command Center como MVP operacional: três páginas, navegação física e autostart systemd validados/documentados."
+  }
+}
