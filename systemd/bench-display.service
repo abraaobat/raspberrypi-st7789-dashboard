@@ -1,0 +1,14 @@
+[Unit]
+Description=Bench ST7789 Display
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi
+ExecStart=/home/pi/st7789-env/bin/python /home/pi/bench_display.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
