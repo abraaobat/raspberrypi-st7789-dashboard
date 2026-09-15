@@ -1,12 +1,12 @@
 [Unit]
-Description=Bench ST7789 Display
+Description=Raspberry Pi ST7789 Dashboard
 After=network.target
 
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/home/pi
-ExecStart=/home/pi/st7789-env/bin/python /home/pi/bench_display.py
+WorkingDirectory=/home/pi/raspberrypi-st7789-dashboard
+ExecStart=/home/pi/st7789-env/bin/python /home/pi/raspberrypi-st7789-dashboard/bench_display.py
 Restart=always
 RestartSec=2
 
