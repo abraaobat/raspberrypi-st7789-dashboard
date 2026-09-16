@@ -114,6 +114,8 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 O foco é a **homologação integrada de D1–D3 no Raspberry Pi real**: instalar os dois serviços, acessar pelo celular, aplicar ordem/carrossel/limites e confirmar a resposta do ST7789 e dos botões. O próximo desenvolvimento funcional será D4 somente depois desse gate.
 
+O deploy deste gate está automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
+
 ## Fora do escopo inicial
 
 - editor visual livre por pixel;

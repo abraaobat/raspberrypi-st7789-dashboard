@@ -122,6 +122,18 @@ Neste módulo o **GPIO24 é um botão**, portanto ele não deve ser usado como `
 
 ## Instalação
 
+### Instalação automática recomendada
+
+Depois de clonar o repositório e habilitar o SPI, execute no Raspberry Pi como usuário normal:
+
+```bash
+./scripts/install.sh
+```
+
+O instalador detecta o usuário e os caminhos reais, executa os testes e habilita os serviços. Consulte o [roteiro de deploy e homologação](docs/DEPLOYMENT.md).
+
+### Instalação manual
+
 ### 1. Atualize o sistema
 
 ```bash
@@ -364,6 +376,9 @@ Isso é normal quando o Tailscale não está instalado, não está conectado ou 
 ├── static/
 ├── templates/
 ├── tests/
+├── scripts/
+│   ├── install.sh
+│   └── validate_install.sh
 ├── requirements.txt
 ├── LICENSE
 ├── README.md
@@ -373,6 +388,7 @@ Isso é normal quando o Tailscale não está instalado, não está conectado ou 
 │   ├── bench-display.service
 │   └── bench-display-web.service
 └── docs/
+    ├── DEPLOYMENT.md
     ├── WEB_CONTROL_PANEL.md
     └── images/
         ├── hero.jpg
