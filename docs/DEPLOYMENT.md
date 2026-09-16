@@ -92,4 +92,4 @@ Para homologar a versão 0.3.0, falta apenas confirmar no hardware:
 - uma fonte HTTP/JSON escolhida pelo usuário;
 - preservação da configuração e do PIN durante a atualização.
 
-Estado em 16/09/2026: versão 0.3.0 implantada, 23 testes aprovados no ARM, serviços/API saudáveis e configuração anterior preservada. As renderizações 240×240 de Clima e SysOps foram geradas no próprio Pi; resta ativá-las e inspecioná-las no TFT físico.
+Estado em 16/09/2026: versão 0.3.0 implantada, 24 testes aprovados no ARM, serviços/API saudáveis e configuração anterior preservada. As renderizações 240×240 de Clima e SysOps foram geradas no próprio Pi; resta ativá-las e inspecioná-las no TFT físico.
