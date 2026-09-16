@@ -364,8 +364,9 @@ def draw_sysops_page(snapshot: dict, config: dict, page_number: int, page_count:
     draw.text((12, 128), "ALIMENTAÇÃO", font=load_font(12, True), fill=PURPLE)
     power = throttle or "SEM DADOS"
     power_color = GREEN if power == "OK" else (GRAY if throttle is None else ORANGE)
-    power_value, power_font = fit_text(draw, power, 120, 13, 10, True)
-    draw.text((108, 127), power_value, font=power_font, fill=power_color)
+    power_value, power_font = fit_text(draw, power, 90, 13, 10, True)
+    power_x = 228 - text_width(draw, power_value, power_font)
+    draw.text((power_x, 127), power_value, font=power_font, fill=power_color)
     draw.line((12, 150, 228, 150), fill=CARD_BORDER)
 
     services = values.get("services") or []

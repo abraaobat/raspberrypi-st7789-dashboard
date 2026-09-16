@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-16T00:06:35-04:00",
-  "status": "v0.3.0 pronta • Clima, SysOps e fontes personalizadas em homologação",
+  "updatedAt": "2026-09-16T00:12:26-04:00",
+  "status": "v0.3.0 implantada • novas páginas em homologação física",
   "statusClass": "validate",
-  "progress": 78,
+  "progress": 80,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "A versão 0.3.0 adiciona Clima com cache, SysOps, páginas HTTP/JSON criadas pelo usuário e perfis de display. A migração preserva o painel v0.2 e mantém as páginas novas desativadas. Testes de software e fluxo completo no navegador foram aprovados.",
+  "current": "A versão 0.3.0 está implantada no Raspberry Pi com serviços e API saudáveis. Clima com cache, SysOps, páginas HTTP/JSON e perfis de display passaram por 23 testes no ARM, fluxo no navegador e renderização 240×240 no próprio Pi; a configuração v0.2 e o PIN foram preservados.",
   "architecture": "Browser → API autenticada → Config/Registry → System + async providers → Pillow Renderer → Display Profile → ST7789/Preview",
-  "next": "Implantar a versão 0.3.0 no Raspberry Pi e homologar visualmente Clima, SysOps e uma fonte HTTP/JSON no ST7789.",
-  "action": "Executar deploy automatizado, validação de serviços e teste manual das novas páginas sem alterar a ordem já homologada.",
+  "next": "Homologar visualmente Clima, SysOps e uma fonte HTTP/JSON no ST7789, ativando-as pelo painel quando conveniente.",
+  "action": "Configurar localização e serviços no painel, ativar as novas páginas e confirmar legibilidade e navegação nos botões físicos.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
@@ -32,6 +32,6 @@
   "activity": {
     "date": "2026-09-16",
     "type": "build",
-    "text": "v0.3.0 implementada com Clima/Open-Meteo, SysOps, fontes HTTP/JSON seguras e perfis de display; testes automatizados e fluxo real no navegador aprovados, aguardando apenas homologação visual no ST7789."
+    "text": "v0.3.0 implantada no Raspberry Pi: 23 testes no ARM, serviços/API e renderizações Clima/SysOps aprovados; configuração anterior preservada, aguardando apenas homologação visual no ST7789."
   }
 }

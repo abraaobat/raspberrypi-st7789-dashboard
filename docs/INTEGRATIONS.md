@@ -28,7 +28,7 @@ A página **SysOps** combina:
 
 - ocupação da partição raiz;
 - gateway detectado pela rota padrão e seu ping;
-- resultado de `vcgencmd get_throttled` quando disponível;
+- resultado de `vcgencmd get_throttled` quando disponível, traduzido em `OK`, `ALERTA` atual ou `HISTÓRICO`;
 - até quatro serviços `systemd` definidos no painel.
 
 Os nomes dos serviços aceitam apenas letras, números, `@`, `_`, `.`, `-` e sufixo opcional `.service`. O backend chama `systemctl is-active` com argumentos separados e nunca interpola shell.

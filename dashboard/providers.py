@@ -232,15 +232,26 @@ def service_statuses(services: list[str]) -> list[dict]:
     return statuses
 
 
-def throttling_status() -> str | None:
+def throttling_details() -> tuple[str | None, str | None]:
     raw = run(["vcgencmd", "get_throttled"])
     if not raw or "=" not in raw:
-        return None
+        return None, None
     try:
         flags = int(raw.split("=", 1)[1], 16)
     except ValueError:
-        return None
-    return "OK" if flags == 0 else f"0x{flags:x}"
+        return None, None
+    raw_label = f"0x{flags:x}"
+    if flags == 0:
+        return "OK", raw_label
+    if flags & 0xF:
+        return "ALERTA", raw_label
+    if flags & 0xF0000:
+        return "HISTÓRICO", raw_label
+    return raw_label, raw_label
+
+
+def throttling_status() -> str | None:
+    return throttling_details()[0]
 
 
 def usb_count() -> int | None:
@@ -264,6 +275,7 @@ class SystemCollector:
         except OSError:
             disk_percent = None
 
+        throttling, throttling_raw = throttling_details()
         return {
             "cpuPercent": self.cpu.read(),
             "ramPercent": memory_percent(),
@@ -276,7 +288,8 @@ class SystemCollector:
             "kernel": platform.release(),
             "usbCount": usb_count(),
             "spi": Path("/dev/spidev0.0").exists(),
-            "throttling": throttling_status(),
+            "throttling": throttling,
+            "throttlingRaw": throttling_raw,
         }
 
 
@@ -429,6 +442,7 @@ def collect_sysops(snapshot: dict, settings: dict) -> dict:
         "gateway": gateway,
         "pingMs": ping_milliseconds(gateway),
         "throttling": snapshot.get("throttling"),
+        "throttlingRaw": snapshot.get("throttlingRaw"),
         "services": service_statuses(settings.get("services") or []),
     }
 

@@ -1,10 +1,24 @@
 import unittest
 from unittest.mock import patch
 
-from dashboard.providers import fetch_custom_page, fetch_weather, json_path, validate_source_url
+from dashboard.providers import (
+    fetch_custom_page,
+    fetch_weather,
+    json_path,
+    throttling_details,
+    validate_source_url,
+)
 
 
 class ProviderTests(unittest.TestCase):
+    @patch("dashboard.providers.run")
+    def test_throttling_flags_distinguish_current_and_historical_events(self, run_mock):
+        run_mock.return_value = "throttled=0x50000"
+        self.assertEqual(throttling_details(), ("HISTÓRICO", "0x50000"))
+
+        run_mock.return_value = "throttled=0x50005"
+        self.assertEqual(throttling_details(), ("ALERTA", "0x50005"))
+
     def test_json_path_supports_objects_and_array_indexes(self):
         payload = {"items": [{"state": "online"}]}
         self.assertEqual(json_path(payload, "items.0.state"), "online")
