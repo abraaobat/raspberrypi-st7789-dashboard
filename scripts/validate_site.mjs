@@ -16,8 +16,9 @@ assert.ok(/<meta name="description" content="[^"]+"/.test(html),'Description is 
 assert.ok(html.includes('data-copy-pix'),'PIX copy controls are missing');
 assert.ok(html.includes('id="pixKey"'),'The visible PIX key is missing');
 
-for(const [,reference] of html.matchAll(/(?:src|href)="(\.\/[^"?#]+)"/g)){
-  assert.ok(fs.statSync(path.resolve(site,reference)).isFile(),`Missing local asset: ${reference}`);
+for(const [,reference] of html.matchAll(/(?:src|href)="(\.\/[^\"]+)"/g)){
+  const filename=reference.split(/[?#]/)[0];
+  assert.ok(fs.statSync(path.resolve(site,filename)).isFile(),`Missing local asset: ${reference}`);
 }
 const ids=new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(match=>match[1]));
 for(const [,fragment] of html.matchAll(/href="#([^"]+)"/g)){

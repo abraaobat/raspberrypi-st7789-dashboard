@@ -10,6 +10,7 @@
 - configuração e PIN anteriores preservados na atualização;
 - landing page bilíngue publicada com fotos reais, sitemap/robots e contribuição opcional por Pix confirmado;
 - publicação GitHub Pages e testes de CI concluídos com sucesso; acesso público HTTP 200.
+- correção das fotos pretas e imagens esticadas na landing page: originais restaurados, QR Pix preservado e proporções conferidas no navegador em 1440/980/390/320 px, em português e inglês (simulação de tamanhos, não novo teste físico no celular).
 
 ## Primeiro gate manual restante
 

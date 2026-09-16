@@ -6,7 +6,13 @@ Static, bilingual landing page prepared for GitHub Pages and Google indexing.
 
 The repository includes `.github/workflows/pages.yml`, which publishes `site/` whenever the landing page changes on `main`.
 
-Before deployment, `node scripts/validate_site.mjs` checks local assets, metadata, section links, translations and saved language preferences.
+Before deployment, the workflow checks:
+
+- `node scripts/validate_site.mjs`: assets (including cache-versioned URLs), metadata, links, translations and saved language preferences;
+- `python scripts/validate_site_images.py` (Pillow required): decodable/nonblank images, EXIF-oriented HTML dimensions, original hardware photos and the exact maintainer-confirmed PIX QR;
+- `node scripts/validate_site_browser.mjs http://127.0.0.1:8092/` (Playwright/Chromium required): all five images keep their natural proportions at 1440, 980, 390 and 320 pixels, in both languages, without horizontal overflow or browser errors.
+
+For browser verification, serve `site/` locally on port 8092. An existing Playwright installation can be selected with `ST7789_PLAYWRIGHT_PATH` (absolute path to its `index.mjs`); `ST7789_BROWSER_CHANNEL=chrome` uses an installed Chrome in an isolated headless profile. `ST7789_SCREENSHOTS` selects an optional output directory. The workflow installs its own isolated Chromium and does not use personal browser sessions.
 
 Live URL, verified with HTTP 200 on 16/09/2026:
 
@@ -35,6 +41,8 @@ The optional support section uses the same public PIX key and validated QR code 
 
 ## Accuracy rules
 
+- Hardware photos must remain byte-for-byte copies of `docs/images/weather.jpg` and `docs/images/sysops.jpg`. A previous resizing conversion erased their pixels; it was replaced with the originals on 16/09/2026.
+- Keep responsive image heights automatic. JPEG orientation is EXIF-based (portrait 3024×4032); the web-panel screenshot is landscape and the PIX QR is square. Do not stretch or crop these assets.
 - Do not advertise experimental SSD1306 or ILI9341 profiles as physical drivers.
 - Keep the local web panel described as LAN/tailnet software, not an Internet-facing service.
 - Do not claim that custom HTTP/JSON sources support authentication tokens until the local secrets vault exists.

@@ -107,6 +107,7 @@ Critério de saída: módulos podem ser instalados e removidos sem aumentar a su
 
 - instalador e atualização segura;
 - landing page bilíngue no GitHub Pages, preparada para indexação e apoio via Pix; ✅
+- proteção da publicação contra fotos vazias, proporções incorretas e transbordamento em telas de computador/celular; ✅ testes automatizados
 - configuração inicial assistida;
 - backup e restauração de configuração;
 - matriz de Raspberry Pi e módulos ST7789 validados;
