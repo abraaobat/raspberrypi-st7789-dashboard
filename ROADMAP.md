@@ -119,9 +119,18 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-D0–D3 estão concluídos e homologados. A versão 0.3.0 antecipou partes de D4–D6: SysOps e Clima estão homologados no ST7789 real; fontes HTTP/JSON e perfis de display estão implementados e cobertos por testes; a página pública bilíngue está preparada para GitHub Pages e Google Search Console. O foco imediato é homologar uma fonte personalizada no display; depois entram conectores autenticados, Docker, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.
+D0–D3 estão concluídos e homologados. A versão 0.3.0 antecipou partes de D4–D6: SysOps e Clima estão homologados no ST7789 real; fontes HTTP/JSON e perfis de display estão implementados e cobertos por testes; a página pública bilíngue está publicada no GitHub Pages com Pix confirmado. A verificação da propriedade no Google Search Console aguarda login do mantenedor. O foco seguinte é homologar uma fonte personalizada no display; depois entram conectores autenticados, Docker, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
+
+## Sequência de retomada
+
+1. **Fonte personalizada no hardware:** criar pelo painel uma página HTTP/JSON de interesse real e confirmar sua legibilidade no ST7789. O núcleo, a extração e a API já possuem testes; esse gate é somente físico.
+2. **Conectores autenticados:** definir e implementar um cofre local de tokens, sem devolver segredos ao navegador, expô-los em logs ou armazená-los no Git.
+3. **Homelab/IoT guiado:** adicionar conectores para Pi-hole, Home Assistant e MQTT/Node-RED sobre o contrato de provedores existente, com cache, estados de erro e atualização independente.
+4. **Outros displays:** implementar e homologar drivers SSD1306 e ILI9341. Os perfis e a adaptação do framebuffer não substituem o teste físico de cada módulo.
+
+O roteiro de continuidade e os gates pendentes estão em [docs/NEXT_SESSION.md](docs/NEXT_SESSION.md).
 
 ## Fora do escopo inicial
 

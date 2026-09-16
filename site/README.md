@@ -6,7 +6,9 @@ Static, bilingual landing page prepared for GitHub Pages and Google indexing.
 
 The repository includes `.github/workflows/pages.yml`, which publishes `site/` whenever the landing page changes on `main`.
 
-Expected URL:
+Before deployment, `node scripts/validate_site.mjs` checks local assets, metadata, section links, translations and saved language preferences.
+
+Live URL, verified with HTTP 200 on 16/09/2026:
 
 `https://abraaobat.github.io/raspberrypi-st7789-dashboard/`
 
@@ -16,13 +18,20 @@ If the first workflow run requests setup, open **Settings → Pages** in the rep
 
 The page includes semantic headings, crawlable text, a canonical URL, descriptions, Open Graph metadata, `SoftwareApplication` JSON-LD, `robots.txt` and `sitemap.xml`.
 
-After the site is live, add its URL to Google Search Console and submit:
+Search Console registration and sitemap submission remain pending because the available browser requires a Google login. To finish:
+
+1. Sign in to [Google Search Console](https://search.google.com/search-console).
+2. Add a **URL-prefix** property with the exact live URL above.
+3. Verify ownership with the HTML meta tag. The page currently reuses the maintainer's public verification tag from the ESP32 AdBlocker page; replace it if Google issues a different tag for this property.
+4. Open **Sitemaps** and submit:
 
 `https://abraaobat.github.io/raspberrypi-st7789-dashboard/sitemap.xml`
 
+Submission is not a guarantee of immediate indexing. See Google's [property setup](https://support.google.com/webmasters/answer/34592?hl=pt-BR), [ownership verification](https://support.google.com/webmasters/answer/9008080?hl=pt-BR) and [sitemap guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap).
+
 ## PIX support
 
-The optional support section uses the same public PIX key and validated QR code already published by the maintainer on the ESP32 AdBlock Gateway page. It does not imply a purchase, subscription or exclusive software license.
+The optional support section uses the same public PIX key and validated QR code already published by the maintainer on the ESP32 AdBlock Gateway page. The maintainer explicitly confirmed this destination before publication. It does not imply a purchase, subscription or exclusive software license.
 
 ## Accuracy rules
 

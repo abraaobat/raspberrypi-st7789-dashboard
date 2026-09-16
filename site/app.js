@@ -25,16 +25,15 @@ function applyLanguage(language){
 
 function copyPix(button){
   const copy=translations[document.documentElement.lang]||translations.en;
-  const original=button.textContent;
   const done=()=>{button.textContent=copy.copied;setTimeout(()=>{button.textContent=button.classList.contains('copy-icon')?'⧉':copy.copyPix;},1600);};
   if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(pixKey).then(done).catch(()=>fallbackCopy(done));}
   else fallbackCopy(done);
   function fallbackCopy(callback){const area=document.createElement('textarea');area.value=pixKey;area.setAttribute('readonly','');area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();try{document.execCommand('copy');callback();}finally{area.remove();}}
 }
 
-let preferred='en';
-try{preferred=localStorage.getItem('st7789-site-language')||preferred;}catch(_error){}
-if(preferred==='en'&&navigator.language&&navigator.language.toLowerCase().startsWith('pt'))preferred='pt-BR';
+let preferred;
+try{preferred=localStorage.getItem('st7789-site-language');}catch(_error){}
+if(!translations[preferred])preferred=navigator.language&&navigator.language.toLowerCase().startsWith('pt')?'pt-BR':'en';
 applyLanguage(preferred);
 languageSelect.addEventListener('change',event=>applyLanguage(event.target.value));
 document.querySelectorAll('[data-copy-pix]').forEach(button=>button.addEventListener('click',()=>copyPix(button)));

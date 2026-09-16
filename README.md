@@ -51,11 +51,12 @@ O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0
 
 O repositório inclui uma landing page bilíngue em `site/`, publicada automaticamente pelo GitHub Pages. Ela apresenta o projeto com texto indexável, fotos reais, metadados estruturados, sitemap, robots e uma seção opcional de apoio via Pix com QR Code e cópia da chave.
 
-O endereço esperado é:
+O endereço público, validado em 16/09/2026, é:
 
 `https://abraaobat.github.io/raspberrypi-st7789-dashboard/`
 
 As instruções de publicação e indexação estão em [site/README.md](site/README.md).
+O roteiro para a próxima sessão está em [docs/NEXT_SESSION.md](docs/NEXT_SESSION.md).
 
 ### 1. STATUS
 

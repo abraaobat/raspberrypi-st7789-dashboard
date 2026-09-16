@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-16T01:00:00-04:00",
+  "updatedAt": "2026-09-16T12:43:10Z",
   "status": "v0.3.0 homologada no ST7789 • expansões em andamento",
   "statusClass": "ops",
   "progress": 86,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "A versão 0.3.0 está implantada no Raspberry Pi com serviços e API saudáveis. Clima e SysOps foram homologados visualmente no ST7789 real; páginas HTTP/JSON e perfis de display passaram por 24 testes no ARM. Uma landing page bilíngue com fotos reais, SEO técnico e apoio via Pix foi adicionada para publicação no GitHub Pages.",
+  "current": "v0.3.0 implantada no Raspberry Pi, com Clima e SysOps homologados no ST7789 real, 24 testes aprovados e configuração/PIN preservados. Landing page bilíngue publicada no GitHub Pages com fotos reais, SEO técnico e Pix confirmado; implantação, CI e acesso público HTTP 200 aprovados.",
   "architecture": "Browser → API autenticada → Config/Registry → System + async providers → Pillow Renderer → Display Profile → ST7789/Preview",
-  "next": "Homologar uma fonte HTTP/JSON no ST7789 e avançar conectores autenticados, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.",
+  "next": "Finalizar Search Console após login do mantenedor; homologar uma fonte HTTP/JSON no ST7789 e avançar cofre local, conectores Homelab/IoT e drivers adicionais.",
   "action": "Criar pelo painel uma página HTTP/JSON de interesse do usuário e confirmar sua legibilidade no display físico.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
@@ -28,11 +28,18 @@
     "Custom HTTP/JSON pages ✓ software",
     "Display profiles foundation ✓ software",
     "Public landing page + Google indexing foundation ✓",
+    "Google Search Console — login/verification pending",
     "Desk / IoT Packs"
   ],
+  "runtime": {
+    "label": "Página pública do projeto",
+    "url": "https://abraaobat.github.io/raspberrypi-st7789-dashboard/",
+    "status": "available",
+    "note": "Landing page e Pix publicados; o painel de controle do Raspberry Pi permanece restrito à rede local/tailnet."
+  },
   "activity": {
     "date": "2026-09-16",
-    "type": "build",
-    "text": "Landing page bilíngue criada com fotos reais do ST7789, SEO técnico, sitemap, publicação automática no GitHub Pages e apoio opcional via Pix."
+    "type": "deployment",
+    "text": "Landing page bilíngue publicada no GitHub Pages com fotos reais do ST7789, SEO técnico, sitemap e Pix confirmado; implantação, CI e HTTP 200 aprovados. Search Console aguarda login do mantenedor."
   }
 }
