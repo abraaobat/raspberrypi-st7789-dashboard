@@ -4,7 +4,7 @@ Dashboard compacto para Raspberry Pi com display TFT ST7789 1.3" 240×240 via SP
 
 ![Raspberry Pi ST7789 Dashboard](docs/images/hero.jpg)
 
-O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit, e exibe informações de sistema em três páginas.
+O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. Além das páginas locais, a versão 0.3 permite adicionar clima, saúde operacional e fontes HTTP/JSON pelo navegador.
 
 ## Visão do produto
 
@@ -15,13 +15,17 @@ Pelo computador ou celular, o usuário pode:
 - escolher quais páginas e recursos aparecem no display;
 - alterar a ordem das páginas e o intervalo do carrossel;
 - configurar limites de alerta e unidade de temperatura;
+- configurar previsão do tempo por latitude e longitude;
+- monitorar disco, gateway, alimentação e serviços `systemd` permitidos;
+- criar páginas para APIs HTTP/JSON sem alterar o código;
 - visualizar uma prévia fiel de 240×240 gerada pelo mesmo renderizador Pillow usado no ST7789;
 - aplicar mudanças sem editar o código-fonte ou reiniciar o serviço.
 
-O MVP físico e o Web Control Panel v0.2.0 estão homologados no Raspberry Pi 3. Foram validados no hardware real: botões, autenticação local, prévia ao vivo, ordem das páginas, seleção remota e carrossel automático.
+O MVP físico e o Web Control Panel v0.2.0 estão homologados no Raspberry Pi 3. A versão 0.3.0 preserva essa configuração, adiciona as integrações de forma opt-in e aguarda somente a validação visual final dessas novas páginas no hardware real.
 
 - [Roadmap do produto](ROADMAP.md)
 - [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)
+- [Integrações, clima e fontes personalizadas](docs/INTEGRATIONS.md)
 
 ## Recursos
 
@@ -34,6 +38,8 @@ O MVP físico e o Web Control Panel v0.2.0 estão homologados no Raspberry Pi 3.
 - limites de alerta de temperatura;
 - prévia PNG 240×240 com dados atuais;
 - seleção imediata da página exibida no hardware;
+- formulário de clima, serviços locais e fontes personalizadas;
+- teste de conexão antes de salvar uma fonte HTTP/JSON;
 - configuração JSON validada e gravada de forma atômica.
 
 ![Primeiro acesso protegido por PIN](docs/images/web-auth.png)
@@ -68,6 +74,25 @@ O MVP físico e o Web Control Panel v0.2.0 estão homologados no Raspberry Pi 3.
 - estado da interface SPI
 
 ![Página Hardware](docs/images/hardware.jpg)
+
+### 4. SYSOPS
+
+- uso do disco raiz;
+- latência do gateway padrão;
+- estado de alimentação/throttling;
+- até quatro serviços `systemd` explicitamente permitidos.
+
+### 5. CLIMA
+
+- condição atual com ícone;
+- temperatura, mínima, máxima e probabilidade de chuva;
+- localização explícita e unidade configurável;
+- cache assíncrono e reaproveitamento do último dado quando a rede falha;
+- dados meteorológicos atribuídos ao Open-Meteo.
+
+### Páginas personalizadas
+
+O assistente **Adicionar fonte** transforma um valor de uma resposta HTTP/JSON em uma página do carrossel. Ele suporta objetos e índices de listas por caminhos como `sensor.energy.value` ou `items.0.status`, layouts de métrica e status, unidade e cor. Veja exemplos e limites de segurança em [Integrações](docs/INTEGRATIONS.md).
 
 ## Hardware usado
 
@@ -196,7 +221,7 @@ pip install -r requirements.txt
 python bench_display.py
 ```
 
-O display deve abrir na página `STATUS`. Use os dois botões para navegar pelas três telas.
+O display deve abrir na página `STATUS`. Use os dois botões para navegar pelas páginas ativas.
 
 Em outro terminal, teste o painel web:
 
@@ -258,17 +283,15 @@ O projeto não grava configuração nem credenciais dentro do repositório. Por 
 └── display-state.json
 ```
 
-`config.json` contém apenas opções do dashboard. O PIN é armazenado como hash PBKDF2 com salt; o PIN em texto puro não é salvo.
+`config.json` contém opções do dashboard, localização e URLs de fontes configuradas. O PIN é armazenado como hash PBKDF2 com salt; o PIN em texto puro não é salvo. A versão atual não armazena tokens de APIs externas.
 
 ## Próximas evoluções
 
-O próximo ciclo é de validação e endurecimento no Raspberry Pi real:
-
-- instalar os dois serviços e confirmar atualização sem reinicialização;
-- validar Ethernet, Wi-Fi USB, Tailscale e textos longos no display;
-- executar teste prolongado de botões, carrossel e reboot;
-- ampliar a página Hardware com disco e throttling;
-- iniciar o SysOps/Homelab Pack somente após esse gate.
+- homologar Clima, SysOps e páginas personalizadas no ST7789 real;
+- adicionar credenciais externas por cofre local, sem devolvê-las ao navegador;
+- criar conectores guiados para Home Assistant, MQTT e Pi-hole;
+- implementar drivers físicos para SSD1306 e ILI9341 sobre os perfis já definidos;
+- adicionar exportação, backup e restauração da configuração.
 
 ## Comandos úteis
 
@@ -374,6 +397,7 @@ Isso é normal quando o Tailscale não está instalado, não está conectado ou 
 │   ├── auth.py
 │   ├── catalog.py
 │   ├── config.py
+│   ├── display_profiles.py
 │   ├── providers.py
 │   ├── rendering.py
 │   └── runtime.py
@@ -393,6 +417,7 @@ Isso é normal quando o Tailscale não está instalado, não está conectado ou 
 │   └── bench-display-web.service
 └── docs/
     ├── DEPLOYMENT.md
+    ├── INTEGRATIONS.md
     ├── WEB_CONTROL_PANEL.md
     └── images/
         ├── hero.jpg

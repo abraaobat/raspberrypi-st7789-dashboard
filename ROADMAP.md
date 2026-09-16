@@ -80,23 +80,26 @@ Critério de saída: uma alteração feita no celular aparece no display em pouc
 
 ### D4 — SysOps e Homelab Pack
 
-- uso de disco, gateway, SSID, sinal e ping;
-- saúde de alimentação e throttling;
-- estado de serviços `systemd` permitidos por configuração;
+- uso de disco, gateway, SSID, sinal e ping; ◐ disco, gateway e ping entregues
+- saúde de alimentação e throttling; ✅
+- estado de serviços `systemd` permitidos por configuração; ✅
 - Docker e Tailscale opcionais;
 - integração Pi-hole compatível com a versão local;
-- estados `OK`, `ALERTA`, `OFFLINE`, `SEM DADOS` e `DESATUALIZADO`;
-- cache e frequências de atualização específicas por provedor.
+- estados `OK`, `ALERTA`, `OFFLINE`, `SEM DADOS` e `DESATUALIZADO`; ◐
+- cache e frequências de atualização específicas por provedor. ✅
+
+Situação: primeiro corte implementado na versão 0.3.0, com coleta assíncrona e serviços limitados por allowlist. Aguarda validação visual no ST7789.
 
 Critério de saída: falhas de serviços e rede são visíveis sem comprometer o loop do display.
 
 ### D5 — Desk e IoT Packs
 
 - relógio/data e Pomodoro controlado pelos botões;
-- meteorologia com cache e localização explícita;
+- meteorologia com cache e localização explícita; ✅ software
 - Home Assistant e MQTT/Node-RED opcionais;
 - páginas para portas, luzes, energia e notificações;
 - ticker financeiro opcional, com limites e indicação de atualização.
+- páginas HTTP/JSON criadas pelo usuário a partir de modelos seguros; ✅ software
 
 Critério de saída: módulos podem ser instalados e removidos sem aumentar a superfície obrigatória do núcleo.
 
@@ -106,6 +109,8 @@ Critério de saída: módulos podem ser instalados e removidos sem aumentar a su
 - configuração inicial assistida;
 - backup e restauração de configuração;
 - matriz de Raspberry Pi e módulos ST7789 validados;
+- perfis desacoplados de resolução, cor, rotação e driver; ✅ fundação
+- adaptação de framebuffer testada para 128×64 monocromático e 320×240 colorido; ✅ software
 - documentação de migração e troubleshooting;
 - releases versionadas e rollback.
 
@@ -113,7 +118,7 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-D0–D3 estão concluídos e homologados. O foco passa a ser **D4 — SysOps e Homelab Pack**, começando por disco, gateway, SSID/sinal, ping, throttling e estado de serviços permitidos.
+D0–D3 estão concluídos e homologados. A versão 0.3.0 antecipou partes de D4–D6: SysOps, clima, fontes HTTP/JSON e perfis de display estão implementados e cobertos por testes. O foco imediato é homologar essas páginas no Raspberry Pi real; depois entram conectores autenticados, Docker, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 

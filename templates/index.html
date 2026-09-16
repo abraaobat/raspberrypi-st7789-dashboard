@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07090d">
-  <title>ST7789 Control Panel</title>
+  <title>Display Control</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
   <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
 </head>
 <body>
@@ -27,9 +28,9 @@
   <main id="app" class="shell" hidden>
     <header class="topbar">
       <div>
-        <p class="eyebrow">RASPBERRY PI • ST7789</p>
+        <p class="eyebrow">RASPBERRY PI • DISPLAY HUB</p>
         <h1>Display Control</h1>
-        <p class="subtitle">Escolha o que aparece no display físico e confirme na prévia 240×240.</p>
+        <p class="subtitle">Escolha páginas nativas ou conecte suas próprias fontes de dados.</p>
       </div>
       <div class="top-actions">
         <span id="connectionBadge" class="status-pill"><span></span> Conectando</span>
@@ -52,6 +53,7 @@
         <div class="device-stage">
           <div class="display-device">
             <img id="previewImage" width="240" height="240" alt="Prévia do display ST7789">
+            <div id="previewPlaceholder" class="preview-placeholder" hidden>Salve a nova fonte para gerar a prévia.</div>
           </div>
         </div>
 
@@ -123,6 +125,72 @@
           </div>
         </article>
 
+        <article class="panel integrations-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">INTEGRAÇÕES</p>
+              <h2>Clima e monitoramento</h2>
+            </div>
+            <span class="muted small">Cache automático</span>
+          </div>
+
+          <div class="integration-grid">
+            <section class="integration-card">
+              <div class="integration-title">
+                <span class="integration-icon weather-icon">☀</span>
+                <div><strong>Previsão do tempo</strong><small>Dados: Open-Meteo • uso pessoal</small></div>
+              </div>
+              <label class="compact-field">
+                <span>Nome da localização</span>
+                <input id="weatherLocation" class="text-input" maxlength="32" placeholder="Ex.: Boa Vista">
+              </label>
+              <div class="inline-fields coordinates">
+                <label><span>Latitude</span><input id="weatherLatitude" class="text-input" type="number" min="-90" max="90" step="0.000001" placeholder="2.8235"></label>
+                <label><span>Longitude</span><input id="weatherLongitude" class="text-input" type="number" min="-180" max="180" step="0.000001" placeholder="-60.6758"></label>
+              </div>
+              <label class="select-field">
+                <span>Atualizar previsão</span>
+                <select id="weatherRefresh">
+                  <option value="10">A cada 10 minutos</option>
+                  <option value="15">A cada 15 minutos</option>
+                  <option value="30">A cada 30 minutos</option>
+                  <option value="60">A cada hora</option>
+                </select>
+              </label>
+            </section>
+
+            <section class="integration-card">
+              <div class="integration-title">
+                <span class="integration-icon ops-icon">⌁</span>
+                <div><strong>SysOps local</strong><small>Somente leitura</small></div>
+              </div>
+              <label class="compact-field">
+                <span>Serviços systemd permitidos</span>
+                <input id="sysopsServices" class="text-input" maxlength="323" placeholder="ssh, docker, pihole-FTL">
+                <small>Até quatro nomes, separados por vírgula.</small>
+              </label>
+              <label class="select-field display-profile-field">
+                <span>Perfil do display</span>
+                <select id="displayProfile"></select>
+                <small>Novos drivers poderão reutilizar as mesmas páginas.</small>
+              </label>
+            </section>
+          </div>
+        </article>
+
+        <article class="panel custom-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">FONTES PERSONALIZADAS</p>
+              <h2>Seus apps no display</h2>
+            </div>
+            <button id="addCustomPage" class="button secondary compact" type="button">+ Adicionar fonte</button>
+          </div>
+          <p class="muted custom-intro">Conecte uma URL HTTP/JSON e transforme um campo da resposta em uma página. O display não executa scripts ou comandos da fonte.</p>
+          <div id="customPageList" class="custom-page-list"></div>
+          <div id="customEmpty" class="empty-state">Nenhuma fonte personalizada. Você pode conectar sensores, automações ou serviços do homelab.</div>
+        </article>
+
         <div class="save-bar">
           <div>
             <strong id="saveState">Configuração carregada</strong>
@@ -138,6 +206,41 @@
       <span>Disponível apenas na sua rede local ou tailnet.</span>
     </footer>
   </main>
+
+  <dialog id="customDialog" class="source-dialog">
+    <form id="customForm" class="source-form">
+      <div class="dialog-head">
+        <div>
+          <p class="section-kicker">HTTP / JSON</p>
+          <h2 id="customDialogTitle">Adicionar fonte</h2>
+        </div>
+        <button id="closeCustomDialog" class="dialog-close" type="button" aria-label="Fechar">×</button>
+      </div>
+      <input id="customId" type="hidden">
+      <div class="dialog-grid">
+        <label class="compact-field"><span>Título</span><input id="customTitle" class="text-input" maxlength="22" required placeholder="Energia"></label>
+        <label class="compact-field"><span>Rótulo do valor</span><input id="customValueLabel" class="text-input" maxlength="18" placeholder="CONSUMO"></label>
+      </div>
+      <label class="compact-field"><span>URL da API</span><input id="customUrl" class="text-input" type="url" maxlength="2048" required placeholder="http://192.168.1.10:8080/status"></label>
+      <div class="dialog-grid">
+        <label class="compact-field"><span>Caminho JSON principal</span><input id="customValuePath" class="text-input" maxlength="120" required placeholder="data.value"></label>
+        <label class="compact-field"><span>Caminho secundário</span><input id="customSecondaryPath" class="text-input" maxlength="120" placeholder="data.updated_at"></label>
+      </div>
+      <div class="dialog-grid three">
+        <label class="compact-field"><span>Unidade</span><input id="customUnit" class="text-input" maxlength="10" placeholder="W"></label>
+        <label class="select-field"><span>Layout</span><select id="customLayout"><option value="metric">Métrica</option><option value="status">Status</option></select></label>
+        <label class="select-field"><span>Cor</span><select id="customAccent"><option value="cyan">Ciano</option><option value="blue">Azul</option><option value="green">Verde</option><option value="orange">Laranja</option><option value="purple">Roxo</option><option value="red">Vermelho</option></select></label>
+      </div>
+      <p class="source-note">Use caminhos separados por ponto, como <code>sensor.energy.value</code> ou <code>items.0.status</code>. Respostas têm limite de 128 KiB.</p>
+      <div id="sourceTestResult" class="source-test-result" aria-live="polite"></div>
+      <div class="dialog-actions">
+        <button id="testCustomSource" class="button ghost" type="button">Testar conexão</button>
+        <span></span>
+        <button id="cancelCustomSource" class="button ghost" type="button">Cancelar</button>
+        <button class="button primary" type="submit">Adicionar ao display</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </body>

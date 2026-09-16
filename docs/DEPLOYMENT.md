@@ -43,6 +43,8 @@ No primeiro acesso, crie o PIN local. Depois:
 4. salve;
 5. use **Mostrar esta página no display**.
 
+Na versão 0.3, as páginas novas permanecem desativadas após a atualização. Configure localização, serviços ou fontes em **Integrações**, ative as páginas desejadas e só então aplique as alterações.
+
 ## 4. Validar automaticamente
 
 ```bash
@@ -81,3 +83,11 @@ O fluxo completo foi aprovado no Raspberry Pi 3 com a versão 0.2.0:
 - painel e prévia ao vivo acessíveis;
 - carrossel automático funcionando;
 - ativação e ordem do conteúdo aplicadas no display.
+
+Para homologar a versão 0.3.0, falta apenas confirmar no hardware:
+
+- legibilidade da página Clima;
+- atualização assíncrona sem congelar os botões;
+- disco, gateway, throttling e serviços na página SysOps;
+- uma fonte HTTP/JSON escolhida pelo usuário;
+- preservação da configuração e do PIN durante a atualização.

@@ -3,14 +3,24 @@
 from __future__ import annotations
 
 import json
+import ipaddress
 import os
 import platform
+import re
 import shutil
 import socket
 import subprocess
 import threading
 import time
+from datetime import datetime, timezone
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode, urlsplit
+from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+
+MAX_JSON_BYTES = 128 * 1024
+HTTP_TIMEOUT_SECONDS = 4
 
 
 def run(command: list[str], timeout: float = 2.0) -> str | None:
@@ -152,9 +162,11 @@ def network_snapshot() -> dict:
             addresses[interface] = candidates[0]
 
     default_interface = None
+    gateway = None
     if routes:
         routes.sort(key=lambda row: row.get("metric") or 0)
         default_interface = routes[0].get("dev")
+        gateway = routes[0].get("gateway")
 
     ethernet_interfaces = [name for name in addresses if name.startswith(("eth", "en"))]
     wifi_interfaces = [
@@ -191,6 +203,7 @@ def network_snapshot() -> dict:
 
     return {
         "defaultInterface": default_interface,
+        "gateway": gateway,
         "ethernetInterface": ethernet_interface,
         "ethernetIp": addresses.get(ethernet_interface) if ethernet_interface else None,
         "wifiInterface": wifi_interface,
@@ -199,6 +212,24 @@ def network_snapshot() -> dict:
         "wifiSignal": signal,
         "tailscaleIp": tailscale_ip,
     }
+
+
+def ping_milliseconds(host: str | None) -> float | None:
+    if not host:
+        return None
+    raw = run(["ping", "-c", "1", "-W", "1", host], timeout=2.0)
+    if not raw:
+        return None
+    match = re.search(r"time[=<]([0-9.]+)\s*ms", raw)
+    return float(match.group(1)) if match else None
+
+
+def service_statuses(services: list[str]) -> list[dict]:
+    statuses = []
+    for name in services:
+        status = run(["systemctl", "is-active", name], timeout=2.0) or "offline"
+        statuses.append({"name": name.removesuffix(".service"), "status": status})
+    return statuses
 
 
 def throttling_status() -> str | None:
@@ -263,3 +294,249 @@ class MetricsCache:
                 self.value = self.collector.collect()
                 self.collected_at = now
             return dict(self.value)
+
+
+class _NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, request, file_pointer, code, message, headers, new_url):
+        raise HTTPError(request.full_url, code, "redirecionamento bloqueado", headers, file_pointer)
+
+
+def validate_source_url(url: str) -> None:
+    """Validate a URL before the dashboard makes an outbound request.
+
+    Private and loopback addresses are intentionally allowed because this feature
+    is designed to monitor homelab services. Link-local, multicast, reserved and
+    unspecified destinations remain blocked.
+    """
+
+    parsed = urlsplit(url)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise ValueError("a fonte deve usar HTTP ou HTTPS")
+    if parsed.username or parsed.password:
+        raise ValueError("credenciais na URL não são permitidas")
+    try:
+        addresses = socket.getaddrinfo(parsed.hostname, parsed.port, type=socket.SOCK_STREAM)
+    except OSError as exc:
+        raise ValueError("não foi possível resolver o endereço da fonte") from exc
+    for address in addresses:
+        ip = ipaddress.ip_address(address[4][0])
+        if ip.is_link_local or ip.is_multicast or ip.is_unspecified or ip.is_reserved:
+            raise ValueError("endereço de rede não permitido")
+
+
+def fetch_json(url: str, *, timeout: float = HTTP_TIMEOUT_SECONDS) -> dict | list:
+    validate_source_url(url)
+    request = Request(
+        url,
+        headers={"Accept": "application/json", "User-Agent": "ST7789-Dashboard/0.3"},
+        method="GET",
+    )
+    try:
+        with build_opener(_NoRedirect).open(request, timeout=timeout) as response:
+            body = response.read(MAX_JSON_BYTES + 1)
+    except (HTTPError, URLError, OSError) as exc:
+        raise ValueError("fonte HTTP indisponível") from exc
+    if len(body) > MAX_JSON_BYTES:
+        raise ValueError("resposta JSON excede 128 KiB")
+    try:
+        payload = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError("a fonte não retornou JSON válido") from exc
+    if not isinstance(payload, (dict, list)):
+        raise ValueError("a raiz da resposta deve ser objeto ou lista JSON")
+    return payload
+
+
+def json_path(payload, path: str):
+    value = payload
+    for token in path.split("."):
+        if isinstance(value, list):
+            try:
+                value = value[int(token)]
+            except (ValueError, IndexError) as exc:
+                raise ValueError(f"caminho JSON não encontrado: {path}") from exc
+        elif isinstance(value, dict) and token in value:
+            value = value[token]
+        else:
+            raise ValueError(f"caminho JSON não encontrado: {path}")
+    if isinstance(value, (dict, list)):
+        raise ValueError(f"caminho JSON deve terminar em um valor simples: {path}")
+    return value
+
+
+def fetch_weather(settings: dict) -> dict:
+    query = urlencode(
+        {
+            "latitude": settings["latitude"],
+            "longitude": settings["longitude"],
+            "current": "temperature_2m,apparent_temperature,is_day,weather_code",
+            "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+            "timezone": "auto",
+            "forecast_days": 1,
+        }
+    )
+    payload = fetch_json(f"https://api.open-meteo.com/v1/forecast?{query}")
+    if not isinstance(payload, dict):
+        raise ValueError("resposta meteorológica inválida")
+    current = payload.get("current") or {}
+    daily = payload.get("daily") or {}
+
+    def first(name):
+        values = daily.get(name) or []
+        return values[0] if values else None
+
+    def number(value):
+        if value is None or isinstance(value, bool):
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    return {
+        "configured": True,
+        "locationName": settings.get("locationName") or "LOCAL",
+        "temperatureC": number(current.get("temperature_2m")),
+        "apparentC": number(current.get("apparent_temperature")),
+        "weatherCode": number(current.get("weather_code")),
+        "isDay": bool(current.get("is_day", 1)),
+        "maximumC": number(first("temperature_2m_max")),
+        "minimumC": number(first("temperature_2m_min")),
+        "precipitationProbability": number(first("precipitation_probability_max")),
+    }
+
+
+def fetch_custom_page(definition: dict) -> dict:
+    source = definition["source"]
+    payload = fetch_json(source["url"])
+    secondary_path = source.get("secondaryPath")
+    value = json_path(payload, source["valuePath"])
+    secondary = json_path(payload, secondary_path) if secondary_path else None
+
+    def bounded(item):
+        if isinstance(item, str) and len(item) > 160:
+            return item[:157] + "..."
+        return item
+
+    return {"value": bounded(value), "secondary": bounded(secondary)}
+
+
+def collect_sysops(snapshot: dict, settings: dict) -> dict:
+    network = snapshot.get("network") or {}
+    gateway = network.get("gateway")
+    return {
+        "diskPercent": snapshot.get("diskPercent"),
+        "gateway": gateway,
+        "pingMs": ping_milliseconds(gateway),
+        "throttling": snapshot.get("throttling"),
+        "services": service_statuses(settings.get("services") or []),
+    }
+
+
+class AsyncDataCache:
+    """Non-blocking stale-while-revalidate cache for external integrations."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._items: dict[str, dict] = {}
+
+    def get(self, key: str, signature: str, maximum_age: float, loader) -> dict:
+        now = time.monotonic()
+        with self._lock:
+            item = self._items.get(key)
+            if item is None or item["signature"] != signature:
+                item = {
+                    "signature": signature,
+                    "value": None,
+                    "error": None,
+                    "loadedAt": 0.0,
+                    "updatedAt": None,
+                    "refreshing": False,
+                }
+                self._items[key] = item
+            stale = item["value"] is None or now - item["loadedAt"] >= maximum_age
+            if stale and not item["refreshing"]:
+                item["refreshing"] = True
+                thread = threading.Thread(
+                    target=self._refresh,
+                    args=(key, signature, loader),
+                    daemon=True,
+                    name=f"dashboard-provider-{key}",
+                )
+                thread.start()
+            result = dict(item["value"] or {})
+            result.update(
+                {
+                    "loading": item["value"] is None and item["refreshing"],
+                    "stale": stale and item["value"] is not None,
+                    "error": item["error"],
+                    "updatedAt": item["updatedAt"],
+                }
+            )
+            return result
+
+    def _refresh(self, key: str, signature: str, loader) -> None:
+        try:
+            value = loader()
+            error = None
+        except Exception as exc:  # external providers must never stop the display loop
+            value = None
+            error = str(exc)
+        with self._lock:
+            item = self._items.get(key)
+            if item is None or item["signature"] != signature:
+                return
+            if value is not None:
+                item["value"] = value
+                item["loadedAt"] = time.monotonic()
+                item["updatedAt"] = datetime.now(timezone.utc).isoformat()
+            item["error"] = error
+            item["refreshing"] = False
+
+
+class DataHub:
+    """Route one page to only the providers that it needs."""
+
+    def __init__(self, metrics: MetricsCache | None = None):
+        self.metrics = metrics or MetricsCache()
+        self.external = AsyncDataCache()
+
+    @staticmethod
+    def _signature(value: dict) -> str:
+        return json.dumps(value, sort_keys=True, ensure_ascii=True)
+
+    def get(self, config: dict, page_id: str, maximum_age: float = 1.0) -> dict:
+        snapshot = self.metrics.get(maximum_age)
+        if page_id == "weather":
+            settings = config["weather"]
+            if settings.get("latitude") is None or settings.get("longitude") is None:
+                snapshot["weather"] = {"configured": False, "loading": False}
+            else:
+                snapshot["weather"] = self.external.get(
+                    "weather",
+                    self._signature(settings),
+                    settings["refreshMinutes"] * 60,
+                    lambda: fetch_weather(settings),
+                )
+        elif page_id == "sysops":
+            settings = config["sysops"]
+            signature = self._signature({"settings": settings, "network": snapshot.get("network")})
+            snapshot["sysops"] = self.external.get(
+                "sysops",
+                signature,
+                max(5, maximum_age),
+                lambda: collect_sysops(snapshot, settings),
+            )
+        elif page_id.startswith("custom:"):
+            definition = next(
+                (item for item in config["customPages"] if item["id"] == page_id),
+                None,
+            )
+            if definition:
+                snapshot["custom"] = self.external.get(
+                    page_id,
+                    self._signature(definition),
+                    max(10, maximum_age),
+                    lambda: fetch_custom_page(definition),
+                )
+        return snapshot

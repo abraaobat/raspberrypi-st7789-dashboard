@@ -5,11 +5,18 @@ from __future__ import annotations
 import copy
 import json
 import os
+import re
 from pathlib import Path
+from urllib.parse import urlsplit
 
-from .catalog import PAGE_BY_ID, PAGE_CATALOG
+from .catalog import PAGE_CATALOG, catalog_by_id
+from .display_profiles import DEFAULT_PROFILE_ID, PROFILE_BY_ID
 
 APP_DIR_NAME = "raspberrypi-st7789-dashboard"
+CUSTOM_ID_PATTERN = re.compile(r"custom:[a-z0-9][a-z0-9-]{0,31}$")
+SERVICE_PATTERN = re.compile(r"[A-Za-z0-9@_.-]{1,80}(?:\.service)?$")
+JSON_PATH_PATTERN = re.compile(r"[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+|\.\d+)*$")
+ACCENTS = {"blue", "cyan", "green", "orange", "purple", "red"}
 
 
 class ConfigError(ValueError):
@@ -33,6 +40,7 @@ def default_config() -> dict:
     return {
         "schemaVersion": 1,
         "theme": "dark",
+        "displayProfile": DEFAULT_PROFILE_ID,
         "temperatureUnit": "celsius",
         "carousel": {
             "enabled": False,
@@ -43,6 +51,16 @@ def default_config() -> dict:
             "temperatureWarning": 60,
             "temperatureCritical": 70,
         },
+        "weather": {
+            "locationName": "",
+            "latitude": None,
+            "longitude": None,
+            "refreshMinutes": 15,
+        },
+        "sysops": {
+            "services": [],
+        },
+        "customPages": [],
         "pages": [
             {
                 "id": page["id"],
@@ -51,6 +69,90 @@ def default_config() -> dict:
             }
             for page in PAGE_CATALOG
         ],
+    }
+
+
+def _text(value, name: str, maximum: int, *, required: bool = False) -> str:
+    if value is None:
+        value = ""
+    if not isinstance(value, str):
+        raise ConfigError(f"{name} deve ser texto")
+    value = value.strip()
+    if required and not value:
+        raise ConfigError(f"{name} é obrigatório")
+    if len(value) > maximum:
+        raise ConfigError(f"{name} deve ter no máximo {maximum} caracteres")
+    return value
+
+
+def _optional_float(value, name: str, minimum: float, maximum: float) -> float | None:
+    if value in (None, ""):
+        return None
+    if isinstance(value, bool):
+        raise ConfigError(f"{name} deve ser um número")
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ConfigError(f"{name} deve ser um número") from exc
+    if not minimum <= parsed <= maximum:
+        raise ConfigError(f"{name} deve estar entre {minimum} e {maximum}")
+    return parsed
+
+
+def _custom_page(item: dict, index: int) -> dict:
+    if not isinstance(item, dict):
+        raise ConfigError("cada página personalizada deve ser um objeto")
+    page_id = _text(item.get("id"), f"customPages.{index}.id", 39, required=True)
+    if not CUSTOM_ID_PATTERN.fullmatch(page_id):
+        raise ConfigError(f"id de página personalizada inválido: {page_id!r}")
+
+    source = item.get("source")
+    if not isinstance(source, dict) or source.get("type") != "http-json":
+        raise ConfigError(f"customPages.{index}.source deve usar http-json")
+    url = _text(source.get("url"), f"customPages.{index}.source.url", 2048, required=True)
+    parsed = urlsplit(url)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise ConfigError(f"customPages.{index}.source.url deve usar HTTP ou HTTPS")
+    if parsed.username or parsed.password:
+        raise ConfigError("credenciais não devem ser incluídas na URL")
+
+    value_path = _text(
+        source.get("valuePath"),
+        f"customPages.{index}.source.valuePath",
+        120,
+        required=True,
+    )
+    secondary_path = _text(
+        source.get("secondaryPath"),
+        f"customPages.{index}.source.secondaryPath",
+        120,
+    )
+    if not JSON_PATH_PATTERN.fullmatch(value_path):
+        raise ConfigError(f"caminho JSON principal inválido: {value_path!r}")
+    if secondary_path and not JSON_PATH_PATTERN.fullmatch(secondary_path):
+        raise ConfigError(f"caminho JSON secundário inválido: {secondary_path!r}")
+
+    layout = item.get("layout", "metric")
+    if layout not in {"metric", "status"}:
+        raise ConfigError(f"customPages.{index}.layout inválido")
+    accent = item.get("accent", "cyan")
+    if accent not in ACCENTS:
+        raise ConfigError(f"customPages.{index}.accent inválido")
+
+    return {
+        "id": page_id,
+        "title": _text(item.get("title"), f"customPages.{index}.title", 22, required=True),
+        "description": _text(item.get("description"), f"customPages.{index}.description", 90),
+        "layout": layout,
+        "valueLabel": _text(item.get("valueLabel"), f"customPages.{index}.valueLabel", 18),
+        "unit": _text(item.get("unit"), f"customPages.{index}.unit", 10),
+        "accent": accent,
+        "source": {
+            "type": "http-json",
+            "url": url,
+            "valuePath": value_path,
+            "secondaryPath": secondary_path,
+        },
     }
 
 
@@ -81,6 +183,12 @@ def normalize_config(payload: dict | None) -> dict:
     if theme not in {"dark"}:
         raise ConfigError("tema não suportado")
     result["theme"] = theme
+
+    display_profile = payload.get("displayProfile", result["displayProfile"])
+    selected_profile = PROFILE_BY_ID.get(display_profile)
+    if selected_profile is None or not selected_profile.available:
+        raise ConfigError("displayProfile não suportado por esta instalação")
+    result["displayProfile"] = display_profile
 
     temperature_unit = payload.get("temperatureUnit", result["temperatureUnit"])
     if temperature_unit not in {"celsius", "fahrenheit"}:
@@ -128,6 +236,50 @@ def normalize_config(payload: dict | None) -> dict:
         "temperatureCritical": critical,
     }
 
+    weather = payload.get("weather", {})
+    if not isinstance(weather, dict):
+        raise ConfigError("weather deve ser um objeto")
+    latitude = _optional_float(weather.get("latitude"), "weather.latitude", -90, 90)
+    longitude = _optional_float(weather.get("longitude"), "weather.longitude", -180, 180)
+    if (latitude is None) != (longitude is None):
+        raise ConfigError("latitude e longitude do clima devem ser informadas juntas")
+    result["weather"] = {
+        "locationName": _text(weather.get("locationName"), "weather.locationName", 32),
+        "latitude": latitude,
+        "longitude": longitude,
+        "refreshMinutes": _bounded_int(
+            weather.get("refreshMinutes", result["weather"]["refreshMinutes"]),
+            "weather.refreshMinutes",
+            10,
+            180,
+        ),
+    }
+
+    sysops = payload.get("sysops", {})
+    if not isinstance(sysops, dict):
+        raise ConfigError("sysops deve ser um objeto")
+    services = sysops.get("services", [])
+    if not isinstance(services, list) or len(services) > 4:
+        raise ConfigError("sysops.services deve ter no máximo quatro serviços")
+    normalized_services = []
+    for service in services:
+        service = _text(service, "sysops.services", 80, required=True)
+        if not SERVICE_PATTERN.fullmatch(service):
+            raise ConfigError(f"nome de serviço inválido: {service!r}")
+        if service not in normalized_services:
+            normalized_services.append(service)
+    result["sysops"] = {"services": normalized_services}
+
+    custom_pages = payload.get("customPages", [])
+    if not isinstance(custom_pages, list) or len(custom_pages) > 8:
+        raise ConfigError("customPages deve ter no máximo oito páginas")
+    result["customPages"] = [_custom_page(item, index) for index, item in enumerate(custom_pages)]
+    custom_ids = [item["id"] for item in result["customPages"]]
+    if len(custom_ids) != len(set(custom_ids)):
+        raise ConfigError("id de página personalizada duplicado")
+
+    page_by_id = catalog_by_id(result["customPages"])
+
     requested_pages = payload.get("pages", result["pages"])
     if not isinstance(requested_pages, list):
         raise ConfigError("pages deve ser uma lista")
@@ -138,12 +290,12 @@ def normalize_config(payload: dict | None) -> dict:
         if not isinstance(item, dict):
             raise ConfigError("cada página deve ser um objeto")
         page_id = item.get("id")
-        if page_id not in PAGE_BY_ID:
+        if page_id not in page_by_id:
             raise ConfigError(f"página desconhecida: {page_id!r}")
         if page_id in seen:
             raise ConfigError(f"página duplicada: {page_id}")
         seen.add(page_id)
-        metadata = PAGE_BY_ID[page_id]
+        metadata = page_by_id[page_id]
         normalized_pages.append(
             {
                 "id": page_id,
@@ -157,7 +309,7 @@ def normalize_config(payload: dict | None) -> dict:
             }
         )
 
-    for metadata in PAGE_CATALOG:
+    for metadata in page_by_id.values():
         if metadata["id"] not in seen:
             normalized_pages.append(
                 {

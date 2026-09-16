@@ -35,7 +35,7 @@ echo "==> Instalando dependências do sistema"
 "${SUDO[@]}" apt-get update
 "${SUDO[@]}" apt-get install -y \
   python3-venv python3-pip libopenblas0 fonts-dejavu-core usbutils \
-  iproute2 iw curl
+  iproute2 iputils-ping iw curl ca-certificates
 
 echo "==> Preparando ambiente Python em ${VENV_DIR}"
 python3 -m venv "${VENV_DIR}"

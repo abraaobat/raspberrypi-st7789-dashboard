@@ -20,7 +20,8 @@ O painel é um configurador local, não um substituto do display físico.
 - catálogo de módulos disponíveis;
 - ativação e desativação;
 - ordenação por controles subir/descer;
-- catálogo preparado para receber os perfis SysOps, Homelab, Mesa e IoT nas próximas fases.
+- catálogo extensível com páginas nativas, integrações e fontes personalizadas;
+- remoção e edição de páginas HTTP/JSON criadas pelo usuário.
 
 ### Comportamento
 
@@ -30,11 +31,12 @@ O painel é um configurador local, não um substituto do display físico.
 - limites de alerta;
 - unidade de temperatura.
 
-### Integrações previstas nas próximas fases
+### Integrações entregues na versão 0.3
 
 - serviços `systemd` explicitamente permitidos;
-- Pi-hole, Home Assistant, MQTT, meteorologia e mercado como módulos opcionais;
-- indicador de conexão, erro, cache e idade do último dado.
+- meteorologia opcional com cache;
+- assistente genérico HTTP/JSON com teste de conexão;
+- indicador de conexão, erro e uso do último dado em cache.
 
 ## Arquitetura
 
@@ -50,9 +52,9 @@ Web UI ── API autenticada de configuração
           └── preview endpoint
                     │
                     ▼
-Providers → Page Registry → Pillow Renderer
-                                 ├── ST7789
-                                 └── PNG 240×240
+System + async integrations → Extensible Page Registry → Pillow Renderer
+                                                           ├── Display profile → ST7789
+                                                           └── Preview PNG
 ```
 
 ### Serviços separados
@@ -96,6 +98,7 @@ Requisitos:
 | `PUT` | `/api/config` | validar e salvar configuração |
 | `GET` | `/api/preview?page=status` | PNG 240×240 da página |
 | `POST` | `/api/display/page` | selecionar página ativa permitida |
+| `POST` | `/api/sources/test` | validar e consultar uma fonte HTTP/JSON sem salvá-la |
 
 Não haverá endpoint de shell, instalação arbitrária ou escrita de caminhos fornecidos pelo cliente.
 
@@ -107,6 +110,7 @@ Exemplo conceitual:
 {
   "schemaVersion": 1,
   "theme": "dark",
+  "displayProfile": "st7789-240x240",
   "temperatureUnit": "celsius",
   "carousel": {
     "enabled": true,
@@ -116,8 +120,13 @@ Exemplo conceitual:
   "pages": [
     {"id": "status", "enabled": true, "refreshSeconds": 1},
     {"id": "network", "enabled": true, "refreshSeconds": 5},
-    {"id": "hardware", "enabled": true, "refreshSeconds": 30}
-  ]
+    {"id": "hardware", "enabled": true, "refreshSeconds": 30},
+    {"id": "sysops", "enabled": false, "refreshSeconds": 15},
+    {"id": "weather", "enabled": false, "refreshSeconds": 600}
+  ],
+  "weather": {"locationName": "", "latitude": null, "longitude": null, "refreshMinutes": 15},
+  "sysops": {"services": []},
+  "customPages": []
 }
 ```
 
@@ -147,11 +156,11 @@ Um banco de dados não é necessário no MVP. Estado transitório pode permanece
 
 - funciona em navegador móvel e desktop;
 - mostra prévia igual ao framebuffer enviado ao ST7789;
-- permite ativar e ordenar as três páginas atuais;
+- permite ativar e ordenar páginas nativas e personalizadas;
 - salva carrossel, intervalos, páginas ativas e ordem;
 - aplica a mudança ao display sem reinicialização manual;
 - display continua funcionando se o painel web cair;
 - configuração inválida é rejeitada sem corromper o último estado válido;
 - não existe execução de comandos arbitrários pela API.
 
-Todos os itens foram homologados no Raspberry Pi 3 real em desktop e celular. A validação incluiu primeiro acesso com PIN, prévia ao vivo, botões GPIO23/GPIO24, páginas ativas, ordem do conteúdo, seleção remota e carrossel automático.
+Todos os itens do MVP foram homologados no Raspberry Pi 3 real em desktop e celular. Clima, SysOps, fontes personalizadas e perfis de display possuem testes automatizados e verificação em navegador; resta a inspeção visual dessas novas páginas no ST7789 físico.

@@ -2,14 +2,25 @@ const state = {
   csrf: null,
   config: null,
   catalog: [],
+  displays: [],
   previewIndex: 0,
   dirty: false,
   authConfigured: false,
+  persistedCustomIds: new Set(),
 };
 
 const $ = (selector) => document.querySelector(selector);
 const app = $("#app");
 const authScreen = $("#authScreen");
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
 async function requestJSON(url, options = {}) {
   const headers = {"Content-Type": "application/json", ...(options.headers || {})};
@@ -82,7 +93,9 @@ async function loadApplication() {
     requestJSON("/api/config"),
   ]);
   state.catalog = catalog.pages;
+  state.displays = catalog.displays || [];
   state.config = config;
+  state.persistedCustomIds = new Set(config.customPages.map((item) => item.id));
   state.previewIndex = 0;
   state.dirty = false;
   authScreen.hidden = true;
@@ -110,8 +123,8 @@ function renderSettings() {
     const row = document.createElement("div");
     row.className = `page-row${page.enabled ? "" : " disabled"}`;
     row.innerHTML = `
-      <input class="page-check" type="checkbox" ${page.enabled ? "checked" : ""} aria-label="Ativar ${meta.title}">
-      <div><strong>${meta.title}</strong><small>${meta.description}</small></div>
+      <input class="page-check" type="checkbox" ${page.enabled ? "checked" : ""} aria-label="Ativar ${escapeHTML(meta.title)}">
+      <div><strong>${escapeHTML(meta.title)}</strong><small>${escapeHTML(meta.description)}</small></div>
       <div class="page-actions">
         <button type="button" data-direction="-1" aria-label="Subir" ${index === 0 ? "disabled" : ""}>↑</button>
         <button type="button" data-direction="1" aria-label="Descer" ${index === state.config.pages.length - 1 ? "disabled" : ""}>↓</button>
@@ -142,6 +155,66 @@ function renderSettings() {
   $("#temperatureWarning").value = state.config.thresholds.temperatureWarning;
   $("#temperatureCritical").value = state.config.thresholds.temperatureCritical;
   $("#temperatureUnit").value = state.config.temperatureUnit;
+  $("#weatherLocation").value = state.config.weather.locationName || "";
+  $("#weatherLatitude").value = state.config.weather.latitude ?? "";
+  $("#weatherLongitude").value = state.config.weather.longitude ?? "";
+  $("#weatherRefresh").value = String(state.config.weather.refreshMinutes);
+  $("#sysopsServices").value = state.config.sysops.services.join(", ");
+  renderDisplayProfiles();
+  renderCustomPages();
+}
+
+function renderDisplayProfiles() {
+  const select = $("#displayProfile");
+  select.textContent = "";
+  state.displays.forEach((display) => {
+    const option = document.createElement("option");
+    option.value = display.id;
+    option.textContent = display.label;
+    option.disabled = !display.available;
+    option.selected = display.id === state.config.displayProfile;
+    select.appendChild(option);
+  });
+}
+
+function customCatalogEntry(definition) {
+  return {
+    id: definition.id,
+    title: definition.title,
+    description: definition.description || "Fonte HTTP/JSON personalizada.",
+    kind: "custom",
+    removable: true,
+  };
+}
+
+function syncCustomCatalog() {
+  state.catalog = state.catalog
+    .filter((item) => item.kind !== "custom")
+    .concat(state.config.customPages.map(customCatalogEntry));
+}
+
+function renderCustomPages() {
+  const list = $("#customPageList");
+  list.textContent = "";
+  $("#customEmpty").hidden = state.config.customPages.length > 0;
+  const accentVariables = {
+    blue: "var(--blue)", cyan: "var(--cyan)", green: "var(--green)",
+    orange: "var(--orange)", purple: "#af78ff", red: "var(--danger)",
+  };
+  state.config.customPages.forEach((definition) => {
+    const row = document.createElement("div");
+    row.className = "custom-source-row";
+    row.innerHTML = `
+      <span class="accent-dot" style="background:${accentVariables[definition.accent] || "var(--cyan)"}"></span>
+      <div class="source-copy"><strong>${escapeHTML(definition.title)}</strong><small>${escapeHTML(definition.source.url)} · ${escapeHTML(definition.source.valuePath)}</small></div>
+      <div class="row-buttons">
+        <button class="edit-source" type="button">Editar</button>
+        <button class="remove-source" type="button">Remover</button>
+      </div>`;
+    row.querySelector(".edit-source").addEventListener("click", () => openCustomDialog(definition));
+    row.querySelector(".remove-source").addEventListener("click", () => removeCustomPage(definition.id));
+    list.appendChild(row);
+  });
 }
 
 function movePage(index, direction) {
@@ -173,6 +246,10 @@ function refreshPreview() {
   const meta = catalogEntry(page.id);
   $("#previewTitle").textContent = meta.title;
   $("#previewPosition").textContent = `${state.previewIndex + 1} de ${pages.length}`;
+  const isUnsavedCustom = page.id.startsWith("custom:") && !state.persistedCustomIds.has(page.id);
+  $("#previewPlaceholder").hidden = !isUnsavedCustom;
+  $("#previewImage").hidden = isUnsavedCustom;
+  if (isUnsavedCustom) return;
   $("#previewImage").src = `/api/preview?page=${encodeURIComponent(page.id)}&t=${Date.now()}`;
 }
 
@@ -223,6 +300,146 @@ $("#temperatureUnit").addEventListener("change", (event) => {
   refreshPreview();
 });
 
+function nullableNumber(value) {
+  return value === "" ? null : Number(value);
+}
+
+$("#weatherLocation").addEventListener("change", (event) => {
+  state.config.weather.locationName = event.target.value.trim();
+  markDirty();
+});
+
+$("#weatherLatitude").addEventListener("change", (event) => {
+  state.config.weather.latitude = nullableNumber(event.target.value);
+  markDirty();
+});
+
+$("#weatherLongitude").addEventListener("change", (event) => {
+  state.config.weather.longitude = nullableNumber(event.target.value);
+  markDirty();
+});
+
+$("#weatherRefresh").addEventListener("change", (event) => {
+  state.config.weather.refreshMinutes = Number(event.target.value);
+  markDirty();
+});
+
+$("#sysopsServices").addEventListener("change", (event) => {
+  state.config.sysops.services = event.target.value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  markDirty();
+});
+
+$("#displayProfile").addEventListener("change", (event) => {
+  state.config.displayProfile = event.target.value;
+  markDirty();
+  refreshPreview();
+});
+
+function customFormValue() {
+  const id = $("#customId").value || makeCustomId($("#customTitle").value);
+  let hostname = "Fonte HTTP/JSON personalizada.";
+  try { hostname = `Dados de ${new URL($("#customUrl").value).hostname}`; } catch (_) {}
+  return {
+    id,
+    title: $("#customTitle").value.trim(),
+    description: hostname,
+    layout: $("#customLayout").value,
+    valueLabel: $("#customValueLabel").value.trim(),
+    unit: $("#customUnit").value.trim(),
+    accent: $("#customAccent").value,
+    source: {
+      type: "http-json",
+      url: $("#customUrl").value.trim(),
+      valuePath: $("#customValuePath").value.trim(),
+      secondaryPath: $("#customSecondaryPath").value.trim(),
+    },
+  };
+}
+
+function makeCustomId(title) {
+  const base = title.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24) || "fonte";
+  let candidate = `custom:${base}`;
+  let number = 2;
+  const used = new Set(state.config.customPages.map((item) => item.id));
+  while (used.has(candidate)) candidate = `custom:${base.slice(0, 20)}-${number++}`;
+  return candidate;
+}
+
+function openCustomDialog(definition = null) {
+  $("#customForm").reset();
+  $("#sourceTestResult").textContent = "";
+  $("#sourceTestResult").className = "source-test-result";
+  $("#customDialogTitle").textContent = definition ? "Editar fonte" : "Adicionar fonte";
+  $("#customId").value = definition?.id || "";
+  $("#customTitle").value = definition?.title || "";
+  $("#customValueLabel").value = definition?.valueLabel || "";
+  $("#customUrl").value = definition?.source.url || "";
+  $("#customValuePath").value = definition?.source.valuePath || "";
+  $("#customSecondaryPath").value = definition?.source.secondaryPath || "";
+  $("#customUnit").value = definition?.unit || "";
+  $("#customLayout").value = definition?.layout || "metric";
+  $("#customAccent").value = definition?.accent || "cyan";
+  $("#customDialog").showModal();
+  $("#customTitle").focus();
+}
+
+function closeCustomDialog() {
+  $("#customDialog").close();
+}
+
+function removeCustomPage(id) {
+  state.config.customPages = state.config.customPages.filter((item) => item.id !== id);
+  state.config.pages = state.config.pages.filter((item) => item.id !== id);
+  syncCustomCatalog();
+  markDirty();
+  clampPreview();
+  renderSettings();
+  refreshPreview();
+}
+
+$("#addCustomPage").addEventListener("click", () => openCustomDialog());
+$("#closeCustomDialog").addEventListener("click", closeCustomDialog);
+$("#cancelCustomSource").addEventListener("click", closeCustomDialog);
+
+$("#testCustomSource").addEventListener("click", async () => {
+  const result = $("#sourceTestResult");
+  result.className = "source-test-result";
+  result.textContent = "Testando…";
+  try {
+    const payload = await requestJSON("/api/sources/test", {
+      method: "POST",
+      body: JSON.stringify(customFormValue()),
+    });
+    const detail = payload.secondary == null ? "" : ` · ${payload.secondary}`;
+    result.textContent = `Conexão aprovada: ${payload.value}${detail}`;
+  } catch (error) {
+    result.className = "source-test-result error";
+    result.textContent = error.message;
+  }
+});
+
+$("#customForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (!event.target.reportValidity()) return;
+  const definition = customFormValue();
+  const index = state.config.customPages.findIndex((item) => item.id === definition.id);
+  if (index >= 0) state.config.customPages[index] = definition;
+  else {
+    if (state.config.customPages.length >= 8) return toast("Limite de oito fontes personalizadas.", true);
+    state.config.customPages.push(definition);
+    state.config.pages.push({id: definition.id, enabled: true, refreshSeconds: 60});
+  }
+  syncCustomCatalog();
+  markDirty();
+  closeCustomDialog();
+  renderSettings();
+  refreshPreview();
+});
+
 $("#saveButton").addEventListener("click", async () => {
   const button = $("#saveButton");
   button.disabled = true;
@@ -231,6 +448,8 @@ $("#saveButton").addEventListener("click", async () => {
       method: "PUT",
       body: JSON.stringify(state.config),
     });
+    state.persistedCustomIds = new Set(state.config.customPages.map((item) => item.id));
+    syncCustomCatalog();
     state.dirty = false;
     $("#saveState").textContent = "Configuração aplicada";
     renderSettings();

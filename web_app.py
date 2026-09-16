@@ -11,9 +11,10 @@ from flask import Flask, jsonify, render_template, request, send_file, session
 
 from dashboard import __version__
 from dashboard.auth import AuthError, AuthStore, LoginLimiter
-from dashboard.catalog import PAGE_BY_ID, public_catalog
+from dashboard.catalog import catalog_by_id, public_catalog
 from dashboard.config import ConfigError, enabled_pages, load_config, normalize_config, save_config
-from dashboard.providers import MetricsCache
+from dashboard.display_profiles import public_profiles
+from dashboard.providers import DataHub, fetch_custom_page
 from dashboard.rendering import render_page
 from dashboard.runtime import RuntimeStore
 
@@ -24,7 +25,7 @@ def create_app(test_config=None):
     auth = AuthStore(state_override)
     login_limiter = LoginLimiter()
     runtime = RuntimeStore(state_override)
-    metrics = MetricsCache()
+    data = DataHub()
 
     app = Flask(__name__, template_folder="templates", static_folder="static")
     app.config.update(
@@ -133,7 +134,8 @@ def create_app(test_config=None):
     @app.get("/api/catalog")
     @require_auth
     def catalog():
-        return jsonify({"pages": public_catalog()})
+        config = load_config(state_override)
+        return jsonify({"pages": public_catalog(config["customPages"]), "displays": public_profiles()})
 
     @app.get("/api/config")
     @require_auth
@@ -155,20 +157,37 @@ def create_app(test_config=None):
     @require_auth
     def preview():
         page_id = request.args.get("page", "status")
-        if page_id not in PAGE_BY_ID:
-            return jsonify({"error": "página desconhecida"}), 404
         config = load_config(state_override)
+        if page_id not in catalog_by_id(config["customPages"]):
+            return jsonify({"error": "página desconhecida"}), 404
         if page_id not in [page["id"] for page in enabled_pages(config)]:
             preview_config = normalize_config(config)
             for page in preview_config["pages"]:
                 if page["id"] == page_id:
                     page["enabled"] = True
             config = preview_config
-        image = render_page(page_id, metrics.get(1), config)
+        page_settings = next(page for page in config["pages"] if page["id"] == page_id)
+        image = render_page(page_id, data.get(config, page_id, page_settings["refreshSeconds"]), config)
         buffer = io.BytesIO()
         image.save(buffer, format="PNG")
         buffer.seek(0)
         return send_file(buffer, mimetype="image/png", max_age=0)
+
+    @app.post("/api/sources/test")
+    @require_auth
+    @require_csrf
+    def test_source():
+        payload = request.get_json(silent=True) or {}
+        candidate = {
+            "schemaVersion": 1,
+            "customPages": [payload],
+        }
+        try:
+            definition = normalize_config(candidate)["customPages"][0]
+            result = fetch_custom_page(definition)
+        except (ConfigError, ValueError) as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify({"ok": True, "value": result["value"], "secondary": result["secondary"]})
 
     @app.get("/api/display/state")
     @require_auth

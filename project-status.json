@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-15T23:45:00-04:00",
-  "status": "D1–D3 homologados • operacional no Raspberry Pi",
-  "statusClass": "ops",
-  "progress": 65,
-  "roadmap": "D0–D6 • D0–D3 concluídos • foco atual D4",
-  "current": "A versão 0.2.0 está implantada e homologada no Raspberry Pi 3. SPI, serviços, API, display e prévia estão saudáveis; botões GPIO23/GPIO24, PIN, páginas ativas, ordem do conteúdo, seleção remota e carrossel automático foram aprovados no hardware real.",
-  "architecture": "Browser → Web API autenticada → Config/Runtime → Providers → Page Catalog → Pillow Renderer → ST7789 + Preview PNG",
-  "next": "Iniciar D4 com disco, gateway, SSID/sinal, ping, throttling e estado de serviços explicitamente permitidos.",
-  "action": "Definir e implementar o primeiro corte do SysOps/Homelab Pack sem ampliar a superfície de segurança da API.",
+  "updatedAt": "2026-09-16T00:06:35-04:00",
+  "status": "v0.3.0 pronta • Clima, SysOps e fontes personalizadas em homologação",
+  "statusClass": "validate",
+  "progress": 78,
+  "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
+  "current": "A versão 0.3.0 adiciona Clima com cache, SysOps, páginas HTTP/JSON criadas pelo usuário e perfis de display. A migração preserva o painel v0.2 e mantém as páginas novas desativadas. Testes de software e fluxo completo no navegador foram aprovados.",
+  "architecture": "Browser → API autenticada → Config/Registry → System + async providers → Pillow Renderer → Display Profile → ST7789/Preview",
+  "next": "Implantar a versão 0.3.0 no Raspberry Pi e homologar visualmente Clima, SysOps e uma fonte HTTP/JSON no ST7789.",
+  "action": "Executar deploy automatizado, validação de serviços e teste manual das novas páginas sem alterar a ordem já homologada.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
@@ -23,12 +23,15 @@
     "PIN / CSRF / atomic config ✓",
     "Automated deploy + install audit ✓",
     "Physical integrated validation ✓",
-    "SysOps / Homelab Pack",
+    "SysOps first slice ✓ software",
+    "Weather page ✓ software",
+    "Custom HTTP/JSON pages ✓ software",
+    "Display profiles foundation ✓ software",
     "Desk / IoT Packs"
   ],
   "activity": {
-    "date": "2026-09-15",
-    "type": "validation",
-    "text": "D1–D3 foram homologados no Raspberry Pi real: botões, painel, prévia ao vivo, carrossel automático e ordem do conteúdo aprovados; serviços e API permanecem ativos sem erro."
+    "date": "2026-09-16",
+    "type": "build",
+    "text": "v0.3.0 implementada com Clima/Open-Meteo, SysOps, fontes HTTP/JSON seguras e perfis de display; testes automatizados e fluxo real no navegador aprovados, aguardando apenas homologação visual no ST7789."
   }
 }

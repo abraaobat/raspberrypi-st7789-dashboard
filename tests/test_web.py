@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from dashboard.config import default_config
 from dashboard.runtime import RuntimeStore
@@ -91,6 +92,40 @@ class WebControlPanelTests(unittest.TestCase):
         response = self.client.get("/")
         self.assertEqual(response.headers["X-Frame-Options"], "DENY")
         self.assertIn("default-src 'self'", response.headers["Content-Security-Policy"])
+
+    def test_catalog_exposes_integrations_and_display_profiles(self):
+        self.configure_auth()
+        response = self.client.get("/api/catalog")
+        payload = response.get_json()
+        ids = {page["id"] for page in payload["pages"]}
+        self.assertIn("weather", ids)
+        self.assertIn("sysops", ids)
+        self.assertEqual(payload["displays"][0]["id"], "st7789-240x240")
+
+    @patch("web_app.fetch_custom_page")
+    def test_custom_source_can_be_tested_without_saving(self, fetch_custom_page_mock):
+        fetch_custom_page_mock.return_value = {"value": 318, "secondary": "W"}
+        csrf = self.configure_auth()
+        response = self.client.post(
+            "/api/sources/test",
+            json={
+                "id": "custom:energia",
+                "title": "Energia",
+                "layout": "metric",
+                "valueLabel": "CONSUMO",
+                "unit": "W",
+                "accent": "green",
+                "source": {
+                    "type": "http-json",
+                    "url": "http://192.168.1.10/status",
+                    "valuePath": "data.power",
+                    "secondaryPath": "data.unit",
+                },
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["value"], 318)
 
     def test_login_is_rate_limited(self):
         self.configure_auth()

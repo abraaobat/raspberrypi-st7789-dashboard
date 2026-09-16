@@ -11,8 +11,9 @@ import signal
 import time
 
 from dashboard.config import ConfigStore, enabled_pages
-from dashboard.providers import MetricsCache
-from dashboard.rendering import HEIGHT, WIDTH, render_page
+from dashboard.display_profiles import profile
+from dashboard.providers import DataHub
+from dashboard.rendering import render_page
 from dashboard.runtime import RuntimeStore
 
 GPIO_CHIP = "/dev/gpiochip0"
@@ -20,13 +21,16 @@ BUTTON_PREV = 23
 BUTTON_NEXT = 24
 
 
-def create_display():
+def create_display(config):
     import st7789
 
+    target = profile(config.get("displayProfile"))
+    if target.driver != "st7789" or not target.available:
+        raise RuntimeError(f"driver de display indisponível: {target.driver}")
     display = st7789.ST7789(
-        height=HEIGHT,
-        width=WIDTH,
-        rotation=90,
+        height=target.height,
+        width=target.width,
+        rotation=target.rotation,
         port=0,
         cs=0,
         dc=25,
@@ -55,11 +59,12 @@ def pressed_transition(previous, current):
 
 
 def main():
-    display = create_display()
-    buttons = create_buttons()
     config_store = ConfigStore()
+    initial_config = config_store.load(force=True)
+    display = create_display(initial_config)
+    buttons = create_buttons()
     runtime = RuntimeStore()
-    metrics = MetricsCache()
+    data = DataHub()
     running = True
 
     def stop(_signum, _frame):
@@ -139,13 +144,16 @@ def main():
             refresh_seconds = page_config["refreshSeconds"]
             if now - last_render_at >= refresh_seconds:
                 try:
-                    snapshot = metrics.get(refresh_seconds)
+                    snapshot = data.get(config, current_page, refresh_seconds)
                     image = render_page(current_page, snapshot, config)
                     display.display(image)
                     runtime.update_display(current_page)
+                    provider_key = current_page if current_page in {"weather", "sysops"} else "custom"
+                    provider_state = snapshot.get(provider_key)
                 except Exception as exc:  # keep service alive and report the fault
                     runtime.update_display(current_page, str(exc))
-                last_render_at = now
+                    provider_state = None
+                last_render_at = now - refresh_seconds + 1 if provider_state and provider_state.get("loading") else now
 
             time.sleep(0.03)
     finally:

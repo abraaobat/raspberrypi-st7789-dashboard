@@ -6,6 +6,9 @@ from functools import lru_cache
 
 from PIL import Image, ImageDraw, ImageFont
 
+from .catalog import catalog_by_id
+from .display_profiles import adapt_image, profile
+
 WIDTH = 240
 HEIGHT = 240
 
@@ -20,6 +23,16 @@ CYAN = (60, 210, 235)
 ORANGE = (255, 170, 70)
 RED = (245, 90, 90)
 PURPLE = (175, 120, 255)
+YELLOW = (255, 215, 80)
+
+ACCENT_COLORS = {
+    "blue": BLUE,
+    "cyan": CYAN,
+    "green": GREEN,
+    "orange": ORANGE,
+    "purple": PURPLE,
+    "red": RED,
+}
 
 FONT_REGULAR_CANDIDATES = (
     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
@@ -210,10 +223,214 @@ def draw_hardware_page(snapshot: dict, config: dict, page_number: int, page_coun
     return image
 
 
+def _state_message(title: str, message: str, page_number: int, page_count: int):
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(image)
+    header(draw, title, page_number, page_count)
+    card(draw, (8, 53, 232, 220))
+    draw.text((22, 83), "SEM DADOS", font=load_font(15, True), fill=ORANGE)
+    lines = []
+    remaining = message
+    while remaining and len(lines) < 4:
+        text, font = fit_text(draw, remaining, 190, 15, 12)
+        if not text.endswith("..."):
+            lines.append((text, font))
+            break
+        cut = max(1, len(text) - 3)
+        space = remaining.rfind(" ", 0, cut)
+        if space <= 0:
+            lines.append((text, font))
+            break
+        lines.append((remaining[:space], font))
+        remaining = remaining[space + 1 :]
+    for index, (line, font) in enumerate(lines):
+        draw.text((22, 116 + index * 23), line, font=font, fill=GRAY)
+    return image
+
+
+def _weather_condition(code) -> str:
+    if code is None:
+        return "SEM DADOS"
+    code = int(code)
+    if code == 0:
+        return "CÉU LIMPO"
+    if code in {1, 2}:
+        return "PARCIAL"
+    if code == 3:
+        return "NUBLADO"
+    if code in {45, 48}:
+        return "NEBLINA"
+    if code in {51, 53, 55, 56, 57}:
+        return "GAROA"
+    if code in {61, 63, 65, 66, 67, 80, 81, 82}:
+        return "CHUVA"
+    if code in {71, 73, 75, 77, 85, 86}:
+        return "NEVE"
+    if code in {95, 96, 99}:
+        return "TEMPESTADE"
+    return "VARIÁVEL"
+
+
+def _weather_icon(draw: ImageDraw.ImageDraw, code, is_day: bool):
+    code = int(code) if code is not None else -1
+    rainy = code in {51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99}
+    cloudy = code not in {0, -1}
+    if not cloudy:
+        if is_day:
+            draw.ellipse((30, 72, 84, 126), fill=YELLOW)
+            for line in ((57, 58, 57, 68), (57, 130, 57, 140), (16, 99, 26, 99), (88, 99, 98, 99)):
+                draw.line(line, fill=YELLOW, width=3)
+        else:
+            draw.ellipse((31, 70, 86, 125), fill=PURPLE)
+            draw.ellipse((48, 63, 93, 108), fill=BG)
+        return
+    draw.ellipse((24, 84, 69, 122), fill=(105, 115, 135))
+    draw.ellipse((49, 70, 94, 122), fill=(125, 135, 155))
+    draw.rounded_rectangle((22, 99, 98, 127), radius=13, fill=(125, 135, 155))
+    if rainy:
+        for x in (35, 57, 79):
+            draw.line((x, 134, x - 4, 146), fill=BLUE, width=3)
+
+
+def draw_weather_page(snapshot: dict, config: dict, page_number: int, page_count: int):
+    weather = snapshot.get("weather") or {}
+    if not weather.get("configured", True):
+        return _state_message("CLIMA", "Configure localização e coordenadas no painel web.", page_number, page_count)
+    if weather.get("loading") and weather.get("temperatureC") is None:
+        return _state_message("CLIMA", "Buscando a primeira previsão meteorológica.", page_number, page_count)
+    if weather.get("temperatureC") is None:
+        return _state_message("CLIMA", weather.get("error") or "Previsão indisponível.", page_number, page_count)
+
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(image)
+    header(draw, "CLIMA", page_number, page_count)
+    location, location_font = fit_text(draw, weather.get("locationName"), 150, 14, 10, True)
+    draw.text((12, 48), location.upper(), font=location_font, fill=CYAN)
+    if weather.get("stale") or weather.get("error"):
+        draw.text((185, 49), "CACHE", font=load_font(10, True), fill=ORANGE)
+
+    _weather_icon(draw, weather.get("weatherCode"), weather.get("isDay", True))
+    _draw_value(
+        draw,
+        (112, 72),
+        temperature_label(weather.get("temperatureC"), config["temperatureUnit"]),
+        112,
+        48,
+        32,
+    )
+    condition, condition_font = fit_text(draw, _weather_condition(weather.get("weatherCode")), 112, 13, 10, True)
+    draw.text((112, 124), condition, font=condition_font, fill=GRAY)
+    apparent = temperature_label(weather.get("apparentC"), config["temperatureUnit"])
+    draw.text((112, 143), f"SEN {apparent}", font=load_font(11, True), fill=PURPLE)
+
+    card(draw, (8, 161, 76, 226))
+    draw.text((17, 170), "MIN", font=load_font(12, True), fill=BLUE)
+    _draw_value(draw, (17, 193), temperature_label(weather.get("minimumC"), config["temperatureUnit"]), 50, 22, 17)
+
+    card(draw, (86, 161, 154, 226))
+    draw.text((95, 170), "MAX", font=load_font(12, True), fill=ORANGE)
+    _draw_value(draw, (95, 193), temperature_label(weather.get("maximumC"), config["temperatureUnit"]), 50, 22, 17)
+
+    card(draw, (164, 161, 232, 226))
+    draw.text((173, 170), "CHUVA", font=load_font(11, True), fill=CYAN)
+    probability = weather.get("precipitationProbability")
+    _draw_value(draw, (173, 193), percent_label(probability), 50, 22, 16)
+    draw.text((174, 229), "OPEN-METEO", font=load_font(7, True), fill=GRAY)
+    return image
+
+
+def draw_sysops_page(snapshot: dict, config: dict, page_number: int, page_count: int):
+    del config
+    values = snapshot.get("sysops") or {}
+    if values.get("loading") and values.get("diskPercent") is None:
+        return _state_message("SYSOPS", "Coletando saúde da rede e dos serviços.", page_number, page_count)
+
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(image)
+    header(draw, "SYSOPS", page_number, page_count)
+
+    card(draw, (8, 49, 114, 117))
+    draw.text((17, 57), "DISCO", font=load_font(13, True), fill=CYAN)
+    _draw_value(draw, (17, 78), percent_label(values.get("diskPercent")), 88, 25, 18)
+    progress_bar(draw, 17, 103, 88, values.get("diskPercent"))
+
+    card(draw, (124, 49, 232, 117))
+    draw.text((133, 57), "GATEWAY", font=load_font(13, True), fill=GREEN)
+    ping = values.get("pingMs")
+    ping_label = "OFF" if ping is None else f"{ping:.0f}ms"
+    _draw_value(draw, (133, 79), ping_label, 90, 24, 17, GREEN if ping is not None else RED)
+
+    throttle = values.get("throttling")
+    draw.text((12, 128), "ALIMENTAÇÃO", font=load_font(12, True), fill=PURPLE)
+    power = throttle or "SEM DADOS"
+    power_color = GREEN if power == "OK" else (GRAY if throttle is None else ORANGE)
+    power_value, power_font = fit_text(draw, power, 120, 13, 10, True)
+    draw.text((108, 127), power_value, font=power_font, fill=power_color)
+    draw.line((12, 150, 228, 150), fill=CARD_BORDER)
+
+    services = values.get("services") or []
+    if not services:
+        draw.text((12, 162), "SERVIÇOS", font=load_font(12, True), fill=BLUE)
+        draw.text((12, 184), "Configure até 4 no painel", font=load_font(13), fill=GRAY)
+    for index, service in enumerate(services[:3]):
+        y = 160 + index * 23
+        active = service.get("status") == "active"
+        draw.ellipse((12, y + 4, 20, y + 12), fill=GREEN if active else RED)
+        name, name_font = fit_text(draw, service.get("name"), 135, 13, 10, True)
+        draw.text((27, y), name, font=name_font, fill=WHITE)
+        label = "ON" if active else "OFF"
+        draw.text((202, y), label, font=load_font(11, True), fill=GREEN if active else RED)
+    return image
+
+
+def draw_custom_page(snapshot: dict, config: dict, page_id: str, page_number: int, page_count: int):
+    definition = next(item for item in config["customPages"] if item["id"] == page_id)
+    custom = snapshot.get("custom") or {}
+    title = definition["title"].upper()
+    if custom.get("loading") and "value" not in custom:
+        return _state_message(title, "Consultando a fonte HTTP/JSON.", page_number, page_count)
+    if "value" not in custom:
+        return _state_message(title, custom.get("error") or "Fonte personalizada indisponível.", page_number, page_count)
+
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(image)
+    header(draw, title, page_number, page_count)
+    accent = ACCENT_COLORS[definition["accent"]]
+    if custom.get("stale") or custom.get("error"):
+        draw.text((181, 46), "CACHE", font=load_font(10, True), fill=ORANGE)
+
+    label = definition.get("valueLabel") or "VALOR"
+    draw.text((14, 59), label.upper(), font=load_font(14, True), fill=accent)
+    value = custom.get("value")
+    if isinstance(value, bool):
+        value = "ON" if value else "OFF"
+    shown = f"{value}{definition.get('unit') or ''}"
+    shown, value_font = fit_text(draw, shown, 212, 46, 22, True)
+    draw.text((14, 88), shown, font=value_font, fill=WHITE)
+
+    secondary = custom.get("secondary")
+    card(draw, (8, 157, 232, 226))
+    if definition["layout"] == "status":
+        active = str(value).strip().lower() in {"1", "true", "on", "ok", "online", "active", "ativo"}
+        draw.ellipse((20, 177, 50, 207), fill=GREEN if active else RED)
+        status = "OPERACIONAL" if active else "ATENÇÃO"
+        draw.text((65, 178), status, font=load_font(18, True), fill=GREEN if active else RED)
+    elif secondary is not None:
+        draw.text((18, 168), "DETALHE", font=load_font(11, True), fill=GRAY)
+        detail, detail_font = fit_text(draw, secondary, 202, 22, 14, True)
+        draw.text((18, 189), detail, font=detail_font, fill=accent)
+    else:
+        draw.text((18, 170), "FONTE PERSONALIZADA", font=load_font(12, True), fill=GRAY)
+        draw.text((18, 194), "HTTP / JSON", font=load_font(18, True), fill=accent)
+    return image
+
+
 RENDERERS = {
     "status": draw_status_page,
     "network": draw_network_page,
     "hardware": draw_hardware_page,
+    "sysops": draw_sysops_page,
+    "weather": draw_weather_page,
 }
 
 
@@ -221,8 +438,10 @@ def render_page(page_id: str, snapshot: dict, config: dict):
     enabled = [page["id"] for page in config["pages"] if page.get("enabled")]
     if page_id not in enabled:
         raise ValueError(f"página não habilitada: {page_id}")
-    try:
-        renderer = RENDERERS[page_id]
-    except KeyError as exc:
-        raise ValueError(f"página desconhecida: {page_id}") from exc
-    return renderer(snapshot, config, enabled.index(page_id) + 1, len(enabled))
+    if page_id not in catalog_by_id(config.get("customPages")):
+        raise ValueError(f"página desconhecida: {page_id}")
+    if page_id.startswith("custom:"):
+        image = draw_custom_page(snapshot, config, page_id, enabled.index(page_id) + 1, len(enabled))
+    else:
+        image = RENDERERS[page_id](snapshot, config, enabled.index(page_id) + 1, len(enabled))
+    return adapt_image(image, profile(config.get("displayProfile")))
