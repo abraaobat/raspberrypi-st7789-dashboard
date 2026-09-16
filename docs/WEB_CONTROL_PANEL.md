@@ -148,10 +148,10 @@ Um banco de dados não é necessário no MVP. Estado transitório pode permanece
 - funciona em navegador móvel e desktop;
 - mostra prévia igual ao framebuffer enviado ao ST7789;
 - permite ativar e ordenar as três páginas atuais;
-- salva carrossel, intervalo e página inicial;
+- salva carrossel, intervalos, páginas ativas e ordem;
 - aplica a mudança ao display sem reinicialização manual;
 - display continua funcionando se o painel web cair;
 - configuração inválida é rejeitada sem corromper o último estado válido;
 - não existe execução de comandos arbitrários pela API.
 
-Os itens estão implementados e cobertos por testes sem hardware. O aceite final permanece pendente até a validação desktop/mobile e display no Raspberry Pi real.
+Todos os itens foram homologados no Raspberry Pi 3 real em desktop e celular. A validação incluiu primeiro acesso com PIN, prévia ao vivo, botões GPIO23/GPIO24, páginas ativas, ordem do conteúdo, seleção remota e carrossel automático.

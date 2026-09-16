@@ -70,3 +70,14 @@ journalctl -u bench-display-web.service -n 50 --no-pager
 ```
 
 Se o usuário do Raspberry Pi mudar, execute novamente `./scripts/install.sh`; ele regenera os serviços sem apagar o PIN ou a configuração.
+
+## Homologação registrada
+
+O fluxo completo foi aprovado no Raspberry Pi 3 com a versão 0.2.0:
+
+- SPI e os dois serviços ativos;
+- API e estado do display sem erros;
+- GPIO23/GPIO24 navegando corretamente;
+- painel e prévia ao vivo acessíveis;
+- carrossel automático funcionando;
+- ativação e ordem do conteúdo aplicadas no display.

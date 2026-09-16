@@ -18,7 +18,7 @@ Pelo computador ou celular, o usuário pode:
 - visualizar uma prévia fiel de 240×240 gerada pelo mesmo renderizador Pillow usado no ST7789;
 - aplicar mudanças sem editar o código-fonte ou reiniciar o serviço.
 
-O MVP físico está validado no Raspberry Pi 3. O Web Control Panel está implementado e coberto por testes automatizados; a validação final dele no hardware real é o gate atual do projeto.
+O MVP físico e o Web Control Panel v0.2.0 estão homologados no Raspberry Pi 3. Foram validados no hardware real: botões, autenticação local, prévia ao vivo, ordem das páginas, seleção remota e carrossel automático.
 
 - [Roadmap do produto](ROADMAP.md)
 - [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)
@@ -35,6 +35,10 @@ O MVP físico está validado no Raspberry Pi 3. O Web Control Panel está implem
 - prévia PNG 240×240 com dados atuais;
 - seleção imediata da página exibida no hardware;
 - configuração JSON validada e gravada de forma atômica.
+
+![Primeiro acesso protegido por PIN](docs/images/web-auth.png)
+
+![Web Control Panel homologado](docs/images/web-control-panel.png)
 
 ### 1. STATUS
 
@@ -395,7 +399,9 @@ Isso é normal quando o Tailscale não está instalado, não está conectado ou 
         ├── status.jpg
         ├── network.jpg
         ├── hardware.jpg
-        └── overview.jpg
+        ├── overview.jpg
+        ├── web-auth.png
+        └── web-control-panel.png
 ```
 
 ## Licença

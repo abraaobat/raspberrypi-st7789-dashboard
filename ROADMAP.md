@@ -27,21 +27,21 @@ Entregas concluídas:
 
 Critério de saída: dashboard inicia automaticamente e as três páginas são navegáveis no hardware real.
 
-### D1 — Confiabilidade e legibilidade 🧪
+### D1 — Confiabilidade e legibilidade ✅
 
 - detectar automaticamente Ethernet e Wi-Fi ativos; ✅
 - acomodar adaptadores USB e nomes como `wlan1`/`wlx...`; ✅
 - ajustar textos longos, especialmente modelo e kernel; ✅
 - distinguir zero real, indisponibilidade e erro de coleta; ✅
-- adicionar armazenamento, conectividade e saúde de alimentação/throttling;
+- coletar armazenamento, conectividade e saúde de alimentação/throttling para os módulos seguintes; ✅
 - centralizar limites de alerta; ✅
 - garantir liberação limpa de GPIO no encerramento. ✅
 
-Situação: implementação concluída em software; falta validar no ST7789 real, inclusive adaptador Wi-Fi USB, textos longos e encerramento do serviço.
+Situação: homologado no Raspberry Pi 3 com Ethernet, Wi-Fi, textos ajustados, estados sem dados e navegação física.
 
 Critério de saída: nenhuma métrica inválida é apresentada como valor real e todo texto permanece dentro da tela no hardware.
 
-### D2 — Núcleo modular e testável 🧪
+### D2 — Núcleo modular e testável ✅
 
 - separar o entry point físico do núcleo testável; ✅
 - criar catálogo de páginas e provedores de dados; ✅
@@ -59,11 +59,11 @@ Buttons ──→ Navigation/Scheduler
 Config ───→ Pages, order, refresh and thresholds
 ```
 
-Situação: gate de software concluído; falta o teste de regressão dos botões e do loop no Raspberry Pi.
+Situação: testes automatizados aprovados no computador, no CI e no Raspberry Pi; botões e loop físico homologados.
 
 Critério de saída: páginas podem ser ativadas, ordenadas e testadas sem alterar o loop principal, sem regressão física.
 
-### D3 — Web Control Panel MVP 🧪
+### D3 — Web Control Panel MVP ✅
 
 - interface responsiva para computador e celular; ✅
 - ativação, desativação e ordenação de páginas; ✅
@@ -74,13 +74,14 @@ Critério de saída: páginas podem ser ativadas, ordenadas e testadas sem alter
 - serviço web separado do serviço do display; ✅
 - PIN local, sessão, CSRF e limite de tentativas; ✅
 
-Situação: MVP implementado; falta homologação pelo celular contra o Raspberry Pi e confirmação da alteração no display físico.
+Situação: homologado em desktop e celular contra o Raspberry Pi real, incluindo PIN, prévia, ordem, seleção de página e carrossel.
 
 Critério de saída: uma alteração feita no celular aparece no display em poucos segundos, sem reiniciar ou editar código.
 
 ### D4 — SysOps e Homelab Pack
 
 - uso de disco, gateway, SSID, sinal e ping;
+- saúde de alimentação e throttling;
 - estado de serviços `systemd` permitidos por configuração;
 - Docker e Tailscale opcionais;
 - integração Pi-hole compatível com a versão local;
@@ -112,9 +113,9 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-O foco é a **homologação integrada de D1–D3 no Raspberry Pi real**: instalar os dois serviços, acessar pelo celular, aplicar ordem/carrossel/limites e confirmar a resposta do ST7789 e dos botões. O próximo desenvolvimento funcional será D4 somente depois desse gate.
+D0–D3 estão concluídos e homologados. O foco passa a ser **D4 — SysOps e Homelab Pack**, começando por disco, gateway, SSID/sinal, ping, throttling e estado de serviços permitidos.
 
-O deploy deste gate está automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
+O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 
 ## Fora do escopo inicial
 

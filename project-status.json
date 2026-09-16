@@ -1,34 +1,34 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-15T21:25:00-04:00",
-  "status": "Deploy automatizado • acesso SSH para homologação pendente",
-  "statusClass": "validate",
-  "progress": 61,
-  "roadmap": "D0–D6 • D0 validado • D1/D2/D3 implementados e em homologação",
-  "current": "O projeto possui núcleo modular e Web Control Panel responsivo com PIN, CSRF, configuração atômica e prévia canônica. O deploy no Raspberry Pi agora é automatizado: detecta usuário/caminhos, instala dependências, testa, gera os dois serviços e oferece auditoria de SPI, serviços, API e estado do display.",
+  "updatedAt": "2026-09-15T23:45:00-04:00",
+  "status": "D1–D3 homologados • operacional no Raspberry Pi",
+  "statusClass": "ops",
+  "progress": 65,
+  "roadmap": "D0–D6 • D0–D3 concluídos • foco atual D4",
+  "current": "A versão 0.2.0 está implantada e homologada no Raspberry Pi 3. SPI, serviços, API, display e prévia estão saudáveis; botões GPIO23/GPIO24, PIN, páginas ativas, ordem do conteúdo, seleção remota e carrossel automático foram aprovados no hardware real.",
   "architecture": "Browser → Web API autenticada → Config/Runtime → Providers → Page Catalog → Pillow Renderer → ST7789 + Preview PNG",
-  "next": "Autorizar uma chave SSH no Raspberry Pi 192.168.100.94, executar scripts/install.sh e homologar pelo celular as alterações ao vivo, botões, carrossel, rede e reboot.",
-  "action": "Liberar acesso SSH por chave para concluir a homologação D1–D3 no hardware real.",
+  "next": "Iniciar D4 com disco, gateway, SSID/sinal, ping, throttling e estado de serviços explicitamente permitidos.",
+  "action": "Definir e implementar o primeiro corte do SysOps/Homelab Pack sem ampliar a superfície de segurança da API.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
     "GPIO23/GPIO24 navigation ✓",
     "systemd/autostart ✓",
     "Documentação + fotos ✓",
-    "Reliability and text fitting ✓ software",
-    "Page Catalog + Providers ✓ software",
+    "Reliability and text fitting ✓ hardware",
+    "Page Catalog + Providers ✓ hardware",
     "Shared Preview Renderer ✓",
-    "Web Control Panel MVP ✓ software",
+    "Web Control Panel MVP ✓ hardware",
     "PIN / CSRF / atomic config ✓",
     "Automated deploy + install audit ✓",
-    "Physical integrated validation",
+    "Physical integrated validation ✓",
     "SysOps / Homelab Pack",
     "Desk / IoT Packs"
   ],
   "activity": {
     "date": "2026-09-15",
-    "type": "deployment",
-    "text": "Deploy e auditoria pós-instalação foram automatizados. O Raspberry Pi respondeu em 192.168.100.94, mas ainda rejeita as chaves SSH disponíveis; autorizar uma chave é o passo restante para executar a homologação física."
+    "type": "validation",
+    "text": "D1–D3 foram homologados no Raspberry Pi real: botões, painel, prévia ao vivo, carrossel automático e ordem do conteúdo aprovados; serviços e API permanecem ativos sem erro."
   }
 }
