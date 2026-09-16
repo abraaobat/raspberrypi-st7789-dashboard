@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07090d">
+  <title>ST7789 Control Panel</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <div id="authScreen" class="auth-shell" hidden>
+    <form id="authForm" class="auth-card">
+      <div class="brand-mark">PI</div>
+      <p class="eyebrow">ST7789 CONTROL PANEL</p>
+      <h1 id="authTitle">Acessar painel</h1>
+      <p id="authDescription" class="muted">Digite o PIN local para configurar o display.</p>
+      <label class="field-label" for="pinInput">PIN</label>
+      <input id="pinInput" class="text-input" type="password" inputmode="numeric" minlength="4" maxlength="64" autocomplete="current-password" required>
+      <button id="authButton" class="button primary full" type="submit">Entrar</button>
+      <p id="authError" class="form-error" role="alert"></p>
+    </form>
+  </div>
+
+  <main id="app" class="shell" hidden>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">RASPBERRY PI • ST7789</p>
+        <h1>Display Control</h1>
+        <p class="subtitle">Escolha o que aparece no display físico e confirme na prévia 240×240.</p>
+      </div>
+      <div class="top-actions">
+        <span id="connectionBadge" class="status-pill"><span></span> Conectando</span>
+        <button id="logoutButton" class="button ghost" type="button">Sair</button>
+      </div>
+    </header>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <section class="dashboard-grid">
+      <article class="panel preview-panel">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">DISPLAY</p>
+            <h2>Prévia ao vivo</h2>
+          </div>
+          <span id="displayState" class="tiny-pill">Estado desconhecido</span>
+        </div>
+
+        <div class="device-stage">
+          <div class="display-device">
+            <img id="previewImage" width="240" height="240" alt="Prévia do display ST7789">
+          </div>
+        </div>
+
+        <div class="preview-controls">
+          <button id="previousPage" class="icon-button" type="button" aria-label="Página anterior">←</button>
+          <div>
+            <strong id="previewTitle">Status</strong>
+            <span id="previewPosition">1 de 3</span>
+          </div>
+          <button id="nextPage" class="icon-button" type="button" aria-label="Próxima página">→</button>
+        </div>
+        <button id="showOnDisplay" class="button secondary full" type="button">Mostrar esta página no display</button>
+      </article>
+
+      <div class="settings-column">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">PÁGINAS</p>
+              <h2>Conteúdo e ordem</h2>
+            </div>
+            <span class="muted small">Ao menos uma ativa</span>
+          </div>
+          <div id="pageList" class="page-list"></div>
+        </article>
+
+        <article class="panel split-settings">
+          <div class="setting-block">
+            <p class="section-kicker">NAVEGAÇÃO</p>
+            <h2>Carrossel</h2>
+            <label class="switch-row">
+              <span>
+                <strong>Alternar automaticamente</strong>
+                <small>Os botões físicos continuam funcionando.</small>
+              </span>
+              <input id="carouselEnabled" type="checkbox">
+              <span class="switch"></span>
+            </label>
+            <label class="range-field">
+              <span>Intervalo <strong id="intervalValue">8s</strong></span>
+              <input id="intervalSeconds" type="range" min="2" max="60" step="1">
+            </label>
+            <label class="range-field">
+              <span>Retomar após interação <strong id="resumeValue">30s</strong></span>
+              <input id="resumeSeconds" type="range" min="0" max="120" step="5">
+            </label>
+          </div>
+
+          <div class="setting-block temperature-block">
+            <p class="section-kicker">ALERTAS</p>
+            <h2>Temperatura</h2>
+            <div class="inline-fields">
+              <label>
+                <span>Alerta</span>
+                <div class="number-wrap"><input id="temperatureWarning" type="number" min="20" max="100"><b>°C</b></div>
+              </label>
+              <label>
+                <span>Crítico</span>
+                <div class="number-wrap"><input id="temperatureCritical" type="number" min="21" max="120"><b>°C</b></div>
+              </label>
+            </div>
+            <label class="select-field">
+              <span>Unidade</span>
+              <select id="temperatureUnit">
+                <option value="celsius">Celsius</option>
+                <option value="fahrenheit">Fahrenheit</option>
+              </select>
+            </label>
+          </div>
+        </article>
+
+        <div class="save-bar">
+          <div>
+            <strong id="saveState">Configuração carregada</strong>
+            <span>As mudanças são validadas antes de chegar ao display.</span>
+          </div>
+          <button id="saveButton" class="button primary" type="button">Aplicar alterações</button>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>ST7789 Dashboard v{{ version }}</span>
+      <span>Disponível apenas na sua rede local ou tailnet.</span>
+    </footer>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

@@ -1,31 +1,33 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-15T18:17:00-04:00",
-  "status": "MVP v1 operacional • evolução modular em construção",
-  "statusClass": "build",
-  "progress": 34,
-  "roadmap": "D0–D6 • MVP v1 concluído • foco atual D1/D2",
-  "current": "O MVP v1 está operacional e documentado: ST7789 240×240 validado no Raspberry Pi 3 com páginas STATUS, REDE e HARDWARE, dois botões, autostart por systemd e fotos reais. O escopo ampliado foi consolidado como microdashboard modular com configuração web responsiva e prévia fiel pelo mesmo renderizador Pillow.",
-  "architecture": "Browser → Web API → Config/Secrets → Providers → Page Registry → Pillow Renderer → ST7789 + Preview PNG",
-  "next": "Concluir D1/D2: validar robustez após reboot, detectar rede automaticamente, ajustar textos, representar erros, modularizar páginas e criar testes de renderização sem hardware antes do Web Control Panel.",
-  "action": "Refatorar o MVP em núcleo modular e configurável preservando o comportamento físico já validado.",
+  "updatedAt": "2026-09-15T20:40:00-04:00",
+  "status": "Web Control Panel MVP implementado • homologação no Pi pendente",
+  "statusClass": "validate",
+  "progress": 58,
+  "roadmap": "D0–D6 • D0 validado • D1/D2/D3 implementados e em homologação",
+  "current": "O projeto agora possui núcleo modular, detecção automática de rede, ajuste de textos, configuração JSON atômica, renderizador Pillow compartilhado, testes sem hardware e Web Control Panel responsivo. O painel oferece PIN local, proteção CSRF, ativação e ordem de páginas, carrossel, alertas, prévia 240×240 e seleção imediata da página física.",
+  "architecture": "Browser → Web API autenticada → Config/Runtime → Providers → Page Catalog → Pillow Renderer → ST7789 + Preview PNG",
+  "next": "Instalar no Raspberry Pi, habilitar os serviços bench-display e bench-display-web, acessar pelo celular e validar alterações ao vivo, botões, carrossel, rede e reboot.",
+  "action": "Homologar D1–D3 no hardware real antes de iniciar o SysOps/Homelab Pack.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
     "GPIO23/GPIO24 navigation ✓",
     "systemd/autostart ✓",
     "Documentação + fotos ✓",
-    "Reliability and text fitting",
-    "Page Registry + Providers",
-    "Preview Renderer",
-    "Web Control Panel",
+    "Reliability and text fitting ✓ software",
+    "Page Catalog + Providers ✓ software",
+    "Shared Preview Renderer ✓",
+    "Web Control Panel MVP ✓ software",
+    "PIN / CSRF / atomic config ✓",
+    "Physical integrated validation",
     "SysOps / Homelab Pack",
     "Desk / IoT Packs"
   ],
   "activity": {
     "date": "2026-09-15",
-    "type": "roadmap",
-    "text": "Após o MVP físico ser publicado como operacional, a visão de produto, o roadmap D0–D6 e a especificação do Web Control Panel foram consolidados; o próximo gate é modularizar coleta e renderização sem regredir o display real."
+    "type": "implementation",
+    "text": "O Web Control Panel MVP foi implementado com núcleo modular, prévia canônica 240×240, configuração atômica, PIN local, testes automatizados e serviços independentes; o próximo gate é a homologação integrada no Raspberry Pi."
   }
 }

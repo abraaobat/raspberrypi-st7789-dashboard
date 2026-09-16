@@ -6,32 +6,31 @@ Permitir que o usuário configure o ST7789 pelo computador ou celular, mantendo 
 
 O painel é um configurador local, não um substituto do display físico.
 
-## Experiência prevista
+## Experiência entregue no MVP
 
 ### Display
 
 - prévia fiel de 240×240;
 - página atualmente selecionada;
 - navegação anterior/próxima para inspecionar páginas;
-- estado do serviço do display e última atualização.
+- estado atual do serviço do display.
 
 ### Páginas
 
 - catálogo de módulos disponíveis;
 - ativação e desativação;
-- ordenação por arrastar ou controles subir/descer;
-- página inicial;
-- perfis prontos como SysOps, Homelab, Mesa e IoT.
+- ordenação por controles subir/descer;
+- catálogo preparado para receber os perfis SysOps, Homelab, Mesa e IoT nas próximas fases.
 
 ### Comportamento
 
 - carrossel automático;
-- intervalo por página;
+- intervalo do carrossel;
 - retomada automática após interação física;
 - limites de alerta;
-- unidade de temperatura e formato de hora.
+- unidade de temperatura.
 
-### Integrações
+### Integrações previstas nas próximas fases
 
 - serviços `systemd` explicitamente permitidos;
 - Pi-hole, Home Assistant, MQTT, meteorologia e mercado como módulos opcionais;
@@ -43,10 +42,11 @@ O painel é um configurador local, não um substituto do display físico.
 Browser on LAN or tailnet
           │
           ▼
-Web UI ── API de configuração
+Web UI ── API autenticada de configuração
           │
           ├── config.json (sem segredos)
-          ├── secrets.env (permissão 0600)
+          ├── auth.json + session-secret.bin (permissão 0600)
+          ├── control.json + display-state.json
           └── preview endpoint
                     │
                     ▼
@@ -63,12 +63,15 @@ Providers → Page Registry → Pillow Renderer
 
 ## Persistência
 
-Arquivos locais sugeridos:
+Arquivos locais usados:
 
 ```text
 /home/pi/.config/raspberrypi-st7789-dashboard/
 ├── config.json
-└── secrets.env
+├── auth.json
+├── session-secret.bin
+├── control.json
+└── display-state.json
 ```
 
 Requisitos:
@@ -84,6 +87,10 @@ Requisitos:
 | Método | Endpoint | Finalidade |
 |---|---|---|
 | `GET` | `/api/health` | saúde e versão dos serviços |
+| `GET` | `/api/auth/status` | estado da autenticação local |
+| `POST` | `/api/auth/setup` | criar o PIN no primeiro acesso |
+| `POST` | `/api/auth/login` | iniciar sessão local |
+| `POST` | `/api/auth/logout` | encerrar sessão local |
 | `GET` | `/api/catalog` | páginas e opções disponíveis |
 | `GET` | `/api/config` | configuração pública atual |
 | `PUT` | `/api/config` | validar e salvar configuração |
@@ -114,7 +121,7 @@ Exemplo conceitual:
 }
 ```
 
-## Tecnologia proposta
+## Tecnologia implementada
 
 - Flask organizado por application factory;
 - HTML, CSS e JavaScript sem framework pesado;
@@ -130,8 +137,8 @@ Um banco de dados não é necessário no MVP. Estado transitório pode permanece
 - acesso pela LAN por padrão;
 - autenticação/PIN configurado no primeiro uso;
 - proteção CSRF para operações de mudança;
-- sessão com cookie seguro quando HTTPS estiver disponível;
-- rate limit para autenticação e gravação;
+- sessão com cookie `HttpOnly` e `SameSite=Lax`;
+- rate limit para autenticação;
 - integração remota preferencialmente via Tailscale;
 - nenhuma porta deve ser exposta diretamente na internet;
 - tokens externos não entram em logs, respostas ou commits.
@@ -146,3 +153,5 @@ Um banco de dados não é necessário no MVP. Estado transitório pode permanece
 - display continua funcionando se o painel web cair;
 - configuração inválida é rejeitada sem corromper o último estado válido;
 - não existe execução de comandos arbitrários pela API.
+
+Os itens estão implementados e cobertos por testes sem hardware. O aceite final permanece pendente até a validação desktop/mobile e display no Raspberry Pi real.

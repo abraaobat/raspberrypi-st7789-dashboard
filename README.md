@@ -8,22 +8,33 @@ O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usa
 
 ## Visão do produto
 
-O projeto evoluirá de um monitor fixo de recursos para um **microdashboard modular, offline-first e controlado por dois botões**. O núcleo continuará leve e funcional sem internet, enquanto páginas opcionais poderão acrescentar monitoramento de homelab, relógio, Pomodoro, meteorologia e integrações de IoT.
+O projeto combina um **microdashboard modular, offline-first e controlado por dois botões** com um painel web local. O display continua funcional sem navegador e sem internet; a interface web apenas configura o conteúdo e o comportamento.
 
-Uma interface web responsiva está planejada para permitir que o usuário, pelo computador ou celular:
+Pelo computador ou celular, o usuário pode:
 
-- escolha quais páginas e recursos aparecem no display;
-- altere a ordem das páginas e o intervalo do carrossel;
-- configure limites de alerta e integrações opcionais;
-- visualize uma prévia fiel de 240×240 gerada pelo mesmo renderizador Pillow usado no ST7789;
-- aplique mudanças sem editar o código-fonte.
+- escolher quais páginas e recursos aparecem no display;
+- alterar a ordem das páginas e o intervalo do carrossel;
+- configurar limites de alerta e unidade de temperatura;
+- visualizar uma prévia fiel de 240×240 gerada pelo mesmo renderizador Pillow usado no ST7789;
+- aplicar mudanças sem editar o código-fonte ou reiniciar o serviço.
 
-O MVP físico descrito abaixo está validado. A interface web e os módulos adicionais ainda fazem parte do roadmap.
+O MVP físico está validado no Raspberry Pi 3. O Web Control Panel está implementado e coberto por testes automatizados; a validação final dele no hardware real é o gate atual do projeto.
 
 - [Roadmap do produto](ROADMAP.md)
 - [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)
 
 ## Recursos
+
+### Web Control Panel
+
+- interface responsiva para desktop e celular;
+- primeiro acesso protegido por PIN local;
+- ativação e ordenação das páginas;
+- carrossel automático e retomada após uso dos botões;
+- limites de alerta de temperatura;
+- prévia PNG 240×240 com dados atuais;
+- seleção imediata da página exibida no hardware;
+- configuração JSON validada e gravada de forma atômica.
 
 ### 1. STATUS
 
@@ -106,6 +117,8 @@ Neste módulo o **GPIO24 é um botão**, portanto ele não deve ser usado como `
 - NumPy 2.5.3
 - gpiod 2.5.0
 - gpiodevice 0.1.0
+- Flask 3.1+
+- Waitress 3.0+
 
 ## Instalação
 
@@ -169,28 +182,37 @@ python bench_display.py
 
 O display deve abrir na página `STATUS`. Use os dois botões para navegar pelas três telas.
 
-## Inicialização automática com systemd
-
-Copie o serviço:
+Em outro terminal, teste o painel web:
 
 ```bash
-sudo cp systemd/bench-display.service /etc/systemd/system/bench-display.service
+source ~/st7789-env/bin/activate
+waitress-serve --host=0.0.0.0 --port=8080 --call web_app:create_app
 ```
 
-Se seu usuário não for `pi`, ajuste `User`, `WorkingDirectory` e `ExecStart` no arquivo antes de ativá-lo.
+Acesse `http://raspberrypi.local:8080` ou `http://IP-DO-RASPBERRY:8080`. No primeiro acesso, crie o PIN local do painel.
 
-Ative o serviço:
+## Inicialização automática com systemd
+
+Copie os dois serviços:
+
+```bash
+sudo cp systemd/bench-display*.service /etc/systemd/system/
+```
+
+Se seu usuário não for `pi`, ajuste `User`, `WorkingDirectory`, `Environment=ST7789_DASHBOARD_STATE_DIR` e `ExecStart` nos arquivos antes de ativá-los.
+
+Ative os serviços:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable bench-display.service
-sudo systemctl start bench-display.service
+sudo systemctl enable --now bench-display.service bench-display-web.service
 ```
 
 Verifique:
 
 ```bash
 systemctl status bench-display.service --no-pager
+systemctl status bench-display-web.service --no-pager
 ```
 
 O esperado é:
@@ -205,16 +227,32 @@ Depois reinicie para testar o autostart:
 sudo reboot
 ```
 
+O painel fica disponível na porta `8080`. Ele foi projetado para uso na LAN ou pela sua tailnet; não exponha essa porta diretamente à internet.
+
+## Configuração local
+
+O projeto não grava configuração nem credenciais dentro do repositório. Por padrão, os arquivos locais ficam em:
+
+```text
+~/.config/raspberrypi-st7789-dashboard/
+├── config.json
+├── auth.json
+├── session-secret.bin
+├── control.json
+└── display-state.json
+```
+
+`config.json` contém apenas opções do dashboard. O PIN é armazenado como hash PBKDF2 com salt; o PIN em texto puro não é salvo.
+
 ## Próximas evoluções
 
-O próximo ciclo prioriza a confiabilidade do núcleo antes da interface web:
+O próximo ciclo é de validação e endurecimento no Raspberry Pi real:
 
-- detectar automaticamente a interface de rede ativa, sem depender de `wlan0` ou `wlan1`;
-- ajustar, truncar ou quebrar textos que excedam os 240 pixels;
-- representar falhas como `SEM DADOS`, sem confundi-las com valor zero;
-- separar páginas, provedores de dados, botões e renderização em módulos testáveis;
-- gerar screenshots de teste sem exigir o display físico;
-- introduzir configuração persistente e prévia web antes das integrações externas.
+- instalar os dois serviços e confirmar atualização sem reinicialização;
+- validar Ethernet, Wi-Fi USB, Tailscale e textos longos no display;
+- executar teste prolongado de botões, carrossel e reboot;
+- ampliar a página Hardware com disco e throttling;
+- iniciar o SysOps/Homelab Pack somente após esse gate.
 
 ## Comandos úteis
 
@@ -222,6 +260,12 @@ Reiniciar o dashboard:
 
 ```bash
 sudo systemctl restart bench-display.service
+```
+
+Reiniciar somente o painel web:
+
+```bash
+sudo systemctl restart bench-display-web.service
 ```
 
 Parar:
@@ -234,12 +278,20 @@ Logs em tempo real:
 
 ```bash
 journalctl -u bench-display.service -f
+journalctl -u bench-display-web.service -f
 ```
 
 Desabilitar o autostart:
 
 ```bash
 sudo systemctl disable bench-display.service
+sudo systemctl disable bench-display-web.service
+```
+
+Executar os testes sem SPI/GPIO:
+
+```bash
+python -m unittest discover -s tests -v
 ```
 
 ## Solução de problemas
@@ -277,6 +329,17 @@ Este projeto foi validado com:
 
 Módulos visualmente semelhantes podem usar pinagens diferentes.
 
+### Painel web não abre
+
+Confira se o serviço está ativo e se a porta está ouvindo:
+
+```bash
+systemctl status bench-display-web.service --no-pager
+ss -ltn | grep 8080
+```
+
+Use o IP mostrado na página `REDE` se o nome `raspberrypi.local` não resolver no seu computador ou celular.
+
 ### Tailscale mostra `-`
 
 Isso é normal quando o Tailscale não está instalado, não está conectado ou não possui IPv4 ativo.
@@ -290,13 +353,25 @@ Isso é normal quando o Tailscale não está instalado, não está conectado ou 
 ```text
 .
 ├── bench_display.py
+├── web_app.py
+├── dashboard/
+│   ├── auth.py
+│   ├── catalog.py
+│   ├── config.py
+│   ├── providers.py
+│   ├── rendering.py
+│   └── runtime.py
+├── static/
+├── templates/
+├── tests/
 ├── requirements.txt
 ├── LICENSE
 ├── README.md
 ├── ROADMAP.md
 ├── project-status.json
 ├── systemd/
-│   └── bench-display.service
+│   ├── bench-display.service
+│   └── bench-display-web.service
 └── docs/
     ├── WEB_CONTROL_PANEL.md
     └── images/

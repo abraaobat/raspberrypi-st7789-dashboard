@@ -27,26 +27,28 @@ Entregas concluídas:
 
 Critério de saída: dashboard inicia automaticamente e as três páginas são navegáveis no hardware real.
 
-### D1 — Confiabilidade e legibilidade 🔄
+### D1 — Confiabilidade e legibilidade 🧪
 
-- detectar automaticamente Ethernet e Wi-Fi ativos;
-- acomodar adaptadores USB e nomes como `wlan1`/`wlx...`;
-- ajustar textos longos, especialmente modelo e kernel;
-- distinguir zero real, indisponibilidade e erro de coleta;
+- detectar automaticamente Ethernet e Wi-Fi ativos; ✅
+- acomodar adaptadores USB e nomes como `wlan1`/`wlx...`; ✅
+- ajustar textos longos, especialmente modelo e kernel; ✅
+- distinguir zero real, indisponibilidade e erro de coleta; ✅
 - adicionar armazenamento, conectividade e saúde de alimentação/throttling;
-- centralizar limites de alerta;
-- garantir liberação limpa de GPIO e display no encerramento.
+- centralizar limites de alerta; ✅
+- garantir liberação limpa de GPIO no encerramento. ✅
 
-Critério de saída: nenhuma métrica inválida é apresentada como valor real e todo texto permanece dentro da tela.
+Situação: implementação concluída em software; falta validar no ST7789 real, inclusive adaptador Wi-Fi USB, textos longos e encerramento do serviço.
 
-### D2 — Núcleo modular e testável
+Critério de saída: nenhuma métrica inválida é apresentada como valor real e todo texto permanece dentro da tela no hardware.
 
-- extrair driver do display, botões, scheduler e cache;
-- criar registro de páginas e provedores de dados;
-- definir contrato comum `collect → render`;
-- suportar configuração JSON validada;
-- gerar PNGs de referência sem acesso a SPI/GPIO;
-- cobrir navegação, coleta e renderização com testes automatizados.
+### D2 — Núcleo modular e testável 🧪
+
+- separar o entry point físico do núcleo testável; ✅
+- criar catálogo de páginas e provedores de dados; ✅
+- compartilhar o contrato `collect → render`; ✅
+- suportar configuração JSON validada e atômica; ✅
+- gerar PNGs sem acesso a SPI/GPIO; ✅
+- cobrir configuração, renderização e API com testes automatizados; ✅
 
 Arquitetura-alvo:
 
@@ -57,18 +59,22 @@ Buttons ──→ Navigation/Scheduler
 Config ───→ Pages, order, refresh and thresholds
 ```
 
-Critério de saída: páginas podem ser ativadas, ordenadas e testadas sem alterar o loop principal.
+Situação: gate de software concluído; falta o teste de regressão dos botões e do loop no Raspberry Pi.
 
-### D3 — Web Control Panel MVP
+Critério de saída: páginas podem ser ativadas, ordenadas e testadas sem alterar o loop principal, sem regressão física.
 
-- interface responsiva para computador e celular;
-- ativação, desativação e ordenação de páginas;
-- configuração de carrossel, página inicial e intervalos;
-- prévia 240×240 usando o renderizador canônico;
-- API fechada de configuração e saúde;
-- persistência atômica fora do repositório;
-- serviço web separado do serviço do display;
-- autenticação local inicial e proteção de mudanças.
+### D3 — Web Control Panel MVP 🧪
+
+- interface responsiva para computador e celular; ✅
+- ativação, desativação e ordenação de páginas; ✅
+- configuração de carrossel, retomada e intervalos; ✅
+- prévia 240×240 usando o renderizador canônico; ✅
+- API fechada de configuração, estado e saúde; ✅
+- persistência atômica fora do repositório; ✅
+- serviço web separado do serviço do display; ✅
+- PIN local, sessão, CSRF e limite de tentativas; ✅
+
+Situação: MVP implementado; falta homologação pelo celular contra o Raspberry Pi e confirmação da alteração no display físico.
 
 Critério de saída: uma alteração feita no celular aparece no display em poucos segundos, sem reiniciar ou editar código.
 
@@ -106,7 +112,7 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-O foco é **D1 → D2**. O Web Control Panel depende primeiro de um renderizador desacoplado do hardware e de uma configuração estável. A primeira entrega de D3 deve permanecer pequena: páginas, ordem, carrossel, prévia e salvamento.
+O foco é a **homologação integrada de D1–D3 no Raspberry Pi real**: instalar os dois serviços, acessar pelo celular, aplicar ordem/carrossel/limites e confirmar a resposta do ST7789 e dos botões. O próximo desenvolvimento funcional será D4 somente depois desse gate.
 
 ## Fora do escopo inicial
 

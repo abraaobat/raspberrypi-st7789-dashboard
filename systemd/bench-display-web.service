@@ -1,5 +1,5 @@
 [Unit]
-Description=Raspberry Pi ST7789 Dashboard
+Description=Raspberry Pi ST7789 Dashboard Web Control Panel
 After=network-online.target
 Wants=network-online.target
 
@@ -9,7 +9,7 @@ User=pi
 WorkingDirectory=/home/pi/raspberrypi-st7789-dashboard
 Environment=PYTHONUNBUFFERED=1
 Environment=ST7789_DASHBOARD_STATE_DIR=/home/pi/.config/raspberrypi-st7789-dashboard
-ExecStart=/home/pi/st7789-env/bin/python /home/pi/raspberrypi-st7789-dashboard/bench_display.py
+ExecStart=/home/pi/st7789-env/bin/waitress-serve --host=0.0.0.0 --port=8080 --call web_app:create_app
 Restart=always
 RestartSec=2
 NoNewPrivileges=true
