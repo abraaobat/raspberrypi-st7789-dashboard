@@ -29,12 +29,24 @@ Não é necessário repetir os testes já aprovados de Clima e SysOps. Esse test
 - 55 testes automatizados e fluxo completo no navegador em ambiente isolado com serviços fictícios;
 - cenários reais ainda não homologados; nenhum endpoint/token do usuário foi solicitado ou inventado.
 
+## Entregas adicionais da v0.5.0
+
+- Relógio offline com hora/data, dia da semana, fuso IANA e formato 12/24 h;
+- Pomodoro de 1–120 minutos, controlado pelo painel sem mudar a navegação dos botões;
+- tempo monotônico e estado privado compartilhado: reiniciar serviço preserva o ciclo; reboot interrompe execução, sem estimativa falsa;
+- configurações de mesa no backup, sem exportar o ciclo ativo nem reiniciá-lo ao restaurar;
+- 84 testes automatizados no computador e navegador isolado com comandos, resposta antiga de atualização, reload/login, backup e layout em quatro tamanhos;
+- prévias RELÓGIO/POMODORO verificadas no computador; teste físico e execução no ARM permanecem pendentes.
+
+Veja [DESK_MODE.md](DESK_MODE.md) para o checklist de um ciclo curto e os limites implementados.
+
 ## Próximas implementações
 
 1. Homologar Pi-hole 6/Home Assistant reais e as duas novas páginas no TFT quando o usuário puder configurar suas credenciais.
-2. MQTT/Node-RED em etapa independente; Docker detalhado e relógio/Pomodoro.
-3. Templates de integrações adicionais, mantendo contrato fechado e sem execução remota.
-4. Drivers físicos adicionais e matriz de compatibilidade por módulo/resolução.
+2. Homologar Relógio/Pomodoro no TFT com um ciclo de 1 minuto, pausa e retomada; não alterar os dois gestos físicos existentes.
+3. MQTT/Node-RED em etapa independente e Docker detalhado.
+4. Templates de integrações adicionais, mantendo contrato fechado e sem execução remota.
+5. Drivers físicos adicionais e matriz de compatibilidade por módulo/resolução.
 
 ## Limites a preservar
 
@@ -56,7 +68,7 @@ Abra o painel existente com o mesmo PIN. Em **Integrações guiadas**, configure
 
 ## Atualização do Raspberry Pi pendente nesta retomada
 
-O Pi não respondeu por SSH nos IPs anteriormente conhecidos (`192.168.100.94` e `192.168.100.11`). Não houve reinício, alteração do estado, cadastro de credenciais nem execução dos 55 testes no ARM nesta retomada. A v0.3.0 continua sendo a última implantação comprovada.
+O Pi não respondeu por SSH nos IPs anteriormente conhecidos (`192.168.100.94` e `192.168.100.11`), inclusive na nova tentativa da v0.5.0. Não houve reinício, alteração do estado, cadastro de credenciais nem execução dos 84 testes no ARM nesta retomada. A v0.3.0 continua sendo a última implantação comprovada.
 
 Quando a conexão voltar, execute no próprio Raspberry Pi:
 

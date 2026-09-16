@@ -502,6 +502,55 @@ def draw_homeassistant_page(snapshot: dict, config: dict, page_number: int, page
     return image
 
 
+def draw_clock_page(snapshot: dict, config: dict, page_number: int, page_count: int):
+    del config
+    values = snapshot.get("clock") or {}
+    if not values.get("time"):
+        return _state_message("RELÓGIO", "Hora indisponível.", page_number, page_count)
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(image)
+    header(draw, "RELÓGIO", page_number, page_count)
+    weekday, weekday_font = fit_text(draw, values.get("weekday"), 212, 14, 11, True)
+    draw.text((14, 58), weekday, font=weekday_font, fill=CYAN)
+    shown, shown_font = fit_text(draw, values["time"], 212, 44, 28, True)
+    draw.text(((WIDTH - text_width(draw, shown, shown_font)) / 2, 91), shown, font=shown_font, fill=WHITE)
+    draw.text((14, 149), values.get("date") or "-", font=load_font(20, True), fill=WHITE)
+    if values.get("period"):
+        draw.text((194, 152), values["period"], font=load_font(11, True), fill=GREEN)
+    card(draw, (8, 187, 232, 228))
+    zone, zone_font = fit_text(draw, values.get("timezone"), 205, 12, 9, True)
+    draw.text((16, 199), zone, font=zone_font, fill=GRAY)
+    return image
+
+
+def draw_pomodoro_page(snapshot: dict, config: dict, page_number: int, page_count: int):
+    del config
+    values = snapshot.get("pomodoro") or {}
+    if values.get("error") or not values.get("status"):
+        return _state_message("POMODORO", values.get("error") or "Cronômetro indisponível.", page_number, page_count)
+    labels = {"idle": "PRONTO PARA FOCAR", "running": "FOCO EM ANDAMENTO", "paused": "PAUSADO",
+              "completed": "CICLO CONCLUÍDO", "interrupted": "PI REINICIADO"}
+    status = values["status"]
+    color = GREEN if status == "completed" else (ORANGE if status in {"paused", "interrupted"} else CYAN)
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(image)
+    header(draw, "POMODORO", page_number, page_count)
+    label, label_font = fit_text(draw, labels.get(status, "SEM DADOS"), 212, 13, 11, True)
+    draw.text((14, 58), label, font=label_font, fill=color)
+    remaining = values.get("remainingSeconds")
+    text = "--:--" if remaining is None else f"{int(remaining) // 60:02}:{int(remaining) % 60:02}"
+    shown, shown_font = fit_text(draw, text, 212, 54, 36, True)
+    draw.text(((WIDTH - text_width(draw, shown, shown_font)) / 2, 88), shown, font=shown_font, fill=WHITE)
+    draw.rounded_rectangle((14, 158, 226, 170), radius=6, fill=CARD_BORDER)
+    progress = max(0, min(1, values.get("progress") or 0))
+    if progress:
+        draw.rounded_rectangle((14, 158, 14 + max(2, 212 * progress), 170), radius=6, fill=color)
+    card(draw, (8, 188, 232, 228))
+    hint = "INICIE OUTRO CICLO" if status in {"completed", "interrupted"} else "CONTROLE PELO PAINEL"
+    draw.text((16, 199), hint, font=load_font(11, True), fill=GRAY)
+    return image
+
+
 RENDERERS = {
     "status": draw_status_page,
     "network": draw_network_page,
@@ -510,6 +559,8 @@ RENDERERS = {
     "weather": draw_weather_page,
     "pihole": draw_pihole_page,
     "homeassistant": draw_homeassistant_page,
+    "clock": draw_clock_page,
+    "pomodoro": draw_pomodoro_page,
 }
 
 

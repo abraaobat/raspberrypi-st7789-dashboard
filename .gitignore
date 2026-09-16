@@ -6,5 +6,8 @@ __pycache__/
 venv/
 credentials.json
 .credentials.lock
+pomodoro.json
+.pomodoro.lock
+.pomodoro-*.tmp
 .credentials-*.tmp
 .DS_Store

@@ -46,6 +46,17 @@ O painel é um configurador local, não um substituto do display físico.
 - teste sem gravação e consentimento explícito para HTTP autenticado na LAN/tailnet;
 - exportação dos ajustes aplicados e restauração validada sem modificar PIN ou cofre.
 
+### Novidades da versão 0.5
+
+- módulos opcionais Relógio/Pomodoro, desativados na atualização;
+- fuso IANA ou do sistema, segundos opcionais e formato 12/24 h;
+- duração do próximo ciclo aplicada com os demais ajustes;
+- iniciar/pausar/retomar/reiniciar com efeito imediato, sessão e CSRF;
+- ciclo preservado entre serviços e ao restaurar ajustes; execução interrompida com aviso após reboot do Pi;
+- navegação física e carrossel não mudam por iniciar um ciclo.
+
+Detalhes e teste físico pendente: [DESK_MODE.md](DESK_MODE.md).
+
 ## Arquitetura
 
 ```text
@@ -57,6 +68,7 @@ Web UI ── API autenticada de configuração
           ├── config.json (sem segredos)
           ├── auth.json + session-secret.bin (permissão 0600)
           ├── credentials.json (privado; sem endpoint de leitura)
+          ├── pomodoro.json (estado privado compartilhado)
           ├── control.json + display-state.json
           └── preview endpoint
                     │
@@ -83,6 +95,8 @@ Arquivos locais usados:
 ├── session-secret.bin
 ├── credentials.json
 ├── .credentials.lock
+├── pomodoro.json
+├── .pomodoro.lock
 ├── control.json
 └── display-state.json
 ```
@@ -116,6 +130,8 @@ Requisitos:
 | `POST` | `/api/integrations/<id>/test` | testar `{settings, secret?}` sem persistir |
 | `GET` | `/api/config/export` | baixar os ajustes aplicados, sem PIN/cofre |
 | `POST` | `/api/config/import` | restaurar configuração validada, preservando PIN/cofre |
+| `GET` | `/api/pomodoro/state` | estado, duração do ciclo, restante e progresso; sem boot/prazo interno |
+| `POST` | `/api/pomodoro/command` | ação fechada `start`, `pause`, `resume` ou `reset`; usa duração aplicada |
 
 IDs permitidos: `pihole` e `homeassistant`. Todos esses endpoints exigem sessão autenticada; mudanças e testes também exigem CSRF. O teste usa a credencial digitada ou, se ausente, a credencial local vinculada ao endereço. Não há `GET` de credencial. Exemplo de ajustes não secretos:
 
@@ -192,3 +208,5 @@ Um banco de dados não é necessário no MVP. Estado transitório pode permanece
 Todos os itens do MVP foram homologados no Raspberry Pi 3 real em desktop e celular. Clima e SysOps também foram homologados visualmente no ST7789 físico. Fontes personalizadas e perfis experimentais de display possuem testes automatizados e verificação em navegador; resta somente a homologação física de uma página HTTP/JSON e de futuros drivers adicionais.
 
 Os assistentes/cofre/backup da v0.4.0 passaram por testes de API e navegador com serviços simulados, em 1440/980/390/320 px. Acesso a Pi-hole/Home Assistant reais e leitura das novas páginas no TFT permanecem pendentes. Veja [limites e recuperação das credenciais](BACKUP_AND_CREDENTIALS.md).
+
+A v0.5.0 acrescenta Relógio/Pomodoro, com 84 testes de software e fluxo de comandos verificado no navegador isolado. Testes de reboot/conclusão usam tempo injetado; não representam reinicialização física nem observação do TFT. Atualização e homologação dessas páginas no Pi permanecem pendentes por conectividade.

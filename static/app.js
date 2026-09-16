@@ -8,6 +8,9 @@ const state = {
   authConfigured: false,
   persistedCustomIds: new Set(),
   integrationsStatus: {},
+  pomodoro: null,
+  pomodoroBusy: false,
+  pomodoroGeneration: 0,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -89,6 +92,7 @@ $("#authForm").addEventListener("submit", async (event) => {
 });
 
 async function loadApplication() {
+  state.pomodoroGeneration++;
   const [catalog, config, integrations] = await Promise.all([
     requestJSON("/api/catalog"),
     requestJSON("/api/config"),
@@ -110,6 +114,7 @@ async function loadApplication() {
   renderSettings();
   refreshPreview();
   refreshDisplayState();
+  refreshPomodoro();
 }
 
 function catalogEntry(id) {
@@ -168,7 +173,79 @@ function renderSettings() {
   renderDisplayProfiles();
   renderCustomPages();
   renderIntegrations();
+  $("#clockTimezone").value = state.config.clock.timezone;
+  $("#clockShowSeconds").checked = state.config.clock.showSeconds;
+  $("#clockHour24").checked = state.config.clock.hour24;
+  $("#pomodoroMinutes").value = state.config.pomodoro.minutes;
 }
+
+$("#clockTimezone").addEventListener("change", event => {
+  state.config.clock.timezone = event.target.value.trim();
+  markDirty();
+});
+for (const [id, option] of [["clockShowSeconds", "showSeconds"], ["clockHour24", "hour24"]]) {
+  $(`#${id}`).addEventListener("change", event => { state.config.clock[option] = event.target.checked; markDirty(); });
+}
+$("#pomodoroMinutes").addEventListener("change", event => {
+  if (!event.target.reportValidity()) return;
+  state.config.pomodoro.minutes = Number(event.target.value);
+  markDirty();
+});
+
+const pomodoroLabels = {idle: "Pronto para focar", running: "Foco em andamento", paused: "Pausado",
+  completed: "Ciclo concluído", interrupted: "Pi reiniciado · inicie outro ciclo"};
+
+function renderPomodoro(snapshot) {
+  state.pomodoro = snapshot;
+  const seconds = snapshot.remainingSeconds;
+  $("#pomodoroCountdown").textContent = seconds == null ? "--:--"
+    : `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  const label = pomodoroLabels[snapshot.status] || "Estado indisponível";
+  if ($("#pomodoroStatus").textContent !== label) $("#pomodoroStatus").textContent = label;
+  $("#pomodoroProgress").value = snapshot.progress || 0;
+  $("#pomodoroStart").disabled = state.pomodoroBusy || !["idle", "completed", "interrupted"].includes(snapshot.status);
+  $("#pomodoroPause").disabled = state.pomodoroBusy || snapshot.status !== "running";
+  $("#pomodoroResume").disabled = state.pomodoroBusy || snapshot.status !== "paused";
+  $("#pomodoroReset").disabled = state.pomodoroBusy;
+}
+
+async function refreshPomodoro() {
+  if (app.hidden || state.pomodoroBusy || refreshPomodoro.pending) return;
+  const generation = state.pomodoroGeneration;
+  refreshPomodoro.pending = true;
+  try {
+    const snapshot = await requestJSON("/api/pomodoro/state");
+    if (generation === state.pomodoroGeneration && !state.pomodoroBusy && !app.hidden) renderPomodoro(snapshot);
+  } catch (error) {
+    if (generation !== state.pomodoroGeneration || state.pomodoroBusy || app.hidden) return;
+    $("#pomodoroStatus").textContent = error.message;
+    document.querySelectorAll("[data-pomodoro-action]").forEach(button => { button.disabled = true; });
+  } finally { refreshPomodoro.pending = false; }
+}
+
+document.querySelectorAll("[data-pomodoro-action]").forEach(button => {
+  button.addEventListener("click", async () => {
+    const action = button.dataset.pomodoroAction;
+    if (state.pomodoroBusy) return;
+    if (action === "start" && state.dirty) return toast("Aplique ou descarte os ajustes antes de iniciar o próximo ciclo.", true);
+    if (action === "reset" && state.pomodoro?.status !== "idle" && !confirm("Descartar o ciclo atual e voltar ao início?")) return;
+    const generation = ++state.pomodoroGeneration;
+    state.pomodoroBusy = true;
+    if (state.pomodoro) renderPomodoro(state.pomodoro);
+    try {
+      const snapshot = await requestJSON("/api/pomodoro/command", {method: "POST", body: JSON.stringify({action})});
+      if (generation === state.pomodoroGeneration && !app.hidden) {
+        renderPomodoro(snapshot);
+        refreshPreview();
+      }
+    } catch (error) { toast(error.message, true); }
+    finally {
+      state.pomodoroBusy = false;
+      if (generation === state.pomodoroGeneration && state.pomodoro && !app.hidden) renderPomodoro(state.pomodoro);
+      refreshPomodoro();
+    }
+  });
+});
 
 const integrationNames = {pihole: "Pi-hole", homeassistant: "Home Assistant"};
 
@@ -620,6 +697,8 @@ $("#saveButton").addEventListener("click", async () => {
     $("#saveState").textContent = "Configuração aplicada";
     renderSettings();
     refreshPreview();
+    state.pomodoroGeneration++;
+    refreshPomodoro();
     toast("Display atualizado com sucesso.");
   } catch (error) {
     toast(error.message, true);
@@ -667,6 +746,8 @@ $("#logoutButton").addEventListener("click", async () => {
     state.csrf = null;
     closeIntegrationDialog();
     state.integrationsStatus = {};
+    state.pomodoro = null;
+    state.pomodoroGeneration++;
     showAuth(true);
   }
 });
@@ -677,5 +758,13 @@ setInterval(() => {
     refreshDisplayState();
   }
 }, 5000);
+
+setInterval(() => {
+  if (!app.hidden) {
+    refreshPomodoro();
+    const pages = state.config ? enabledPages() : [];
+    if (["clock", "pomodoro"].includes(pages[state.previewIndex]?.id)) refreshPreview();
+  }
+}, 1000);
 
 bootstrap();

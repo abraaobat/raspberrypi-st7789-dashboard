@@ -68,6 +68,14 @@ PAGE_CATALOG = (
         "defaultRefreshSeconds": 30,
         "minRefreshSeconds": 15,
     },
+    {
+        "id": "clock", "title": "Relógio", "description": "Hora, data e fuso escolhido, sem internet.",
+        "kind": "native", "defaultEnabled": False, "defaultRefreshSeconds": 1, "minRefreshSeconds": 1, "maxRefreshSeconds": 1,
+    },
+    {
+        "id": "pomodoro", "title": "Pomodoro", "description": "Cronômetro de foco controlado pelo painel local.",
+        "kind": "native", "defaultEnabled": False, "defaultRefreshSeconds": 1, "minRefreshSeconds": 1, "maxRefreshSeconds": 1,
+    },
 )
 
 PAGE_BY_ID = {page["id"]: page for page in PAGE_CATALOG}

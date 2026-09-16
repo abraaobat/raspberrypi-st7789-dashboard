@@ -211,6 +211,31 @@
           <div id="customEmpty" class="empty-state">Nenhuma fonte personalizada. Você pode conectar sensores, automações ou serviços do homelab.</div>
         </article>
 
+        <article class="panel desk-panel">
+          <div class="panel-head"><div><p class="section-kicker">MODO DE MESA</p><h2>Relógio e Pomodoro</h2></div><span class="muted small">Sem internet</span></div>
+          <div class="integration-grid">
+            <section class="integration-card">
+              <div class="integration-title"><span class="integration-icon weather-icon">◷</span><div><strong>Relógio</strong><small>Ative em Conteúdo e ordem</small></div></div>
+              <label class="compact-field"><span>Fuso horário IANA</span><input id="clockTimezone" class="text-input" maxlength="80" placeholder="America/Boa_Vista"><small>Vazio usa o fuso configurado no Raspberry Pi.</small></label>
+              <label class="http-consent"><input id="clockShowSeconds" type="checkbox"><span>Mostrar segundos</span></label>
+              <label class="http-consent"><input id="clockHour24" type="checkbox"><span>Formato de 24 horas</span></label>
+            </section>
+            <section class="integration-card">
+              <div class="integration-title"><span class="integration-icon ops-icon">◴</span><div><strong>Pomodoro</strong><small>Ative a página para vê-lo no display</small></div></div>
+              <label class="compact-field"><span>Duração do próximo ciclo (minutos)</span><input id="pomodoroMinutes" class="text-input" type="number" min="1" max="120" step="1"><small>Aplique a duração antes de iniciar um novo ciclo.</small></label>
+              <div class="timer-readout"><strong id="pomodoroCountdown">25:00</strong><span id="pomodoroStatus" class="muted small" role="status" aria-live="polite">Pronto para focar</span></div>
+              <progress id="pomodoroProgress" value="0" max="1" aria-label="Progresso do Pomodoro"></progress>
+              <div class="timer-actions">
+                <button id="pomodoroStart" class="button secondary compact" type="button" data-pomodoro-action="start">Iniciar</button>
+                <button id="pomodoroPause" class="button ghost compact" type="button" data-pomodoro-action="pause">Pausar</button>
+                <button id="pomodoroResume" class="button secondary compact" type="button" data-pomodoro-action="resume">Retomar</button>
+                <button id="pomodoroReset" class="button ghost compact" type="button" data-pomodoro-action="reset">Reiniciar</button>
+              </div>
+            </section>
+          </div>
+          <p class="guided-note">Os controles do cronômetro têm efeito imediato, mesmo sem ativar sua página. Um ciclo não alterna o carrossel nem inicia pausas automaticamente. GPIO23/GPIO24 continuam mudando de página. Após reinício do Pi, um ciclo em execução fica interrompido e precisa ser iniciado novamente; um ciclo pausado pode ser retomado pelo painel.</p>
+        </article>
+
         <article class="panel backup-panel">
           <div class="panel-head"><div><p class="section-kicker">CONFIGURAÇÃO</p><h2>Backup e restauração</h2></div></div>
           <p class="muted small">Baixe os ajustes salvos. O arquivo não inclui PIN nem credenciais. Ao restaurar, esses segredos locais são preservados.</p>

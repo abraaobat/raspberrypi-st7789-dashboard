@@ -1,10 +1,12 @@
-# Backup e credenciais — v0.4.0
+# Backup e credenciais — v0.5.0
 
 ## Backup pelo painel
 
 **Baixar configuração** exporta os ajustes já aplicados, não o rascunho. Inclui páginas, ordem, carrossel, alertas, localização do clima, serviços, URLs de fontes personalizadas e endereços/entidades das integrações. Não inclui o PIN, a chave de sessão ou o arquivo do cofre.
 
 O backup pode revelar localização e endereços do seu homelab. Não coloque tokens em URLs de fontes personalizadas e não publique o arquivo indiscriminadamente.
+
+Relógio (fuso/formatos) e duração do próximo Pomodoro também são incluídos. O ciclo ativo, identificação de boot e prazo monotônico não são exportados. Restaurar a configuração preserva o ciclo local em andamento/pausado; mudar duração vale somente para o próximo ciclo. Um backup local completo pode conter `pomodoro.json`, mas seu ciclo em execução não é portável entre dispositivos/boots. Veja [modo de mesa](DESK_MODE.md).
 
 **Restaurar configuração** pede confirmação e aceita JSON de até 64 KiB. O servidor valida tudo antes da substituição atômica; arquivo inválido é recusado sem substituir os ajustes válidos. Ao restaurar no mesmo Pi, PIN e cofre são preservados. Em outro Pi, cadastre o PIN e as credenciais separadamente. Uma credencial existente só será usada se o endereço do backup coincidir com o endereço ao qual ela foi vinculada.
 
@@ -39,5 +41,6 @@ O backup pelo navegador serve para ajustes; o backup local completo serve para r
 3. Confirmar legibilidade das páginas PI-HOLE/CASA no ST7789; o teste de navegador não substitui observação física.
 4. Fonte HTTP/JSON de interesse real: criar pelo assistente e confirmar o texto no TFT.
 5. Backup: exportar os ajustes, guardar privadamente e testar a restauração quando conveniente. O fluxo automatizado já cobre preservação do PIN e cofre em ambiente isolado.
+6. Relógio/Pomodoro: verificar hora/fuso e concluir um ciclo de 1 minuto no TFT, com pausa/retomada pelo painel. Os botões permanecem anterior/próxima página.
 
 Não é necessário repetir a homologação anterior de Status/Rede/Hardware/Clima/SysOps apenas para cadastrar os novos serviços.

@@ -13,6 +13,7 @@ from urllib.parse import urlsplit
 from .catalog import PAGE_CATALOG, catalog_by_id
 from .display_profiles import DEFAULT_PROFILE_ID, PROFILE_BY_ID
 from .integration_settings import INTEGRATION_IDS, integration_settings
+from .desk_settings import DeskError, clock_settings, pomodoro_settings
 
 APP_DIR_NAME = "raspberrypi-st7789-dashboard"
 CUSTOM_ID_PATTERN = re.compile(r"custom:[a-z0-9][a-z0-9-]{0,31}$")
@@ -63,6 +64,8 @@ def default_config() -> dict:
             "services": [],
         },
         "customPages": [],
+        "clock": clock_settings({}),
+        "pomodoro": pomodoro_settings({}),
         "integrations": {connector: integration_settings(connector, {}) for connector in INTEGRATION_IDS},
         "pages": [
             {
@@ -273,6 +276,12 @@ def normalize_config(payload: dict | None) -> dict:
             normalized_services.append(service)
     result["sysops"] = {"services": normalized_services}
 
+    try:
+        result["clock"] = clock_settings(payload.get("clock", {}))
+        result["pomodoro"] = pomodoro_settings(payload.get("pomodoro", {}))
+    except DeskError as exc:
+        raise ConfigError(str(exc)) from exc
+
     integrations = payload.get("integrations", {})
     if not isinstance(integrations, dict) or set(integrations) - set(INTEGRATION_IDS):
         raise ConfigError("integração não suportada")
@@ -318,7 +327,7 @@ def normalize_config(payload: dict | None) -> dict:
                     item.get("refreshSeconds", metadata["defaultRefreshSeconds"]),
                     f"pages.{page_id}.refreshSeconds",
                     metadata["minRefreshSeconds"],
-                    3600,
+                    metadata.get("maxRefreshSeconds", 3600),
                 ),
             }
         )

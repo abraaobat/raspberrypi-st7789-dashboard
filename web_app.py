@@ -20,6 +20,7 @@ from dashboard.integrations import fetch_integration
 from dashboard.providers import DataHub, fetch_custom_page
 from dashboard.rendering import render_page
 from dashboard.runtime import RuntimeStore
+from dashboard.desk import DeskError
 
 
 def create_app(test_config=None):
@@ -272,6 +273,26 @@ def create_app(test_config=None):
     @require_auth
     def display_state():
         return jsonify(runtime.read_display())
+
+    @app.get("/api/pomodoro/state")
+    @require_auth
+    def pomodoro_state():
+        try:
+            return jsonify(data.pomodoro.snapshot(load_config(state_override)["pomodoro"]["minutes"]))
+        except DeskError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    @app.post("/api/pomodoro/command")
+    @require_auth
+    @require_csrf
+    def pomodoro_command():
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict) or set(payload) != {"action"}:
+            return jsonify({"error": "informe somente a ação do Pomodoro"}), 400
+        try:
+            return jsonify(data.pomodoro.command(payload["action"], load_config(state_override)["pomodoro"]["minutes"]))
+        except DeskError as exc:
+            return jsonify({"error": str(exc)}), 400
 
     @app.post("/api/display/page")
     @require_auth

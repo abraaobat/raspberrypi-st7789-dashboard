@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-16T14:48:00Z",
-  "status": "v0.4.0 pronta • integração real e atualização do Pi pendentes",
+  "updatedAt": "2026-09-16T17:55:58Z",
+  "status": "v0.5.0 pronta • Relógio/Pomodoro • atualização do Pi pendente",
   "statusClass": "ops",
-  "progress": 90,
+  "progress": 92,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "v0.4.0 implementada: cofre privado vinculado ao endereço, assistentes Pi-hole 6/Home Assistant, páginas PI-HOLE/CASA e backup/restauração preservando PIN/cofre. 55 testes locais e fluxo de navegador com serviços simulados aprovados. Base física v0.3.0 homologada; atualização do Pi aguarda conectividade SSH. Landing bilíngue e Pix confirmado preservados.",
-  "architecture": "Browser → API autenticada → Config/Registry → System + async providers → Pillow Renderer → Display Profile → ST7789/Preview",
-  "next": "Atualizar o Raspberry Pi quando voltar a responder, configurar Pi-hole 6/Home Assistant reais e homologar as novas páginas/fonte HTTP/JSON no TFT. Search Console ainda depende de login; depois MQTT, Docker detalhado, relógio e novos drivers.",
-  "action": "Restabelecer acesso ao Raspberry Pi e atualizar para v0.4.0; cadastrar credenciais somente no painel privado e confirmar legibilidade no ST7789.",
+  "current": "v0.5.0 soma Relógio/Pomodoro offline: fuso/formato, comandos protegidos e tempo monotônico com estado privado compartilhado, preservação entre serviços e interrupção segura após reboot. Mantém cofre, Pi-hole 6/Home Assistant e backup/restauração. 84 testes locais e navegador isolado aprovados. Base física v0.3.0 homologada; Pi inacessível por SSH nos IPs conhecidos. Landing bilíngue e Pix preservados.",
+  "architecture": "Browser → API autenticada → Config/Registry + shared monotonic Pomodoro → System/async providers → Pillow → Display Profile → ST7789/Preview",
+  "next": "Atualizar o Pi quando voltar a responder; testar Relógio/Pomodoro com ciclo curto, conectores reais e fonte HTTP/JSON no TFT. Search Console depende de login. Depois MQTT, Docker detalhado, templates e novos drivers.",
+  "action": "Restabelecer acesso ao Pi, atualizar para v0.5.0 e conferir Relógio/Pomodoro no TFT; botões mantêm anterior/próxima. Credenciais reais somente no painel privado.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
@@ -31,12 +31,16 @@
     "Home Assistant selected entities ✓ simulated API",
     "PI-HOLE / CASA pages — physical validation pending",
     "Config export/restore preserving PIN/vault ✓ isolated browser",
-    "55 automated tests ✓ local",
-    "v0.4.0 Raspberry Pi deployment — connectivity pending",
+    "Clock timezone + 12/24h + seconds ✓ software",
+    "Pomodoro panel controls + process persistence + reboot safety ✓ software",
+    "RELÓGIO / POMODORO — physical validation pending",
+    "84 automated tests ✓ local",
+    "v0.5.0 Raspberry Pi deployment — connectivity pending",
     "Display profiles foundation ✓ software",
     "Public landing page + Google indexing foundation ✓",
     "Google Search Console — login/verification pending",
-    "Desk / IoT Packs"
+    "MQTT / Node-RED / Docker detailed — future work",
+    "Pomodoro physical gestures — future work"
   ],
   "runtime": {
     "label": "Página pública do projeto",
@@ -47,6 +51,6 @@
   "activity": {
     "date": "2026-09-16",
     "type": "update",
-    "text": "v0.4.0: cofre local, assistentes Pi-hole 6/Home Assistant, duas novas páginas e backup/restauração; 55 testes locais e navegador com APIs fictícias aprovados. Docs, roadmap e landing atualizados; Pi não respondeu nos IPs conhecidos, deploy e testes reais permanecem pendentes."
+    "text": "v0.5.0: Relógio/Pomodoro offline, controle pelo painel, tempo monotônico compartilhado e interrupção segura após reboot; 84 testes locais e navegador isolado aprovados. Docs, roadmap, landing e Command Dashboard atualizados. Pix e navegação preservados; Pi segue inacessível nos IPs conhecidos, instalação/ARM/TFT permanecem pendentes."
   }
 }

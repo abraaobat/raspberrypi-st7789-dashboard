@@ -4,7 +4,7 @@ Dashboard compacto para Raspberry Pi com display TFT ST7789 1.3" 240×240 via SP
 
 ![Raspberry Pi ST7789 Dashboard](docs/images/hero.jpg)
 
-O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.4.0 acrescenta assistentes de Pi-hole 6 e Home Assistant, credenciais locais privadas e backup/restauração ao clima, SysOps e fontes HTTP/JSON da versão 0.3.
+O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.5.0 acrescenta relógio e Pomodoro offline aos assistentes de Pi-hole 6/Home Assistant, credenciais locais privadas, backup/restauração, clima, SysOps e fontes HTTP/JSON.
 
 ## Visão do produto
 
@@ -20,17 +20,20 @@ Pelo computador ou celular, o usuário pode:
 - criar páginas para APIs HTTP/JSON sem alterar o código;
 - configurar Pi-hole 6 e até quatro entidades do Home Assistant com credenciais separadas dos ajustes;
 - exportar e restaurar a configuração sem alterar PIN ou credenciais locais;
+- configurar relógio com data, fuso e formato de 12/24 horas;
+- iniciar, pausar, retomar e reiniciar um Pomodoro de 1–120 minutos pelo painel;
 - visualizar uma prévia fiel de 240×240 gerada pelo mesmo renderizador Pillow usado no ST7789;
 - aplicar mudanças sem editar o código-fonte ou reiniciar o serviço.
 
 O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0 estão homologados no Raspberry Pi 3. A atualização preservou a configuração anterior e adicionou as integrações de forma opt-in, sem regressão nos botões, na prévia ou no carrossel.
 
-As adições da versão 0.4.0 possuem 55 testes automatizados e verificação de ponta a ponta no navegador com serviços simulados. Pi-hole/Home Assistant reais e legibilidade das novas páginas no ST7789 aguardam homologação manual. Os novos módulos permanecem desativados na atualização.
+O software da versão 0.5.0 possui 84 testes automatizados e verificação de ponta a ponta no navegador com serviços simulados. Pi-hole/Home Assistant reais e legibilidade de PI-HOLE/CASA/RELÓGIO/POMODORO no ST7789 aguardam homologação manual. Os novos módulos permanecem desativados na atualização. A última implantação física comprovada é v0.3.0; o Pi não respondeu por SSH nesta retomada.
 
 - [Roadmap do produto](ROADMAP.md)
 - [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)
 - [Integrações, clima e fontes personalizadas](docs/INTEGRATIONS.md)
 - [Backup, credenciais e atualização](docs/BACKUP_AND_CREDENTIALS.md)
+- [Relógio e Pomodoro offline](docs/DESK_MODE.md)
 - [Página pública do projeto](https://abraaobat.github.io/raspberrypi-st7789-dashboard/)
 
 ## Recursos
@@ -123,6 +126,16 @@ O assistente **Adicionar fonte** transforma um valor de uma resposta HTTP/JSON e
 - HTTP autenticado exige autorização explícita e fica limitado à LAN/tailnet; HTTPS valida certificados. Nenhum comando de controle é enviado aos serviços.
 
 O cofre é um arquivo privado com permissão `0600`, não criptografia de disco. Cadastre credenciais somente por uma conexão confiável. Detalhes em [Backup e credenciais](docs/BACKUP_AND_CREDENTIALS.md).
+
+### 8. RELÓGIO / 9. POMODORO — novos módulos opcionais
+
+- **Relógio:** hora, data, dia da semana, segundos opcionais, formato 12/24 h e fuso IANA explícito ou do sistema.
+- **Pomodoro:** ciclo de foco de 1–120 minutos (padrão 25), barra de progresso e comandos imediatos no painel protegido.
+- Sem API externa: a hora depende do relógio do sistema; a contagem usa tempo monotônico e estado privado compartilhado pelos serviços.
+- Fechar/reiniciar o painel não reinicia o ciclo. Reiniciar o Pi interrompe um ciclo em execução; um ciclo pausado pode ser retomado explicitamente.
+- GPIO23/GPIO24 mantêm anterior/próxima página. Sem ciclos de pausa automáticos, alarme sonoro ou novos gestos físicos nesta versão.
+
+Veja [uso, persistência e checklist físico](docs/DESK_MODE.md). Alterar duração ou restaurar ajustes não altera o ciclo em andamento.
 
 ## Hardware usado
 

@@ -19,6 +19,7 @@ from .credentials import CredentialError, CredentialStore
 from .http_client import HTTP_TIMEOUT_SECONDS, MAX_JSON_BYTES, request_json, validate_source_url
 from .integration_settings import INTEGRATION_IDS
 from .integrations import fetch_integration
+from .desk import DeskError, PomodoroStore, clock_snapshot
 
 
 def run(command: list[str], timeout: float = 2.0) -> str | None:
@@ -472,12 +473,21 @@ class DataHub:
         self.metrics = metrics or MetricsCache()
         self.external = AsyncDataCache()
         self.credentials = CredentialStore(state_override)
+        self.pomodoro = PomodoroStore(state_override)
 
     @staticmethod
     def _signature(value: dict) -> str:
         return json.dumps(value, sort_keys=True, ensure_ascii=True)
 
     def get(self, config: dict, page_id: str, maximum_age: float = 1.0) -> dict:
+        # Time pages do not need a CPU/system scan or any network integration.
+        if page_id == "clock":
+            return {"clock": clock_snapshot(config["clock"])}
+        if page_id == "pomodoro":
+            try:
+                return {"pomodoro": self.pomodoro.snapshot(config["pomodoro"]["minutes"])}
+            except DeskError as exc:
+                return {"pomodoro": {"error": str(exc), "status": "unavailable"}}
         snapshot = self.metrics.get(maximum_age)
         if page_id == "weather":
             settings = config["weather"]
