@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-16T00:44:00-04:00",
+  "updatedAt": "2026-09-16T01:00:00-04:00",
   "status": "v0.3.0 homologada no ST7789 • expansões em andamento",
   "statusClass": "ops",
-  "progress": 84,
+  "progress": 86,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "A versão 0.3.0 está implantada no Raspberry Pi com serviços e API saudáveis. Clima e SysOps foram homologados visualmente no ST7789 real; páginas HTTP/JSON e perfis de display passaram por 24 testes no ARM e verificação no navegador. A configuração v0.2 e o PIN foram preservados.",
+  "current": "A versão 0.3.0 está implantada no Raspberry Pi com serviços e API saudáveis. Clima e SysOps foram homologados visualmente no ST7789 real; páginas HTTP/JSON e perfis de display passaram por 24 testes no ARM. Uma landing page bilíngue com fotos reais, SEO técnico e apoio via Pix foi adicionada para publicação no GitHub Pages.",
   "architecture": "Browser → API autenticada → Config/Registry → System + async providers → Pillow Renderer → Display Profile → ST7789/Preview",
   "next": "Homologar uma fonte HTTP/JSON no ST7789 e avançar conectores autenticados, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.",
   "action": "Criar pelo painel uma página HTTP/JSON de interesse do usuário e confirmar sua legibilidade no display físico.",
@@ -27,11 +27,12 @@
     "Weather page ✓ hardware",
     "Custom HTTP/JSON pages ✓ software",
     "Display profiles foundation ✓ software",
+    "Public landing page + Google indexing foundation ✓",
     "Desk / IoT Packs"
   ],
   "activity": {
     "date": "2026-09-16",
-    "type": "validate",
-    "text": "Clima e SysOps da v0.3.0 foram homologados visualmente no ST7789 real, com dados legíveis, ordem 4/5 e 5/5 e evidência fotográfica adicionada à documentação."
+    "type": "build",
+    "text": "Landing page bilíngue criada com fotos reais do ST7789, SEO técnico, sitemap, publicação automática no GitHub Pages e apoio opcional via Pix."
   }
 }

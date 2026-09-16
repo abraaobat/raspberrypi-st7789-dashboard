@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://abraaobat.github.io/raspberrypi-st7789-dashboard/sitemap.xml

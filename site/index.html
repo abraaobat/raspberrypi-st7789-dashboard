@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="google-site-verification" content="0h8yRCge7UtPO570fPZsTDNVKGekMW01I0p9-vthDMI">
+  <title>Raspberry Pi ST7789 Dashboard — 240×240 System Monitor</title>
+  <meta name="description" content="Build a compact Raspberry Pi system dashboard with an ST7789 display, physical buttons, live weather, SysOps metrics and a local web control panel.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#070a0f">
+  <link rel="canonical" href="https://abraaobat.github.io/raspberrypi-st7789-dashboard/">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Raspberry Pi ST7789 Dashboard">
+  <meta property="og:description" content="A configurable 240×240 system dashboard with physical controls and a local web panel.">
+  <meta property="og:url" content="https://abraaobat.github.io/raspberrypi-st7789-dashboard/">
+  <meta property="og:site_name" content="Raspberry Pi ST7789 Dashboard">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Raspberry Pi ST7789 Dashboard",
+    "softwareVersion": "0.3.0",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Raspberry Pi OS",
+    "isAccessibleForFree": true,
+    "license": "https://opensource.org/license/mit",
+    "codeRepository": "https://github.com/abraaobat/raspberrypi-st7789-dashboard",
+    "url": "https://abraaobat.github.io/raspberrypi-st7789-dashboard/",
+    "description": "Open-source Raspberry Pi dashboard for an ST7789 240x240 SPI display with physical buttons and a local web control panel."
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="Raspberry Pi ST7789 Dashboard home">
+      <span class="brand-mark" aria-hidden="true">PI</span>
+      <span><strong>ST7789</strong> Dashboard</span>
+    </a>
+    <nav class="nav" aria-label="Primary navigation">
+      <a href="#features" data-i18n="navFeatures">Features</a>
+      <a href="#control" data-i18n="navControl">Web control</a>
+      <a href="#hardware" data-i18n="navHardware">Hardware</a>
+      <a href="#install" data-i18n="navInstall">Install</a>
+      <a href="https://github.com/abraaobat/raspberrypi-st7789-dashboard" rel="noopener">GitHub</a>
+    </nav>
+    <label class="lang-control">
+      <span class="sr-only" data-i18n="language">Language</span>
+      <span aria-hidden="true">◎</span>
+      <select id="languageSelect" aria-label="Language">
+        <option value="en">English</option>
+        <option value="pt-BR">Português</option>
+      </select>
+    </label>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <div class="status-line"><span class="status-dot"></span><span data-i18n="validated">v0.3.0 validated on real hardware</span></div>
+        <p class="eyebrow" data-i18n="eyebrow">A TINY SCREEN WITH A USEFUL JOB</p>
+        <h1 data-i18n="heroTitle">Turn your Raspberry Pi into a glanceable system dashboard</h1>
+        <p class="hero-lead" data-i18n="heroLead">Monitor CPU, memory, network, hardware, services and weather on a 240×240 ST7789 display. Configure the pages from your phone or computer, while the display keeps working independently.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/abraaobat/raspberrypi-st7789-dashboard#instalação" rel="noopener" data-i18n="installCta">Install on Raspberry Pi</a>
+          <a class="btn btn-secondary" href="https://github.com/abraaobat/raspberrypi-st7789-dashboard" rel="noopener" data-i18n="sourceCta">View source</a>
+          <a class="btn btn-ghost" href="#support" data-i18n="supportCta">Support via PIX</a>
+        </div>
+        <ul class="trust-row" aria-label="Project highlights">
+          <li><span>240×240</span><b data-i18n="trustDisplay">shared physical + web rendering</b></li>
+          <li><span>2</span><b data-i18n="trustButtons">physical navigation buttons</b></li>
+          <li><span>24</span><b data-i18n="trustTests">automated tests passing</b></li>
+        </ul>
+      </div>
+
+      <figure class="hero-visual">
+        <div class="photo-frame">
+          <img src="./weather-hardware.jpg" width="1600" height="1200" alt="Weather page running on the ST7789 display attached to a Raspberry Pi 3">
+          <span class="screen-tag"><i></i><span data-i18n="liveHardware">REAL HARDWARE</span></span>
+        </div>
+        <figcaption data-i18n="heroCaption">Weather data from Open-Meteo, rendered directly on the ST7789.</figcaption>
+      </figure>
+    </section>
+
+    <section class="proof-strip" aria-label="Project capabilities">
+      <article><strong>5</strong><span data-i18n="proofPages">built-in pages</span></article>
+      <article><strong>SPI</strong><span data-i18n="proofBus">validated display bus</span></article>
+      <article><strong>LAN</strong><span data-i18n="proofLocal">local-first control panel</span></article>
+      <article><strong>JSON</strong><span data-i18n="proofCustom">custom data sources</span></article>
+    </section>
+
+    <section class="section" id="features">
+      <div class="section-heading split-heading">
+        <div>
+          <p class="eyebrow" data-i18n="featuresEyebrow">ONE DISPLAY, SEVERAL VIEWS</p>
+          <h2 data-i18n="featuresTitle">Useful information without opening another app</h2>
+        </div>
+        <p data-i18n="featuresLead">The page catalog is modular. Enable only what matters, choose the order and let the carousel rotate automatically—or use the physical buttons.</p>
+      </div>
+      <div class="feature-grid">
+        <article><span class="feature-number">01</span><h3 data-i18n="fStatus">System status</h3><p data-i18n="fStatusD">CPU load, SoC temperature, memory usage and uptime with compact visual indicators.</p></article>
+        <article><span class="feature-number">02</span><h3 data-i18n="fNetwork">Network</h3><p data-i18n="fNetworkD">Hostname and active Ethernet, Wi-Fi and Tailscale addresses for headless access.</p></article>
+        <article><span class="feature-number">03</span><h3 data-i18n="fHardware">Hardware</h3><p data-i18n="fHardwareD">Raspberry Pi model, Linux kernel, connected USB devices and SPI state.</p></article>
+        <article><span class="feature-number">04</span><h3>SysOps</h3><p data-i18n="fSysopsD">Disk usage, gateway latency, power history and allowlisted systemd services.</p></article>
+        <article><span class="feature-number">05</span><h3 data-i18n="fWeather">Weather</h3><p data-i18n="fWeatherD">Current conditions, apparent temperature, daily minimum and maximum, and rain probability.</p></article>
+        <article><span class="feature-number">+</span><h3 data-i18n="fCustom">Your own API</h3><p data-i18n="fCustomD">Turn selected values from an HTTP/JSON response into a metric or status page without changing the source code.</p></article>
+      </div>
+    </section>
+
+    <section class="section control-section" id="control">
+      <div class="control-copy">
+        <p class="eyebrow" data-i18n="controlEyebrow">CONTROL IT FROM ANY BROWSER</p>
+        <h2 data-i18n="controlTitle">Choose what appears on the physical display</h2>
+        <p data-i18n="controlLead">The local web panel works on phones and computers. It uses the same Pillow renderer as the physical screen, so the 240×240 preview represents the frame sent to the display.</p>
+        <ul class="check-list">
+          <li data-i18n="controlA">Enable, disable and reorder pages</li>
+          <li data-i18n="controlB">Configure carousel timing and temperature alerts</li>
+          <li data-i18n="controlC">Preview and select a page immediately</li>
+          <li data-i18n="controlD">Protect changes with a local PIN and CSRF validation</li>
+          <li data-i18n="controlE">Keep the display running even if the web panel stops</li>
+        </ul>
+      </div>
+      <figure class="panel-shot">
+        <img src="./control-panel.png" width="1600" height="1141" loading="lazy" alt="Responsive web control panel for the ST7789 dashboard">
+        <figcaption data-i18n="controlCaption">Responsive control panel with live preview, content order, carousel and alerts.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section hardware-section" id="hardware">
+      <div class="section-heading">
+        <p class="eyebrow" data-i18n="hardwareEyebrow">PHOTOGRAPHED ON THE ACTUAL DEVICE</p>
+        <h2 data-i18n="hardwareTitle">Software and hardware validated together</h2>
+        <p data-i18n="hardwareLead">The reference build uses a Raspberry Pi 3 Model B V1.2, an ST7789 1.3-inch SPI module and its two onboard buttons on GPIO23 and GPIO24.</p>
+      </div>
+      <div class="hardware-gallery">
+        <figure>
+          <img src="./sysops-hardware.jpg" width="1600" height="1200" loading="lazy" alt="SysOps page on a physical ST7789 display">
+          <figcaption><b>SysOps</b><span data-i18n="sysopsCaption">Disk, gateway, power history and local services.</span></figcaption>
+        </figure>
+        <figure>
+          <img src="./weather-hardware.jpg" width="1600" height="1200" loading="lazy" alt="Weather page on a physical ST7789 display">
+          <figcaption><b data-i18n="weatherLabel">Weather</b><span data-i18n="weatherCaption">Current condition, temperature, range and rain probability.</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section architecture-section">
+      <div class="section-heading split-heading">
+        <div><p class="eyebrow" data-i18n="architectureEyebrow">BUILT TO GROW</p><h2 data-i18n="architectureTitle">One renderer, several destinations</h2></div>
+        <p data-i18n="architectureLead">Data collection, page selection and rendering are separated from the display driver. That keeps the ST7789 stable today and creates a path to other resolutions and display technologies.</p>
+      </div>
+      <div class="flow" aria-label="Dashboard architecture">
+        <span data-i18n="flowData">System + integrations</span><b>→</b><span data-i18n="flowPages">Page catalog</span><b>→</b><span>Pillow</span><b>→</b><span>ST7789 / PNG</span>
+      </div>
+      <div class="architecture-notes">
+        <p><strong data-i18n="profilesTitle">Display profiles.</strong> <span data-i18n="profilesText">The 240×240 ST7789 driver is production-ready. Software profiles for 128×64 monochrome and 320×240 color already validate framebuffer adaptation, while their physical drivers remain future work.</span></p>
+        <p><strong data-i18n="safeTitle">Safe custom sources.</strong> <span data-i18n="safeText">HTTP/JSON requests are read-only, bounded by time and size, block unsafe network destinations and use cached data when a provider is temporarily unavailable.</span></p>
+      </div>
+    </section>
+
+    <section class="section install-section" id="install">
+      <div class="section-heading">
+        <p class="eyebrow" data-i18n="installEyebrow">FROM REPOSITORY TO DESK</p>
+        <h2 data-i18n="installTitle">A repeatable Raspberry Pi installation</h2>
+      </div>
+      <ol class="steps">
+        <li><span>1</span><div><h3 data-i18n="step1Title">Connect the module</h3><p data-i18n="step1Text">Use the documented SPI and button pinout, then enable SPI in Raspberry Pi OS.</p></div></li>
+        <li><span>2</span><div><h3 data-i18n="step2Title">Run the installer</h3><p data-i18n="step2Text">The installer creates the Python environment, validates dependencies and installs the display and web services.</p></div></li>
+        <li><span>3</span><div><h3 data-i18n="step3Title">Open the local panel</h3><p data-i18n="step3Text">Create a PIN, choose the pages, configure integrations and confirm the live preview.</p></div></li>
+      </ol>
+      <div class="install-actions">
+        <a class="btn btn-primary" href="https://github.com/abraaobat/raspberrypi-st7789-dashboard#instalação" rel="noopener" data-i18n="guideCta">Read the installation guide</a>
+        <a class="btn btn-secondary" href="https://github.com/abraaobat/raspberrypi-st7789-dashboard/blob/main/docs/INTEGRATIONS.md" rel="noopener" data-i18n="integrationsCta">Explore integrations</a>
+        <a class="btn btn-ghost" href="https://pt.aliexpress.com/item/1005008209370173.html" rel="nofollow noopener" data-i18n="displayCta">View the reference display</a>
+      </div>
+    </section>
+
+    <section class="section support-section" id="support">
+      <div class="support-copy">
+        <p class="eyebrow" data-i18n="supportEyebrow">KEEP OPEN HARDWARE PROJECTS MOVING</p>
+        <h2 data-i18n="supportTitle">Support the project via PIX</h2>
+        <p data-i18n="supportLead">Any optional contribution helps pay for display modules, Raspberry Pi tests, documentation and future integrations. The software remains open source.</p>
+        <div class="pix-key-card">
+          <div><span data-i18n="pixLabel">PIX key</span><strong id="pixKey">oabraaobatista@gmail.com</strong></div>
+          <button class="copy-icon" type="button" data-copy-pix aria-label="Copy PIX key" title="Copy PIX key">⧉</button>
+        </div>
+        <button class="btn btn-primary copy-wide" type="button" data-copy-pix data-i18n="copyPix">Copy PIX key</button>
+        <p class="support-note"><span>✓</span><span><b data-i18n="optional">Optional contribution.</b> <span data-i18n="thanks">Any amount helps the project continue. Thank you.</span></span></p>
+      </div>
+      <div class="qr-card">
+        <p data-i18n="scan">SCAN TO CONTRIBUTE</p>
+        <div><img src="./pix-qr.png" width="1125" height="1125" loading="lazy" alt="PIX QR code for an optional project contribution"></div>
+        <span data-i18n="scanHelp">Open your banking app and scan the QR code.</span>
+        <small data-i18n="pixCountry">PIX is Brazil's instant-payment system.</small>
+      </div>
+    </section>
+
+    <section class="section limits-section">
+      <div class="section-heading"><p class="eyebrow" data-i18n="limitsEyebrow">CLEAR BOUNDARIES</p><h2 data-i18n="limitsTitle">Local control without unnecessary exposure</h2></div>
+      <div class="limit-grid">
+        <p><strong data-i18n="limit1Title">Local by default.</strong> <span data-i18n="limit1Text">The control panel is intended for your LAN or tailnet, not direct public Internet exposure.</span></p>
+        <p><strong data-i18n="limit2Title">No remote shell.</strong> <span data-i18n="limit2Text">The API does not provide arbitrary command execution or filesystem paths supplied by the browser.</span></p>
+        <p><strong data-i18n="limit3Title">Internet is optional.</strong> <span data-i18n="limit3Text">Core system pages and physical navigation continue working without weather or external data providers.</span></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">PI</span><span><strong>ST7789</strong> Dashboard</span></div>
+    <p><span data-i18n="footerText">Open-source Raspberry Pi hardware/software project.</span> MIT License.</p>
+    <div><a href="https://github.com/abraaobat/raspberrypi-st7789-dashboard">GitHub</a><a href="https://github.com/abraaobat/raspberrypi-st7789-dashboard/blob/main/ROADMAP.md" data-i18n="roadmapLink">Roadmap</a><a href="https://github.com/abraaobat/raspberrypi-st7789-dashboard/blob/main/LICENSE" data-i18n="licenseLink">License</a></div>
+    <small>© <span id="year">2026</span> Raspberry Pi ST7789 Dashboard</small>
+  </footer>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

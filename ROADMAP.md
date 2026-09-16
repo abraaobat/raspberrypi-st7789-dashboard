@@ -106,6 +106,7 @@ Critério de saída: módulos podem ser instalados e removidos sem aumentar a su
 ### D6 — Distribuição e compatibilidade
 
 - instalador e atualização segura;
+- landing page bilíngue no GitHub Pages, preparada para indexação e apoio via Pix; ✅
 - configuração inicial assistida;
 - backup e restauração de configuração;
 - matriz de Raspberry Pi e módulos ST7789 validados;
@@ -118,7 +119,7 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-D0–D3 estão concluídos e homologados. A versão 0.3.0 antecipou partes de D4–D6: SysOps e Clima estão homologados no ST7789 real; fontes HTTP/JSON e perfis de display estão implementados e cobertos por testes. O foco imediato é homologar uma fonte personalizada no display; depois entram conectores autenticados, Docker, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.
+D0–D3 estão concluídos e homologados. A versão 0.3.0 antecipou partes de D4–D6: SysOps e Clima estão homologados no ST7789 real; fontes HTTP/JSON e perfis de display estão implementados e cobertos por testes; a página pública bilíngue está preparada para GitHub Pages e Google Search Console. O foco imediato é homologar uma fonte personalizada no display; depois entram conectores autenticados, Docker, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 

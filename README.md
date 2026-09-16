@@ -26,6 +26,7 @@ O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0
 - [Roadmap do produto](ROADMAP.md)
 - [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)
 - [Integrações, clima e fontes personalizadas](docs/INTEGRATIONS.md)
+- [Página pública do projeto](https://abraaobat.github.io/raspberrypi-st7789-dashboard/)
 
 ## Recursos
 
@@ -45,6 +46,16 @@ O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0
 ![Primeiro acesso protegido por PIN](docs/images/web-auth.png)
 
 ![Web Control Panel homologado](docs/images/web-control-panel.png)
+
+### Página pública e apoio ao projeto
+
+O repositório inclui uma landing page bilíngue em `site/`, publicada automaticamente pelo GitHub Pages. Ela apresenta o projeto com texto indexável, fotos reais, metadados estruturados, sitemap, robots e uma seção opcional de apoio via Pix com QR Code e cópia da chave.
+
+O endereço esperado é:
+
+`https://abraaobat.github.io/raspberrypi-st7789-dashboard/`
+
+As instruções de publicação e indexação estão em [site/README.md](site/README.md).
 
 ### 1. STATUS
 
