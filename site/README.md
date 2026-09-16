@@ -45,5 +45,6 @@ The optional support section uses the same public PIX key and validated QR code 
 - Keep responsive image heights automatic. JPEG orientation is EXIF-based (portrait 3024×4032); the web-panel screenshot is landscape and the PIX QR is square. Do not stretch or crop these assets.
 - Do not advertise experimental SSD1306 or ILI9341 profiles as physical drivers.
 - Keep the local web panel described as LAN/tailnet software, not an Internet-facing service.
-- Do not claim that custom HTTP/JSON sources support authentication tokens until the local secrets vault exists.
+- Generic HTTP/JSON sources still do not accept arbitrary auth headers. Only the closed Pi-hole 6/Home Assistant connectors use the v0.4.0 vault; its private file is not disk encryption.
+- Keep the v0.3.0 physical-validation badge separate from the v0.4.0 software additions. Fake-service browser tests do not establish real Pi-hole/Home Assistant or TFT validation.
 - Update the displayed version and physical-validation statements together with `project-status.json`.

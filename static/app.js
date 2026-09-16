@@ -7,6 +7,7 @@ const state = {
   dirty: false,
   authConfigured: false,
   persistedCustomIds: new Set(),
+  integrationsStatus: {},
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -88,16 +89,20 @@ $("#authForm").addEventListener("submit", async (event) => {
 });
 
 async function loadApplication() {
-  const [catalog, config] = await Promise.all([
+  const [catalog, config, integrations] = await Promise.all([
     requestJSON("/api/catalog"),
     requestJSON("/api/config"),
+    requestJSON("/api/integrations/status"),
   ]);
   state.catalog = catalog.pages;
   state.displays = catalog.displays || [];
   state.config = config;
+  state.authConfigured = true;
+  state.integrationsStatus = integrations;
   state.persistedCustomIds = new Set(config.customPages.map((item) => item.id));
   state.previewIndex = 0;
   state.dirty = false;
+  $("#saveState").textContent = "Configuração aplicada";
   authScreen.hidden = true;
   app.hidden = false;
   $("#connectionBadge").classList.add("online");
@@ -162,7 +167,168 @@ function renderSettings() {
   $("#sysopsServices").value = state.config.sysops.services.join(", ");
   renderDisplayProfiles();
   renderCustomPages();
+  renderIntegrations();
 }
+
+const integrationNames = {pihole: "Pi-hole", homeassistant: "Home Assistant"};
+
+function renderIntegrations() {
+  Object.keys(integrationNames).forEach((id) => {
+    const settings = state.config.integrations[id];
+    const metadata = state.integrationsStatus[id] || {};
+    const matches = metadata.credentialConfigured && metadata.credentialBaseUrl === settings.baseUrl;
+    $(`#${id}Status`).textContent = metadata.error || (!settings.baseUrl ? "Não configurado"
+      : !matches ? "Credencial pendente para este endereço" : "Configurado · teste a conexão no assistente");
+  });
+}
+
+function integrationFormValue() {
+  const id = $("#integrationId").value;
+  const url = new URL($("#integrationUrl").value.trim());
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.search || url.hash) {
+    throw new Error("Use um endereço HTTP/HTTPS sem senha, parâmetros ou fragmentos.");
+  }
+  const settings = {baseUrl: url.href.replace(/\/+$/, ""), allowInsecureHttp: $("#integrationAllowHttp").checked};
+  if (id === "homeassistant") {
+    settings.entities = $("#integrationEntities").value.split(",").map((value) => value.trim()).filter(Boolean);
+    if (settings.entities.length > 4 || new Set(settings.entities).size !== settings.entities.length
+      || settings.entities.some((value) => value.length > 120 || !/^[a-z0-9_]+\.[a-z0-9_]+$/.test(value))) {
+      throw new Error("Escolha até quatro entidades diferentes, no formato sensor.temperatura.");
+    }
+  }
+  return {id, settings};
+}
+
+function updateCredentialStatus() {
+  const id = $("#integrationId").value;
+  const metadata = state.integrationsStatus[id] || {};
+  $("#integrationCredentialStatus").textContent = metadata.error || (!metadata.credentialConfigured
+    ? "Nenhuma credencial guardada."
+    : `Credencial guardada para ${metadata.credentialBaseUrl}. Ela não será exibida novamente.`);
+  $("#removeIntegrationCredential").disabled = !metadata.credentialConfigured;
+}
+
+function openIntegrationDialog(id) {
+  const settings = state.config.integrations[id];
+  $("#integrationForm").reset();
+  $("#integrationId").value = id;
+  $("#integrationDialogTitle").textContent = `Configurar ${integrationNames[id]}`;
+  $("#integrationUrl").value = settings.baseUrl;
+  $("#integrationEntitiesField").hidden = id !== "homeassistant";
+  $("#integrationEntities").value = (settings.entities || []).join(", ");
+  $("#integrationSecretLabel").textContent = id === "pihole" ? "Senha de aplicativo do Pi-hole 6" : "Token de acesso de longa duração";
+  $("#integrationHelp").textContent = id === "pihole"
+    ? "No Pi-hole 6, gere uma senha de aplicativo nas configurações de API. Informe a raiz do serviço, por exemplo http://pi.hole, sem /admin ou /api."
+    : "No seu perfil do Home Assistant, crie um token de acesso de longa duração. Informe a raiz do serviço e os IDs das entidades, encontrados em Ferramentas do desenvolvedor → Estados.";
+  $("#integrationAllowHttp").checked = settings.allowInsecureHttp;
+  $("#integrationActivate").checked = state.config.pages.find((page) => page.id === id).enabled;
+  $("#integrationTestResult").textContent = "";
+  $("#integrationTestResult").className = "source-test-result";
+  updateCredentialStatus();
+  $("#integrationDialog").showModal();
+  $("#integrationUrl").focus();
+}
+
+function closeIntegrationDialog() { $("#integrationDialog").close(); }
+$("#integrationDialog").addEventListener("close", () => { $("#integrationSecret").value = ""; });
+$("#closeIntegrationDialog").addEventListener("click", closeIntegrationDialog);
+$("#cancelIntegrationDialog").addEventListener("click", closeIntegrationDialog);
+document.querySelectorAll("[data-configure-integration]").forEach((button) => {
+  button.addEventListener("click", () => openIntegrationDialog(button.dataset.configureIntegration));
+});
+
+function integrationFeedback(message, error = false) {
+  $("#integrationTestResult").textContent = message;
+  $("#integrationTestResult").className = `source-test-result${error ? " error" : ""}`;
+}
+
+async function storeIntegrationCredential() {
+  const {id, settings} = integrationFormValue();
+  if (!$("#integrationSecret").value) throw new Error("Digite uma nova credencial para guardá-la.");
+  const receipt = await requestJSON(`/api/integrations/${id}/credential`, {
+    method: "PUT", body: JSON.stringify({baseUrl: settings.baseUrl, secret: $("#integrationSecret").value}),
+  });
+  $("#integrationSecret").value = "";
+  state.integrationsStatus[id] = receipt;
+  $("#integrationUrl").value = receipt.credentialBaseUrl;
+  updateCredentialStatus();
+  renderIntegrations();
+}
+
+// Serialize modal actions: a late reply must never populate another connector's dialog.
+async function integrationAction(action) {
+  const buttons = $("#integrationForm").querySelectorAll("button");
+  buttons.forEach((button) => { button.disabled = true; });
+  try { await action(); } catch (error) { integrationFeedback(error.message, true); }
+  finally { buttons.forEach((button) => { button.disabled = false; }); updateCredentialStatus(); }
+}
+
+$("#integrationDialog").addEventListener("cancel", (event) => {
+  if ($("#testIntegration").disabled) event.preventDefault();
+});
+$("#storeIntegrationCredential").addEventListener("click", () => integrationAction(async () => {
+  await storeIntegrationCredential();
+  integrationFeedback("Credencial guardada localmente. Os ajustes ainda precisam ser aplicados.");
+}));
+$("#removeIntegrationCredential").addEventListener("click", () => integrationAction(async () => {
+  if (!confirm("Remover somente a credencial local? O token no serviço de origem não será revogado.")) return;
+  const id = $("#integrationId").value;
+  await requestJSON(`/api/integrations/${id}/credential`, {method: "DELETE"});
+  state.integrationsStatus[id] = {};
+  $("#integrationSecret").value = "";
+  renderIntegrations();
+  integrationFeedback("Credencial local removida. Se necessário, revogue-a também no serviço de origem.");
+}));
+$("#testIntegration").addEventListener("click", () => integrationAction(async () => {
+  if (!$("#integrationForm").reportValidity()) return;
+  const {id, settings} = integrationFormValue();
+  const payload = {settings};
+  if ($("#integrationSecret").value) payload.secret = $("#integrationSecret").value;
+  integrationFeedback("Testando conexão somente de leitura…");
+  const response = await requestJSON(`/api/integrations/${id}/test`, {method: "POST", body: JSON.stringify(payload)});
+  integrationFeedback(id === "pihole"
+    ? `Conexão aprovada: ${response.result.blockedQueries} consultas bloqueadas (${response.result.blockedPercent.toFixed(1)}%).`
+    : `Conexão concluída: ${response.result.entities.filter((entity) => entity.available).length} de ${response.result.entities.length} entidades com dados. Nenhum estado foi alterado.`);
+}));
+$("#integrationForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  integrationAction(async () => {
+    if (!event.target.reportValidity()) return;
+    if ($("#integrationSecret").value) await storeIntegrationCredential();
+    const {id, settings} = integrationFormValue();
+    if (id === "homeassistant" && $("#integrationActivate").checked && !settings.entities.length) {
+      throw new Error("Selecione ao menos uma entidade para ativar a página Casa.");
+    }
+    const page = state.config.pages.find((entry) => entry.id === id);
+    if (!$("#integrationActivate").checked && page.enabled && enabledPages().length === 1) {
+      throw new Error("Ao menos uma página deve permanecer ativa.");
+    }
+    state.config.integrations[id] = settings;
+    page.enabled = $("#integrationActivate").checked;
+    markDirty();
+    renderSettings();
+    clampPreview();
+    refreshPreview();
+    closeIntegrationDialog();
+    toast("Ajustes guardados no rascunho. Clique em Aplicar alterações.");
+  });
+});
+
+$("#importConfigButton").addEventListener("click", () => $("#importConfigFile").click());
+$("#importConfigFile").addEventListener("change", async (event) => {
+  const file = event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  try {
+    if (file.size > 64 * 1024) throw new Error("O backup deve ter no máximo 64 KB.");
+    const config = JSON.parse(await file.text());
+    if (!config || typeof config !== "object" || Array.isArray(config)) throw new Error("Backup inválido.");
+    if (!confirm("Restaurar a configuração e substituir os ajustes atuais, inclusive o rascunho? PIN e credenciais locais serão preservados.")) return;
+    await requestJSON("/api/config/import", {method: "POST", body: JSON.stringify(config)});
+    await loadApplication();
+    toast("Configuração restaurada. PIN e credenciais foram preservados.");
+  } catch (error) { toast(error.message, true); }
+});
 
 function renderDisplayProfiles() {
   const select = $("#displayProfile");
@@ -499,6 +665,8 @@ $("#logoutButton").addEventListener("click", async () => {
     await requestJSON("/api/auth/logout", {method: "POST", body: "{}"});
   } finally {
     state.csrf = null;
+    closeIntegrationDialog();
+    state.integrationsStatus = {};
     showAuth(true);
   }
 });

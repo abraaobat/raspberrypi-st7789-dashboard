@@ -38,6 +38,14 @@ O painel é um configurador local, não um substituto do display físico.
 - assistente genérico HTTP/JSON com teste de conexão;
 - indicador de conexão, erro e uso do último dado em cache.
 
+### Novidades da versão 0.4
+
+- assistentes fechados de Pi-hole 6 e Home Assistant, somente monitoramento;
+- até quatro entidades do Home Assistant selecionadas por ID;
+- cofre privado, separado dos ajustes, com credenciais vinculadas ao endereço do serviço;
+- teste sem gravação e consentimento explícito para HTTP autenticado na LAN/tailnet;
+- exportação dos ajustes aplicados e restauração validada sem modificar PIN ou cofre.
+
 ## Arquitetura
 
 ```text
@@ -48,6 +56,7 @@ Web UI ── API autenticada de configuração
           │
           ├── config.json (sem segredos)
           ├── auth.json + session-secret.bin (permissão 0600)
+          ├── credentials.json (privado; sem endpoint de leitura)
           ├── control.json + display-state.json
           └── preview endpoint
                     │
@@ -72,6 +81,8 @@ Arquivos locais usados:
 ├── config.json
 ├── auth.json
 ├── session-secret.bin
+├── credentials.json
+├── .credentials.lock
 ├── control.json
 └── display-state.json
 ```
@@ -99,6 +110,21 @@ Requisitos:
 | `GET` | `/api/preview?page=status` | PNG 240×240 da página |
 | `POST` | `/api/display/page` | selecionar página ativa permitida |
 | `POST` | `/api/sources/test` | validar e consultar uma fonte HTTP/JSON sem salvá-la |
+| `GET` | `/api/integrations/status` | presença da credencial e endereço vinculado, sem segredo |
+| `PUT` | `/api/integrations/<id>/credential` | guardar/substituir `{baseUrl, secret}` para ID fechado |
+| `DELETE` | `/api/integrations/<id>/credential` | apagar somente a credencial local |
+| `POST` | `/api/integrations/<id>/test` | testar `{settings, secret?}` sem persistir |
+| `GET` | `/api/config/export` | baixar os ajustes aplicados, sem PIN/cofre |
+| `POST` | `/api/config/import` | restaurar configuração validada, preservando PIN/cofre |
+
+IDs permitidos: `pihole` e `homeassistant`. Todos esses endpoints exigem sessão autenticada; mudanças e testes também exigem CSRF. O teste usa a credencial digitada ou, se ausente, a credencial local vinculada ao endereço. Não há `GET` de credencial. Exemplo de ajustes não secretos:
+
+```json
+{
+  "pihole": {"baseUrl": "http://pi.hole", "allowInsecureHttp": true},
+  "homeassistant": {"baseUrl": "https://home.example", "allowInsecureHttp": false, "entities": ["sensor.energia", "binary_sensor.porta"]}
+}
+```
 
 Não haverá endpoint de shell, instalação arbitrária ou escrita de caminhos fornecidos pelo cliente.
 
@@ -164,3 +190,5 @@ Um banco de dados não é necessário no MVP. Estado transitório pode permanece
 - não existe execução de comandos arbitrários pela API.
 
 Todos os itens do MVP foram homologados no Raspberry Pi 3 real em desktop e celular. Clima e SysOps também foram homologados visualmente no ST7789 físico. Fontes personalizadas e perfis experimentais de display possuem testes automatizados e verificação em navegador; resta somente a homologação física de uma página HTTP/JSON e de futuros drivers adicionais.
+
+Os assistentes/cofre/backup da v0.4.0 passaram por testes de API e navegador com serviços simulados, em 1440/980/390/320 px. Acesso a Pi-hole/Home Assistant reais e leitura das novas páginas no TFT permanecem pendentes. Veja [limites e recuperação das credenciais](BACKUP_AND_CREDENTIALS.md).

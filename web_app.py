@@ -14,6 +14,9 @@ from dashboard.auth import AuthError, AuthStore, LoginLimiter
 from dashboard.catalog import catalog_by_id, public_catalog
 from dashboard.config import ConfigError, enabled_pages, load_config, normalize_config, save_config
 from dashboard.display_profiles import public_profiles
+from dashboard.credentials import CredentialError, CredentialStore
+from dashboard.integration_settings import INTEGRATION_IDS, integration_settings
+from dashboard.integrations import fetch_integration
 from dashboard.providers import DataHub, fetch_custom_page
 from dashboard.rendering import render_page
 from dashboard.runtime import RuntimeStore
@@ -25,7 +28,8 @@ def create_app(test_config=None):
     auth = AuthStore(state_override)
     login_limiter = LoginLimiter()
     runtime = RuntimeStore(state_override)
-    data = DataHub()
+    credentials = CredentialStore(state_override)
+    data = DataHub(state_override=state_override)
 
     app = Flask(__name__, template_folder="templates", static_folder="static")
     app.config.update(
@@ -188,6 +192,81 @@ def create_app(test_config=None):
         except (ConfigError, ValueError) as exc:
             return jsonify({"error": str(exc)}), 400
         return jsonify({"ok": True, "value": result["value"], "secondary": result["secondary"]})
+
+    @app.get("/api/integrations/status")
+    @require_auth
+    def integration_status():
+        config = load_config(state_override)
+        result = {}
+        for connector in INTEGRATION_IDS:
+            settings = config["integrations"][connector]
+            try:
+                metadata = credentials.status(connector, settings["baseUrl"])
+            except CredentialError as exc:
+                metadata = {"credentialConfigured": False, "credentialMatches": False, "error": str(exc)}
+            result[connector] = {**metadata, "configured": bool(settings["baseUrl"])}
+        return jsonify(result)
+
+    @app.put("/api/integrations/<connector>/credential")
+    @require_auth
+    @require_csrf
+    def put_credential(connector):
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict) or set(payload) - {"baseUrl", "secret"}:
+            return jsonify({"error": "informe somente endereço e credencial"}), 400
+        try:
+            metadata = credentials.put(connector, payload.get("baseUrl", ""), payload.get("secret"))
+        except (CredentialError, ValueError) as exc:
+            return jsonify({"error": str(exc)}), 400
+        data.external.invalidate(connector)
+        return jsonify({"ok": True, **metadata})
+
+    @app.delete("/api/integrations/<connector>/credential")
+    @require_auth
+    @require_csrf
+    def delete_credential(connector):
+        try:
+            credentials.delete(connector)
+        except CredentialError as exc:
+            return jsonify({"error": str(exc)}), 400
+        data.external.invalidate(connector)
+        return jsonify({"ok": True})
+
+    @app.post("/api/integrations/<connector>/test")
+    @require_auth
+    @require_csrf
+    def test_integration(connector):
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict) or set(payload) - {"settings", "secret"}:
+            return jsonify({"error": "teste de integração inválido"}), 400
+        try:
+            settings = integration_settings(connector, payload.get("settings"))
+            secret = payload.get("secret")
+            if secret is None:
+                secret = credentials.read_secret(connector, settings["baseUrl"])
+            result = fetch_integration(connector, settings, secret)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify({"ok": True, "result": result})
+
+    @app.get("/api/config/export")
+    @require_auth
+    def export_config():
+        import json
+
+        buffer = io.BytesIO((json.dumps(load_config(state_override), ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+        return send_file(buffer, mimetype="application/json", as_attachment=True,
+                         download_name="st7789-config.json", max_age=0)
+
+    @app.post("/api/config/import")
+    @require_auth
+    @require_csrf
+    def import_config():
+        try:
+            normalized = save_config(request.get_json(silent=True), state_override)
+        except ConfigError as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify(normalized)
 
     @app.get("/api/display/state")
     @require_auth

@@ -34,7 +34,7 @@ class ConfigTests(unittest.TestCase):
             saved = save_config(payload, directory)
 
             self.assertEqual(load_config(directory), saved)
-            self.assertEqual(saved["pages"][0]["id"], "weather")
+            self.assertEqual([page["id"] for page in saved["pages"]], [page["id"] for page in payload["pages"]])
             self.assertEqual(saved["temperatureUnit"], "fahrenheit")
             self.assertTrue(saved["carousel"]["enabled"])
             self.assertEqual(

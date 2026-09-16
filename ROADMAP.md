@@ -84,11 +84,13 @@ Critério de saída: uma alteração feita no celular aparece no display em pouc
 - saúde de alimentação e throttling; ✅
 - estado de serviços `systemd` permitidos por configuração; ✅
 - Docker e Tailscale opcionais;
-- integração Pi-hole compatível com a versão local;
+- integração guiada Pi-hole 6 com senha de aplicativo; ✅ software, homologação real pendente
 - estados `OK`, `ALERTA`, `OFFLINE`, `SEM DADOS` e `DESATUALIZADO`; ◐
 - cache e frequências de atualização específicas por provedor. ✅
 
 Situação: primeiro corte implementado e homologado visualmente no ST7789 real na versão 0.3.0, com disco, gateway, alimentação/throttling, serviços limitados por allowlist e coleta assíncrona.
+
+A v0.4.0 acrescenta coleta autenticada do resumo Pi-hole 6, sem controle de DNS, com cache e encerramento da própria sessão. Validado com API simulada; Pi-hole 5 não é suportado por este conector.
 
 Critério de saída: falhas de serviços e rede são visíveis sem comprometer o loop do display.
 
@@ -96,8 +98,9 @@ Critério de saída: falhas de serviços e rede são visíveis sem comprometer o
 
 - relógio/data e Pomodoro controlado pelos botões;
 - meteorologia com cache e localização explícita; ✅ hardware
-- Home Assistant e MQTT/Node-RED opcionais;
-- páginas para portas, luzes, energia e notificações;
+- Home Assistant somente de leitura, até quatro entidades escolhidas; ✅ software
+- MQTT/Node-RED opcionais; pendente
+- página Casa para sensores, portas, luzes e energia; ✅ software; notificações pendentes
 - ticker financeiro opcional, com limites e indicação de atualização.
 - páginas HTTP/JSON criadas pelo usuário a partir de modelos seguros; ✅ software
 
@@ -109,7 +112,8 @@ Critério de saída: módulos podem ser instalados e removidos sem aumentar a su
 - landing page bilíngue no GitHub Pages, preparada para indexação e apoio via Pix; ✅
 - proteção da publicação contra fotos vazias, proporções incorretas e transbordamento em telas de computador/celular; ✅ testes automatizados
 - configuração inicial assistida;
-- backup e restauração de configuração;
+- cofre privado separado da configuração e credenciais vinculadas ao destino; ✅ software
+- backup e restauração de configuração sem incluir PIN/cofre; ✅ software
 - matriz de Raspberry Pi e módulos ST7789 validados;
 - perfis desacoplados de resolução, cor, rotação e driver; ✅ fundação
 - adaptação de framebuffer testada para 128×64 monocromático e 320×240 colorido; ✅ software
@@ -120,18 +124,20 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-D0–D3 estão concluídos e homologados. A versão 0.3.0 antecipou partes de D4–D6: SysOps e Clima estão homologados no ST7789 real; fontes HTTP/JSON e perfis de display estão implementados e cobertos por testes; a página pública bilíngue está publicada no GitHub Pages com Pix confirmado. A verificação da propriedade no Google Search Console aguarda login do mantenedor. O foco seguinte é homologar uma fonte personalizada no display; depois entram conectores autenticados, Docker, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.
+D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A v0.4.0 entrega cofre privado, conectores guiados Pi-hole 6/Home Assistant e backup/restauração, com 55 testes automatizados e fluxo de navegador com serviços simulados. A página bilíngue e o Pix confirmado permanecem publicados. Search Console aguarda login do mantenedor; conectores reais, fonte personalizada e legibilidade das novas páginas aguardam observação física. MQTT, Docker detalhado e drivers adicionais continuam como evoluções, não como recursos prontos.
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 
 ## Sequência de retomada
 
 1. **Fonte personalizada no hardware:** criar pelo painel uma página HTTP/JSON de interesse real e confirmar sua legibilidade no ST7789. O núcleo, a extração e a API já possuem testes; esse gate é somente físico.
-2. **Conectores autenticados:** definir e implementar um cofre local de tokens, sem devolver segredos ao navegador, expô-los em logs ou armazená-los no Git.
-3. **Homelab/IoT guiado:** adicionar conectores para Pi-hole, Home Assistant e MQTT/Node-RED sobre o contrato de provedores existente, com cache, estados de erro e atualização independente.
+2. **Homologar integrações reais:** configurar Pi-hole 6 e Home Assistant pelos assistentes já implementados, comparar dados e observar estados de falha/legibilidade no TFT.
+3. **Expansões independentes:** MQTT/Node-RED, Docker detalhado, relógio/Pomodoro e templates para outros apps. Tokens arbitrários no assistente HTTP/JSON não estão habilitados.
 4. **Outros displays:** implementar e homologar drivers SSD1306 e ILI9341. Os perfis e a adaptação do framebuffer não substituem o teste físico de cada módulo.
 
 O roteiro de continuidade e os gates pendentes estão em [docs/NEXT_SESSION.md](docs/NEXT_SESSION.md).
+
+O cofre é armazenamento protegido por permissões, não criptografia de disco. APIs externas não recebem comandos de controle; tokens continuam tendo as permissões concedidas no serviço de origem.
 
 ## Fora do escopo inicial
 

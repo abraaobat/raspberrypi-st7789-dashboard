@@ -6,11 +6,13 @@ import copy
 import json
 import os
 import re
+import tempfile
 from pathlib import Path
 from urllib.parse import urlsplit
 
 from .catalog import PAGE_CATALOG, catalog_by_id
 from .display_profiles import DEFAULT_PROFILE_ID, PROFILE_BY_ID
+from .integration_settings import INTEGRATION_IDS, integration_settings
 
 APP_DIR_NAME = "raspberrypi-st7789-dashboard"
 CUSTOM_ID_PATTERN = re.compile(r"custom:[a-z0-9][a-z0-9-]{0,31}$")
@@ -61,6 +63,7 @@ def default_config() -> dict:
             "services": [],
         },
         "customPages": [],
+        "integrations": {connector: integration_settings(connector, {}) for connector in INTEGRATION_IDS},
         "pages": [
             {
                 "id": page["id"],
@@ -270,6 +273,17 @@ def normalize_config(payload: dict | None) -> dict:
             normalized_services.append(service)
     result["sysops"] = {"services": normalized_services}
 
+    integrations = payload.get("integrations", {})
+    if not isinstance(integrations, dict) or set(integrations) - set(INTEGRATION_IDS):
+        raise ConfigError("integração não suportada")
+    try:
+        result["integrations"] = {
+            connector: integration_settings(connector, integrations.get(connector, {}))
+            for connector in INTEGRATION_IDS
+        }
+    except ValueError as exc:
+        raise ConfigError(str(exc)) from exc
+
     custom_pages = payload.get("customPages", [])
     if not isinstance(custom_pages, list) or len(custom_pages) > 8:
         raise ConfigError("customPages deve ter no máximo oito páginas")
@@ -338,6 +352,8 @@ def load_config(override: str | Path | None = None) -> dict:
 
 
 def save_config(payload: dict, override: str | Path | None = None) -> dict:
+    if not isinstance(payload, dict):
+        raise ConfigError("configuração deve ser um objeto JSON")
     normalized = normalize_config(payload)
     directory = state_dir(override)
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -347,16 +363,17 @@ def save_config(payload: dict, override: str | Path | None = None) -> dict:
         pass
 
     destination = config_path(override)
-    temporary = destination.with_suffix(".json.tmp")
-    temporary.write_text(
-        json.dumps(normalized, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    descriptor, temporary = tempfile.mkstemp(prefix=".config-", suffix=".tmp", dir=directory)
     try:
-        temporary.chmod(0o600)
-    except OSError:
-        pass
-    os.replace(temporary, destination)
+        with os.fdopen(descriptor, "w", encoding="utf-8") as file:
+            os.fchmod(file.fileno(), 0o600)
+            file.write(json.dumps(normalized, ensure_ascii=False, indent=2) + "\n")
+            file.flush()
+            os.fsync(file.fileno())
+        os.replace(temporary, destination)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
     return copy.deepcopy(normalized)
 
 

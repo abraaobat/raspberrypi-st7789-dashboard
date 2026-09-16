@@ -50,6 +50,24 @@ PAGE_CATALOG = (
         "defaultRefreshSeconds": 600,
         "minRefreshSeconds": 300,
     },
+    {
+        "id": "pihole",
+        "title": "Pi-hole",
+        "description": "Pi-hole 6: consultas, bloqueios, porcentagem e clientes.",
+        "kind": "integration",
+        "defaultEnabled": False,
+        "defaultRefreshSeconds": 60,
+        "minRefreshSeconds": 30,
+    },
+    {
+        "id": "homeassistant",
+        "title": "Casa",
+        "description": "Home Assistant: até quatro sensores ou estados escolhidos.",
+        "kind": "integration",
+        "defaultEnabled": False,
+        "defaultRefreshSeconds": 30,
+        "minRefreshSeconds": 15,
+    },
 )
 
 PAGE_BY_ID = {page["id"]: page for page in PAGE_CATALOG}

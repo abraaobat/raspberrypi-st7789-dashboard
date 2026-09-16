@@ -4,7 +4,7 @@ Dashboard compacto para Raspberry Pi com display TFT ST7789 1.3" 240×240 via SP
 
 ![Raspberry Pi ST7789 Dashboard](docs/images/hero.jpg)
 
-O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. Além das páginas locais, a versão 0.3 permite adicionar clima, saúde operacional e fontes HTTP/JSON pelo navegador.
+O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.4.0 acrescenta assistentes de Pi-hole 6 e Home Assistant, credenciais locais privadas e backup/restauração ao clima, SysOps e fontes HTTP/JSON da versão 0.3.
 
 ## Visão do produto
 
@@ -18,14 +18,19 @@ Pelo computador ou celular, o usuário pode:
 - configurar previsão do tempo por latitude e longitude;
 - monitorar disco, gateway, alimentação e serviços `systemd` permitidos;
 - criar páginas para APIs HTTP/JSON sem alterar o código;
+- configurar Pi-hole 6 e até quatro entidades do Home Assistant com credenciais separadas dos ajustes;
+- exportar e restaurar a configuração sem alterar PIN ou credenciais locais;
 - visualizar uma prévia fiel de 240×240 gerada pelo mesmo renderizador Pillow usado no ST7789;
 - aplicar mudanças sem editar o código-fonte ou reiniciar o serviço.
 
 O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0 estão homologados no Raspberry Pi 3. A atualização preservou a configuração anterior e adicionou as integrações de forma opt-in, sem regressão nos botões, na prévia ou no carrossel.
 
+As adições da versão 0.4.0 possuem 55 testes automatizados e verificação de ponta a ponta no navegador com serviços simulados. Pi-hole/Home Assistant reais e legibilidade das novas páginas no ST7789 aguardam homologação manual. Os novos módulos permanecem desativados na atualização.
+
 - [Roadmap do produto](ROADMAP.md)
 - [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)
 - [Integrações, clima e fontes personalizadas](docs/INTEGRATIONS.md)
+- [Backup, credenciais e atualização](docs/BACKUP_AND_CREDENTIALS.md)
 - [Página pública do projeto](https://abraaobat.github.io/raspberrypi-st7789-dashboard/)
 
 ## Recursos
@@ -109,6 +114,15 @@ O roteiro para a próxima sessão está em [docs/NEXT_SESSION.md](docs/NEXT_SESS
 ### Páginas personalizadas
 
 O assistente **Adicionar fonte** transforma um valor de uma resposta HTTP/JSON em uma página do carrossel. Ele suporta objetos e índices de listas por caminhos como `sensor.energy.value` ou `items.0.status`, layouts de métrica e status, unidade e cor. Veja exemplos e limites de segurança em [Integrações](docs/INTEGRATIONS.md).
+
+### 6. PI-HOLE / 7. CASA — novos módulos opcionais
+
+- **Pi-hole 6:** consultas, quantidade e porcentagem bloqueada, clientes ativos e domínios de bloqueio; autenticação com senha de aplicativo e encerramento da própria sessão de coleta.
+- **Casa:** até quatro entidades escolhidas do Home Assistant, seus estados e unidades; entidades ausentes ou indisponíveis aparecem como `SEM DADOS`, não como desligadas.
+- Assistentes com teste sem gravação, armazenamento/substituição e remoção de credenciais locais.
+- HTTP autenticado exige autorização explícita e fica limitado à LAN/tailnet; HTTPS valida certificados. Nenhum comando de controle é enviado aos serviços.
+
+O cofre é um arquivo privado com permissão `0600`, não criptografia de disco. Cadastre credenciais somente por uma conexão confiável. Detalhes em [Backup e credenciais](docs/BACKUP_AND_CREDENTIALS.md).
 
 ## Hardware usado
 

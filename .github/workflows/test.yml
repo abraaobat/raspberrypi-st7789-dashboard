@@ -22,3 +22,20 @@ jobs:
         run: python -m compileall -q dashboard bench_display.py web_app.py
       - name: Run tests
         run: python -m unittest discover -s tests -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install isolated browser dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/st7789-control-browser" playwright@1.62.1
+          "$RUNNER_TEMP/st7789-control-browser/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Verify control panel with fake services only
+        run: |
+          python scripts/control_panel_fixture.py --port 8093 &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid"' EXIT
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:8093/api/health; then break; fi
+            sleep 0.5
+          done
+          PLAYWRIGHT_MODULE="$RUNNER_TEMP/st7789-control-browser/node_modules/playwright" node scripts/validate_control_panel_browser.mjs

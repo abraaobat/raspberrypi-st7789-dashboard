@@ -18,17 +18,28 @@ No painel, use **Adicionar fonte** para criar uma página HTTP/JSON de um app ou
 
 Não é necessário repetir os testes já aprovados de Clima e SysOps. Esse teste personalizado pode ser feito depois da implementação dos próximos conectores, desde que não seja registrado como homologado antes de sua execução real.
 
+## Entregas adicionais da v0.4.0
+
+- cofre local `0600`, separado de `config.json`, com bloqueio/atômico e vínculo ao endereço;
+- assistentes Pi-hole 6 e Home Assistant, até quatro entidades, teste sem gravação;
+- páginas PI-HOLE/CASA e cache com espera mínima após falhas;
+- HTTP autenticado exige consentimento; DNS fixado por conexão, sem redirect/proxy, HTTPS validado;
+- backup/restauração preservando PIN e credenciais;
+- correção de reentrada no painel após criar PIN e fazer logout;
+- 55 testes automatizados e fluxo completo no navegador em ambiente isolado com serviços fictícios;
+- cenários reais ainda não homologados; nenhum endpoint/token do usuário foi solicitado ou inventado.
+
 ## Próximas implementações
 
-1. Cofre local para credenciais externas e contrato fechado de autenticação por conector.
-2. Conectores guiados de Pi-hole e Home Assistant; MQTT/Node-RED em etapa independente.
-3. Backup, exportação e restauração de configuração sem incluir segredos por padrão.
+1. Homologar Pi-hole 6/Home Assistant reais e as duas novas páginas no TFT quando o usuário puder configurar suas credenciais.
+2. MQTT/Node-RED em etapa independente; Docker detalhado e relógio/Pomodoro.
+3. Templates de integrações adicionais, mantendo contrato fechado e sem execução remota.
 4. Drivers físicos adicionais e matriz de compatibilidade por módulo/resolução.
 
 ## Limites a preservar
 
 - O display deve continuar operando sem o painel web e sem internet.
-- Fontes personalizadas atuais consultam somente HTTP/JSON, sem tokens externos.
+- Fontes personalizadas genéricas consultam somente HTTP/JSON, sem headers de autenticação arbitrários; os dois conectores guiados usam o cofre.
 - Não adicionar endpoints de shell ou instalação arbitrária.
 - SSD1306/ILI9341 continuam experimentais até existir driver e evidência física.
 - O painel permanece restrito à rede local ou tailnet; a landing page pública não expõe a API do Raspberry Pi.
@@ -38,3 +49,23 @@ Não é necessário repetir os testes já aprovados de Clima e SysOps. Esse test
 O fluxo de GitHub Pages publica `site/`. A indexação no Google é uma etapa separada: verificar a propriedade no Search Console e enviar o sitemap não garante inclusão imediata nos resultados. Consulte [site/README.md](../site/README.md).
 
 O Search Console exige login no navegador disponível. Essa é a única etapa de publicação que ficou para o mantenedor; a propriedade não foi registrada nem o sitemap enviado durante esta sessão.
+
+## Roteiro manual curto
+
+Abra o painel existente com o mesmo PIN. Em **Integrações guiadas**, configure o serviço desejado, teste, marque a ativação, guarde os ajustes e aplique. Depois confirme PI-HOLE/CASA com os botões. Nenhuma dessas etapas exige enviar credenciais nesta conversa. Veja [checklist e backup](BACKUP_AND_CREDENTIALS.md).
+
+## Atualização do Raspberry Pi pendente nesta retomada
+
+O Pi não respondeu por SSH nos IPs anteriormente conhecidos (`192.168.100.94` e `192.168.100.11`). Não houve reinício, alteração do estado, cadastro de credenciais nem execução dos 55 testes no ARM nesta retomada. A v0.3.0 continua sendo a última implantação comprovada.
+
+Quando a conexão voltar, execute no próprio Raspberry Pi:
+
+```bash
+cd ~/raspberrypi-st7789-dashboard
+git status --short
+git pull --ff-only
+./scripts/install.sh
+./scripts/validate_install.sh
+```
+
+Se o primeiro comando de status mostrar alterações próprias, não as descarte: preserve-as antes de atualizar. O instalador usa o usuário/caminhos existentes e executa os testes antes de reiniciar os serviços; ele também reconfere dependências. Guarde privadamente um backup do estado antes de atualizar. Os novos módulos entram desativados e o PIN existente não precisa ser recriado.

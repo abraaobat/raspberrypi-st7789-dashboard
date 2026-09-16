@@ -16,7 +16,7 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
+body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); overflow-x: clip; }
 button, input, select { font: inherit; }
 button { color: inherit; }
 
@@ -93,6 +93,12 @@ select:focus, .text-input:focus, .number-wrap:focus-within { border-color: var(-
 .button.secondary { background: rgba(76,150,255,.12); border-color: rgba(76,150,255,.35); color: #b9d6ff; }
 .button.ghost { background: transparent; border-color: var(--line); color: var(--muted); }
 .button.full { width: 100%; }
+.button { text-decoration: none; display: inline-block; text-align: center; }
+.credential-actions, .backup-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.http-consent { display: flex; gap: 10px; align-items: flex-start; font-size: 12px; line-height: 1.5; margin-top: 18px; color: var(--muted); }
+.http-consent input { accent-color: var(--blue); flex-shrink: 0; margin-top: 3px; }
+.guided-note { font-size: 12px; color: var(--muted); line-height: 1.5; margin: 16px 0 0; }
+.integration-card, .page-row > div { min-width: 0; overflow-wrap: anywhere; }
 .save-bar { display: flex; justify-content: space-between; gap: 18px; align-items: center; padding: 16px 18px; border: 1px solid rgba(84,220,138,.25); background: rgba(84,220,138,.06); border-radius: 17px; }
 .save-bar div { display: grid; gap: 3px; }
 .save-bar span { color: var(--muted); font-size: 12px; }

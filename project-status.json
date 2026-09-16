@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-16T12:43:10Z",
-  "status": "v0.3.0 homologada no ST7789 • expansões em andamento",
+  "updatedAt": "2026-09-16T14:48:00Z",
+  "status": "v0.4.0 pronta • integração real e atualização do Pi pendentes",
   "statusClass": "ops",
-  "progress": 86,
+  "progress": 90,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "v0.3.0 implantada no Raspberry Pi, com Clima e SysOps homologados no ST7789 real, 24 testes aprovados e configuração/PIN preservados. Landing page bilíngue publicada no GitHub Pages com fotos reais, SEO técnico e Pix confirmado; implantação, CI e acesso público HTTP 200 aprovados.",
+  "current": "v0.4.0 implementada: cofre privado vinculado ao endereço, assistentes Pi-hole 6/Home Assistant, páginas PI-HOLE/CASA e backup/restauração preservando PIN/cofre. 55 testes locais e fluxo de navegador com serviços simulados aprovados. Base física v0.3.0 homologada; atualização do Pi aguarda conectividade SSH. Landing bilíngue e Pix confirmado preservados.",
   "architecture": "Browser → API autenticada → Config/Registry → System + async providers → Pillow Renderer → Display Profile → ST7789/Preview",
-  "next": "Finalizar Search Console após login do mantenedor; homologar uma fonte HTTP/JSON no ST7789 e avançar cofre local, conectores Homelab/IoT e drivers adicionais.",
-  "action": "Criar pelo painel uma página HTTP/JSON de interesse do usuário e confirmar sua legibilidade no display físico.",
+  "next": "Atualizar o Raspberry Pi quando voltar a responder, configurar Pi-hole 6/Home Assistant reais e homologar as novas páginas/fonte HTTP/JSON no TFT. Search Console ainda depende de login; depois MQTT, Docker detalhado, relógio e novos drivers.",
+  "action": "Restabelecer acesso ao Raspberry Pi e atualizar para v0.4.0; cadastrar credenciais somente no painel privado e confirmar legibilidade no ST7789.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
@@ -26,6 +26,13 @@
     "SysOps first slice ✓ hardware",
     "Weather page ✓ hardware",
     "Custom HTTP/JSON pages ✓ software",
+    "Private credential vault + address binding ✓ software",
+    "Pi-hole 6 guided connector ✓ simulated API",
+    "Home Assistant selected entities ✓ simulated API",
+    "PI-HOLE / CASA pages — physical validation pending",
+    "Config export/restore preserving PIN/vault ✓ isolated browser",
+    "55 automated tests ✓ local",
+    "v0.4.0 Raspberry Pi deployment — connectivity pending",
     "Display profiles foundation ✓ software",
     "Public landing page + Google indexing foundation ✓",
     "Google Search Console — login/verification pending",
@@ -39,7 +46,7 @@
   },
   "activity": {
     "date": "2026-09-16",
-    "type": "deployment",
-    "text": "Landing page bilíngue publicada no GitHub Pages com fotos reais do ST7789, SEO técnico, sitemap e Pix confirmado; implantação, CI e HTTP 200 aprovados. Search Console aguarda login do mantenedor."
+    "type": "update",
+    "text": "v0.4.0: cofre local, assistentes Pi-hole 6/Home Assistant, duas novas páginas e backup/restauração; 55 testes locais e navegador com APIs fictícias aprovados. Docs, roadmap e landing atualizados; Pi não respondeu nos IPs conhecidos, deploy e testes reais permanecem pendentes."
   }
 }

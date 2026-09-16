@@ -180,6 +180,26 @@
 
         <article class="panel custom-panel">
           <div class="panel-head">
+            <div><p class="section-kicker">HOMELAB E CASA</p><h2>Integrações guiadas</h2></div>
+            <span class="muted small">Somente monitoramento</span>
+          </div>
+          <div class="integration-grid">
+            <section class="integration-card guided-card">
+              <div class="integration-title"><span class="integration-icon ops-icon">P</span><div><strong>Pi-hole 6</strong><small>Consultas, bloqueios e clientes</small></div></div>
+              <p id="piholeStatus" class="muted small">Não configurado</p>
+              <button class="button secondary full" type="button" data-configure-integration="pihole">Configurar Pi-hole</button>
+            </section>
+            <section class="integration-card guided-card">
+              <div class="integration-title"><span class="integration-icon weather-icon">H</span><div><strong>Home Assistant</strong><small>Até quatro entidades escolhidas</small></div></div>
+              <p id="homeassistantStatus" class="muted small">Não configurado</p>
+              <button class="button secondary full" type="button" data-configure-integration="homeassistant">Configurar Home Assistant</button>
+            </section>
+          </div>
+          <p class="muted small credential-note">Credenciais ficam em arquivo privado no Raspberry Pi, separado da configuração. O painel não permite ler os segredos salvos. Use uma rede confiável para cadastrá-los.</p>
+        </article>
+
+        <article class="panel custom-panel">
+          <div class="panel-head">
             <div>
               <p class="section-kicker">FONTES PERSONALIZADAS</p>
               <h2>Seus apps no display</h2>
@@ -189,6 +209,16 @@
           <p class="muted custom-intro">Conecte uma URL HTTP/JSON e transforme um campo da resposta em uma página. O display não executa scripts ou comandos da fonte.</p>
           <div id="customPageList" class="custom-page-list"></div>
           <div id="customEmpty" class="empty-state">Nenhuma fonte personalizada. Você pode conectar sensores, automações ou serviços do homelab.</div>
+        </article>
+
+        <article class="panel backup-panel">
+          <div class="panel-head"><div><p class="section-kicker">CONFIGURAÇÃO</p><h2>Backup e restauração</h2></div></div>
+          <p class="muted small">Baixe os ajustes salvos. O arquivo não inclui PIN nem credenciais. Ao restaurar, esses segredos locais são preservados.</p>
+          <div class="backup-actions">
+            <a class="button secondary" href="/api/config/export">Baixar configuração</a>
+            <button id="importConfigButton" class="button ghost" type="button">Restaurar configuração</button>
+          </div>
+          <input id="importConfigFile" type="file" accept="application/json,.json" hidden>
         </article>
 
         <div class="save-bar">
@@ -238,6 +268,33 @@
         <span></span>
         <button id="cancelCustomSource" class="button ghost" type="button">Cancelar</button>
         <button class="button primary" type="submit">Adicionar ao display</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="integrationDialog" class="source-dialog">
+    <form id="integrationForm" class="source-form">
+      <div class="dialog-head">
+        <div><p class="section-kicker">INTEGRAÇÃO GUIADA</p><h2 id="integrationDialogTitle">Configurar integração</h2></div>
+        <button id="closeIntegrationDialog" class="dialog-close" type="button" aria-label="Fechar">×</button>
+      </div>
+      <input id="integrationId" type="hidden">
+      <p id="integrationHelp" class="muted small"></p>
+      <label class="compact-field"><span>Endereço base do serviço</span><input id="integrationUrl" class="text-input" type="url" maxlength="512" required placeholder="https://servico.local"></label>
+      <label id="integrationEntitiesField" class="compact-field" hidden><span>Entidades, separadas por vírgula</span><input id="integrationEntities" class="text-input" maxlength="485" placeholder="sensor.energia, light.sala, binary_sensor.porta"><small>Até quatro identificadores, copiados do Home Assistant.</small></label>
+      <label class="compact-field"><span id="integrationSecretLabel">Credencial</span><input id="integrationSecret" class="text-input" type="password" maxlength="4096" autocomplete="off" spellcheck="false" placeholder="Deixe vazio para manter a credencial salva"><small id="integrationCredentialStatus">Nenhuma credencial salva.</small></label>
+      <div class="credential-actions">
+        <button id="storeIntegrationCredential" class="button secondary compact" type="button">Guardar credencial agora</button>
+        <button id="removeIntegrationCredential" class="button ghost compact" type="button">Remover credencial local</button>
+      </div>
+      <label class="http-consent"><input id="integrationAllowHttp" type="checkbox"><span>Autorizo HTTP sem criptografia para este serviço na rede local ou tailnet. Prefiro HTTPS quando disponível.</span></label>
+      <label class="http-consent"><input id="integrationActivate" type="checkbox"><span>Ativar esta página no display ao aplicar os ajustes.</span></label>
+      <p class="source-note">O teste não salva a credencial. Guardar ou remover credenciais tem efeito imediato; os demais ajustes só entram no display em <strong>Aplicar alterações</strong>. O armazenamento privado usa permissões do sistema, não criptografia de disco.</p>
+      <div id="integrationTestResult" class="source-test-result" role="status" aria-live="polite"></div>
+      <div class="dialog-actions">
+        <button id="testIntegration" class="button ghost" type="button">Testar conexão</button><span></span>
+        <button id="cancelIntegrationDialog" class="button ghost" type="button">Cancelar</button>
+        <button id="saveIntegrationSettings" class="button primary" type="submit">Guardar ajustes</button>
       </div>
     </form>
   </dialog>

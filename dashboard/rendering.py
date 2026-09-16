@@ -37,10 +37,12 @@ ACCENT_COLORS = {
 FONT_REGULAR_CANDIDATES = (
     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     "DejaVuSans.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
 )
 FONT_BOLD_CANDIDATES = (
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "DejaVuSans-Bold.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
 )
 
 
@@ -51,7 +53,7 @@ def load_font(size: int, bold: bool = False):
             return ImageFont.truetype(candidate, size)
         except OSError:
             continue
-    return ImageFont.load_default()
+    return ImageFont.load_default(size=size)
 
 
 def text_width(draw: ImageDraw.ImageDraw, text: str, font) -> int:
@@ -426,12 +428,88 @@ def draw_custom_page(snapshot: dict, config: dict, page_id: str, page_number: in
     return image
 
 
+def _compact_count(value):
+    if value is None:
+        return "-"
+    if value >= 1_000_000:
+        return f"{value / 1_000_000:.1f}M"
+    if value >= 10_000:
+        return f"{value / 1000:.1f}k"
+    return f"{value:.0f}"
+
+
+def _integration_frame(snapshot, key, title, page_number, page_count):
+    values = snapshot.get(key) or {}
+    if values.get("configured") is False:
+        return values, _state_message(title, values.get("error") or "Configure a integração no painel.", page_number, page_count)
+    if values.get("loading"):
+        return values, _state_message(title, "Consultando a integração.", page_number, page_count)
+    if "configured" not in values:
+        return values, _state_message(title, values.get("error") or "Integração indisponível.", page_number, page_count)
+    return values, None
+
+
+def draw_pihole_page(snapshot: dict, config: dict, page_number: int, page_count: int):
+    del config
+    values, unavailable = _integration_frame(snapshot, "pihole", "PI-HOLE", page_number, page_count)
+    if unavailable is not None:
+        return unavailable
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(image)
+    header(draw, "PI-HOLE", page_number, page_count)
+    draw.text((14, 54), "CONSULTAS BLOQUEADAS", font=load_font(12, True), fill=CYAN)
+    if values.get("stale") or values.get("error"):
+        draw.text((184, 46), "CACHE", font=load_font(9, True), fill=ORANGE)
+    percent = values.get("blockedPercent")
+    _draw_value(draw, (14, 75), "-" if percent is None else f"{percent:.1f}%", 212, 46, 30, GREEN)
+    for box, label, value, color in [
+        ((8, 130, 114, 179), "BLOQUEIOS", values.get("blockedQueries"), GREEN),
+        ((124, 130, 232, 179), "CONSULTAS", values.get("totalQueries"), BLUE),
+    ]:
+        card(draw, box)
+        x, y = box[:2]
+        draw.text((x + 9, y + 5), label, font=load_font(10, True), fill=color)
+        _draw_value(draw, (x + 9, y + 21), _compact_count(value), 89, 21, 15)
+    card(draw, (8, 188, 232, 230))
+    draw.text((17, 194), "CLIENTES", font=load_font(9, True), fill=CYAN)
+    draw.text((125, 194), "DOMÍNIOS", font=load_font(9, True), fill=PURPLE)
+    _draw_value(draw, (17, 207), _compact_count(values.get("activeClients")), 90, 17, 12)
+    _draw_value(draw, (125, 207), _compact_count(values.get("blockedDomains")), 94, 17, 12)
+    return image
+
+
+def draw_homeassistant_page(snapshot: dict, config: dict, page_number: int, page_count: int):
+    del config
+    values, unavailable = _integration_frame(snapshot, "homeassistant", "CASA", page_number, page_count)
+    if unavailable is not None:
+        return unavailable
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(image)
+    header(draw, "CASA", page_number, page_count)
+    if values.get("stale") or values.get("error"):
+        draw.text((184, 43), "CACHE", font=load_font(9, True), fill=ORANGE)
+    for index, entity in enumerate((values.get("entities") or [])[:4]):
+        y = 54 + index * 42
+        card(draw, (8, y, 232, y + 37))
+        label, font = fit_text(draw, entity.get("label"), 196, 10, 9, True)
+        draw.text((15, y + 3), label, font=font, fill=CYAN)
+        state = entity.get("state")
+        available = entity.get("available", False)
+        text = f"{state}{entity.get('unit') or ''}" if available else "SEM DADOS"
+        color = GREEN if available and state == "on" else (WHITE if available else GRAY)
+        _draw_value(draw, (15, y + 16), text.upper() if state in {"on", "off"} else text, 201, 16, 11, color)
+    draw.text((14, 227), "HOME ASSISTANT · LEITURA", font=load_font(8, True), fill=GRAY)
+    return image
+
+
 RENDERERS = {
     "status": draw_status_page,
     "network": draw_network_page,
     "hardware": draw_hardware_page,
     "sysops": draw_sysops_page,
     "weather": draw_weather_page,
+    "pihole": draw_pihole_page,
+    "homeassistant": draw_homeassistant_page,
 }
 
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import ipaddress
 import os
 import platform
 import re
@@ -14,13 +13,12 @@ import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode, urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener
+from urllib.parse import urlencode
 
-
-MAX_JSON_BYTES = 128 * 1024
-HTTP_TIMEOUT_SECONDS = 4
+from .credentials import CredentialError, CredentialStore
+from .http_client import HTTP_TIMEOUT_SECONDS, MAX_JSON_BYTES, request_json, validate_source_url
+from .integration_settings import INTEGRATION_IDS
+from .integrations import fetch_integration
 
 
 def run(command: list[str], timeout: float = 2.0) -> str | None:
@@ -309,55 +307,8 @@ class MetricsCache:
             return dict(self.value)
 
 
-class _NoRedirect(HTTPRedirectHandler):
-    def redirect_request(self, request, file_pointer, code, message, headers, new_url):
-        raise HTTPError(request.full_url, code, "redirecionamento bloqueado", headers, file_pointer)
-
-
-def validate_source_url(url: str) -> None:
-    """Validate a URL before the dashboard makes an outbound request.
-
-    Private and loopback addresses are intentionally allowed because this feature
-    is designed to monitor homelab services. Link-local, multicast, reserved and
-    unspecified destinations remain blocked.
-    """
-
-    parsed = urlsplit(url)
-    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
-        raise ValueError("a fonte deve usar HTTP ou HTTPS")
-    if parsed.username or parsed.password:
-        raise ValueError("credenciais na URL não são permitidas")
-    try:
-        addresses = socket.getaddrinfo(parsed.hostname, parsed.port, type=socket.SOCK_STREAM)
-    except OSError as exc:
-        raise ValueError("não foi possível resolver o endereço da fonte") from exc
-    for address in addresses:
-        ip = ipaddress.ip_address(address[4][0])
-        if ip.is_link_local or ip.is_multicast or ip.is_unspecified or ip.is_reserved:
-            raise ValueError("endereço de rede não permitido")
-
-
 def fetch_json(url: str, *, timeout: float = HTTP_TIMEOUT_SECONDS) -> dict | list:
-    validate_source_url(url)
-    request = Request(
-        url,
-        headers={"Accept": "application/json", "User-Agent": "ST7789-Dashboard/0.3"},
-        method="GET",
-    )
-    try:
-        with build_opener(_NoRedirect).open(request, timeout=timeout) as response:
-            body = response.read(MAX_JSON_BYTES + 1)
-    except (HTTPError, URLError, OSError) as exc:
-        raise ValueError("fonte HTTP indisponível") from exc
-    if len(body) > MAX_JSON_BYTES:
-        raise ValueError("resposta JSON excede 128 KiB")
-    try:
-        payload = json.loads(body.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ValueError("a fonte não retornou JSON válido") from exc
-    if not isinstance(payload, (dict, list)):
-        raise ValueError("a raiz da resposta deve ser objeto ou lista JSON")
-    return payload
+    return request_json(url, timeout=timeout)
 
 
 def json_path(payload, path: str):
@@ -454,6 +405,10 @@ class AsyncDataCache:
         self._lock = threading.Lock()
         self._items: dict[str, dict] = {}
 
+    def invalidate(self, key: str) -> None:
+        with self._lock:
+            self._items.pop(key, None)
+
     def get(self, key: str, signature: str, maximum_age: float, loader) -> dict:
         now = time.monotonic()
         with self._lock:
@@ -466,10 +421,11 @@ class AsyncDataCache:
                     "loadedAt": 0.0,
                     "updatedAt": None,
                     "refreshing": False,
+                    "retryAt": 0.0,
                 }
                 self._items[key] = item
             stale = item["value"] is None or now - item["loadedAt"] >= maximum_age
-            if stale and not item["refreshing"]:
+            if stale and not item["refreshing"] and now >= item["retryAt"]:
                 item["refreshing"] = True
                 thread = threading.Thread(
                     target=self._refresh,
@@ -506,14 +462,16 @@ class AsyncDataCache:
                 item["updatedAt"] = datetime.now(timezone.utc).isoformat()
             item["error"] = error
             item["refreshing"] = False
+            item["retryAt"] = time.monotonic() + (30 if error else 0)
 
 
 class DataHub:
     """Route one page to only the providers that it needs."""
 
-    def __init__(self, metrics: MetricsCache | None = None):
+    def __init__(self, metrics: MetricsCache | None = None, state_override=None):
         self.metrics = metrics or MetricsCache()
         self.external = AsyncDataCache()
+        self.credentials = CredentialStore(state_override)
 
     @staticmethod
     def _signature(value: dict) -> str:
@@ -541,6 +499,27 @@ class DataHub:
                 max(5, maximum_age),
                 lambda: collect_sysops(snapshot, settings),
             )
+        elif page_id in INTEGRATION_IDS:
+            settings = config["integrations"][page_id]
+            address = settings["baseUrl"]
+            error = None
+            try:
+                revision = self.credentials.revision(page_id, address) if address else None
+            except CredentialError as exc:
+                revision = None
+                error = str(exc)
+            if not revision:
+                self.external.invalidate(page_id)
+                snapshot[page_id] = {
+                    "configured": False,
+                    "error": error or ("Guarde a credencial no painel." if address else "Configure a integração no painel."),
+                }
+            else:
+                signature = self._signature({"settings": settings, "credentialRevision": revision})
+                snapshot[page_id] = self.external.get(
+                    page_id, signature, maximum_age,
+                    lambda: fetch_integration(page_id, settings, self.credentials.read_secret(page_id, address)),
+                )
         elif page_id.startswith("custom:"):
             definition = next(
                 (item for item in config["customPages"] if item["id"] == page_id),

@@ -80,7 +80,47 @@ O botão **Testar conexão** consulta a fonte sem salvar. Depois de aprovada, a 
 - texto final limitado antes da renderização;
 - credenciais embutidas na URL são rejeitadas.
 
-APIs que exigem token ainda não são suportadas pelo assistente. A fase seguinte usará um cofre local separado do `config.json`, sem devolver o segredo à interface.
+O assistente genérico continua sem headers/tokens arbitrários. APIs autenticadas são atendidas pelos conectores fechados abaixo; para outros apps, use uma API de leitura compatível ou um adaptador local dedicado. Não coloque tokens em parâmetros da URL: URLs fazem parte do backup da configuração.
+
+## Pi-hole 6 (versão 0.4.0)
+
+Em **Integrações guiadas → Configurar Pi-hole**:
+
+1. Informe o endereço base final do serviço, por exemplo `http://pi.hole`, sem `/admin`, `/api`, senha ou parâmetros. Prefixos simples de reverse proxy são aceitos.
+2. No Pi-hole 6, gere uma senha de aplicativo nas configurações de API e copie-a para o campo privado. Não use o hash legado do Pi-hole 5.
+3. Prefira HTTPS. Se o serviço só oferece HTTP, autorize explicitamente seu uso na rede local/tailnet.
+4. Use **Testar conexão**. O teste não salva a senha nem os ajustes.
+5. Marque a ativação da página, use **Guardar ajustes** e depois **Aplicar alterações**. Uma senha digitada é guardada ao confirmar os ajustes; o botão **Guardar credencial agora** permite fazê-lo separadamente.
+
+O conector faz `POST /api/auth`, coleta `GET /api/stats/summary` com `X-FTL-SID` e encerra apenas sua sessão com `DELETE /api/auth`. A página mostra bloqueios, consultas, porcentagem, clientes ativos e domínios na lista de bloqueio. A janela temporal é a fornecida pelo resumo da API, não um cálculo próprio de “hoje”. Não há mudança de bloqueio DNS nem outros comandos administrativos.
+
+Referências oficiais: [autenticação e senhas de aplicativo](https://docs.pi-hole.net/api/auth/), [API Pi-hole 6 e documentação local](https://docs.pi-hole.net/api/). Pi-hole 5 requer um conector separado e não é suportado por este assistente.
+
+## Home Assistant (versão 0.4.0)
+
+Em **Configurar Home Assistant**, informe a raiz final, por exemplo `http://homeassistant.local:8123`, um token de acesso de longa duração criado no perfil e até quatro IDs distintos de entidades. Copie os IDs em **Ferramentas do desenvolvedor → Estados**:
+
+```text
+sensor.temperatura, sensor.energia, binary_sensor.porta, light.sala
+```
+
+Teste a conexão, guarde os ajustes e aplique. HTTP também exige autorização explícita. O cliente usa apenas `GET /api/states/<entity_id>` com `Authorization: Bearer ...`; não envia ações, eventos, comandos ou alterações de estado. Somente nome amigável, estado e unidade das entidades escolhidas entram no resultado. Não se busca o inventário inteiro da casa.
+
+IDs inexistentes (`404`), `unknown` e `unavailable` são exibidos como `SEM DADOS`. Erros de autenticação/conexão conservam o último quadro válido com `CACHE`, quando houver. O token herda as permissões do usuário no Home Assistant: um conector somente de leitura **não transforma o token em uma credencial somente de leitura**. Use o menor privilégio viável e revogue tokens que não utiliza.
+
+Referência oficial: [REST API do Home Assistant](https://developers.home-assistant.io/docs/api/rest/).
+
+## Proteções e atualização
+
+- Configuração de integração aceita somente endereço, consentimento HTTP e IDs de entidades; segredos usam endpoints próprios e arquivo privado separado.
+- A credencial fica vinculada ao endereço base canônico, incluindo protocolo, porta e prefixo. Alterar o destino não transfere o segredo automaticamente; é necessário cadastrá-lo para o novo destino.
+- Respostas do painel não incluem segredo, SID ou revisão interna. Não há endpoint para ler uma credencial salva.
+- Destinos verificados são fixados por IP durante cada conexão, sem redirecionamentos ou proxies de ambiente. HTTPS mantém validação de certificado e nome do servidor.
+- Conexão/leitura têm orçamento de quatro segundos após resolução DNS e corpo máximo de 128 KiB por requisição. A resolução DNS depende do sistema; coletas em segundo plano não param o display. Testes Pi-hole podem fazer três requisições; Home Assistant, até quatro.
+- Pi-hole atualiza a cada 60 segundos por padrão (mínimo 30); Home Assistant, a cada 30 (mínimo 15). Após erro, o cache aguarda pelo menos 30 segundos antes de nova tentativa automática.
+- Retirar ou substituir a credencial descarta o cache anterior; configurações migradas mantêm as novas páginas desativadas.
+
+Armazenamento, transporte e recuperação estão em [Backup e credenciais](BACKUP_AND_CREDENTIALS.md).
 
 ## Outros displays
 
