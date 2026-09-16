@@ -88,14 +88,14 @@ Critério de saída: uma alteração feita no celular aparece no display em pouc
 - estados `OK`, `ALERTA`, `OFFLINE`, `SEM DADOS` e `DESATUALIZADO`; ◐
 - cache e frequências de atualização específicas por provedor. ✅
 
-Situação: primeiro corte implementado na versão 0.3.0, com coleta assíncrona e serviços limitados por allowlist. Aguarda validação visual no ST7789.
+Situação: primeiro corte implementado e homologado visualmente no ST7789 real na versão 0.3.0, com disco, gateway, alimentação/throttling, serviços limitados por allowlist e coleta assíncrona.
 
 Critério de saída: falhas de serviços e rede são visíveis sem comprometer o loop do display.
 
 ### D5 — Desk e IoT Packs
 
 - relógio/data e Pomodoro controlado pelos botões;
-- meteorologia com cache e localização explícita; ✅ software
+- meteorologia com cache e localização explícita; ✅ hardware
 - Home Assistant e MQTT/Node-RED opcionais;
 - páginas para portas, luzes, energia e notificações;
 - ticker financeiro opcional, com limites e indicação de atualização.
@@ -118,7 +118,7 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-D0–D3 estão concluídos e homologados. A versão 0.3.0 antecipou partes de D4–D6: SysOps, clima, fontes HTTP/JSON e perfis de display estão implementados e cobertos por testes. O foco imediato é homologar essas páginas no Raspberry Pi real; depois entram conectores autenticados, Docker, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.
+D0–D3 estão concluídos e homologados. A versão 0.3.0 antecipou partes de D4–D6: SysOps e Clima estão homologados no ST7789 real; fontes HTTP/JSON e perfis de display estão implementados e cobertos por testes. O foco imediato é homologar uma fonte personalizada no display; depois entram conectores autenticados, Docker, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 

@@ -21,7 +21,7 @@ Pelo computador ou celular, o usuário pode:
 - visualizar uma prévia fiel de 240×240 gerada pelo mesmo renderizador Pillow usado no ST7789;
 - aplicar mudanças sem editar o código-fonte ou reiniciar o serviço.
 
-O MVP físico e o Web Control Panel v0.2.0 estão homologados no Raspberry Pi 3. A versão 0.3.0 preserva essa configuração, adiciona as integrações de forma opt-in e aguarda somente a validação visual final dessas novas páginas no hardware real.
+O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0 estão homologados no Raspberry Pi 3. A atualização preservou a configuração anterior e adicionou as integrações de forma opt-in, sem regressão nos botões, na prévia ou no carrossel.
 
 - [Roadmap do produto](ROADMAP.md)
 - [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)
@@ -82,6 +82,8 @@ O MVP físico e o Web Control Panel v0.2.0 estão homologados no Raspberry Pi 3.
 - estado de alimentação/throttling;
 - até quatro serviços `systemd` explicitamente permitidos.
 
+![Página SysOps no ST7789 real](docs/images/sysops.jpg)
+
 ### 5. CLIMA
 
 - condição atual com ícone;
@@ -89,6 +91,8 @@ O MVP físico e o Web Control Panel v0.2.0 estão homologados no Raspberry Pi 3.
 - localização explícita e unidade configurável;
 - cache assíncrono e reaproveitamento do último dado quando a rede falha;
 - dados meteorológicos atribuídos ao Open-Meteo.
+
+![Página Clima no ST7789 real](docs/images/weather.jpg)
 
 ### Páginas personalizadas
 
@@ -287,7 +291,7 @@ O projeto não grava configuração nem credenciais dentro do repositório. Por 
 
 ## Próximas evoluções
 
-- homologar Clima, SysOps e páginas personalizadas no ST7789 real;
+- homologar uma página HTTP/JSON personalizada no ST7789 real;
 - adicionar credenciais externas por cofre local, sem devolvê-las ao navegador;
 - criar conectores guiados para Home Assistant, MQTT e Pi-hole;
 - implementar drivers físicos para SSD1306 e ILI9341 sobre os perfis já definidos;

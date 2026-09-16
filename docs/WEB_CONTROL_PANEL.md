@@ -163,4 +163,4 @@ Um banco de dados não é necessário no MVP. Estado transitório pode permanece
 - configuração inválida é rejeitada sem corromper o último estado válido;
 - não existe execução de comandos arbitrários pela API.
 
-Todos os itens do MVP foram homologados no Raspberry Pi 3 real em desktop e celular. Clima, SysOps, fontes personalizadas e perfis de display possuem testes automatizados e verificação em navegador; resta a inspeção visual dessas novas páginas no ST7789 físico.
+Todos os itens do MVP foram homologados no Raspberry Pi 3 real em desktop e celular. Clima e SysOps também foram homologados visualmente no ST7789 físico. Fontes personalizadas e perfis experimentais de display possuem testes automatizados e verificação em navegador; resta somente a homologação física de uma página HTTP/JSON e de futuros drivers adicionais.

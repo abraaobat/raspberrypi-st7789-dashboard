@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-16T00:16:36-04:00",
-  "status": "v0.3.0 implantada • novas páginas em homologação física",
-  "statusClass": "validate",
-  "progress": 80,
+  "updatedAt": "2026-09-16T00:44:00-04:00",
+  "status": "v0.3.0 homologada no ST7789 • expansões em andamento",
+  "statusClass": "ops",
+  "progress": 84,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "A versão 0.3.0 está implantada no Raspberry Pi com serviços e API saudáveis. Clima com cache, SysOps, páginas HTTP/JSON e perfis de display passaram por 24 testes no ARM, fluxo no navegador e renderização 240×240 no próprio Pi; a configuração v0.2 e o PIN foram preservados.",
+  "current": "A versão 0.3.0 está implantada no Raspberry Pi com serviços e API saudáveis. Clima e SysOps foram homologados visualmente no ST7789 real; páginas HTTP/JSON e perfis de display passaram por 24 testes no ARM e verificação no navegador. A configuração v0.2 e o PIN foram preservados.",
   "architecture": "Browser → API autenticada → Config/Registry → System + async providers → Pillow Renderer → Display Profile → ST7789/Preview",
-  "next": "Homologar visualmente Clima, SysOps e uma fonte HTTP/JSON no ST7789, ativando-as pelo painel quando conveniente.",
-  "action": "Configurar localização e serviços no painel, ativar as novas páginas e confirmar legibilidade e navegação nos botões físicos.",
+  "next": "Homologar uma fonte HTTP/JSON no ST7789 e avançar conectores autenticados, Pi-hole, Home Assistant/MQTT e drivers físicos adicionais.",
+  "action": "Criar pelo painel uma página HTTP/JSON de interesse do usuário e confirmar sua legibilidade no display físico.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
@@ -23,15 +23,15 @@
     "PIN / CSRF / atomic config ✓",
     "Automated deploy + install audit ✓",
     "Physical integrated validation ✓",
-    "SysOps first slice ✓ software",
-    "Weather page ✓ software",
+    "SysOps first slice ✓ hardware",
+    "Weather page ✓ hardware",
     "Custom HTTP/JSON pages ✓ software",
     "Display profiles foundation ✓ software",
     "Desk / IoT Packs"
   ],
   "activity": {
     "date": "2026-09-16",
-    "type": "build",
-    "text": "v0.3.0 implantada no Raspberry Pi: 24 testes no ARM, serviços/API e renderizações Clima/SysOps aprovados; configuração anterior preservada, aguardando apenas homologação visual no ST7789."
+    "type": "validate",
+    "text": "Clima e SysOps da v0.3.0 foram homologados visualmente no ST7789 real, com dados legíveis, ordem 4/5 e 5/5 e evidência fotográfica adicionada à documentação."
   }
 }

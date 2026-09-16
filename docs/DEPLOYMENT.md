@@ -84,12 +84,12 @@ O fluxo completo foi aprovado no Raspberry Pi 3 com a versão 0.2.0:
 - carrossel automático funcionando;
 - ativação e ordem do conteúdo aplicadas no display.
 
-Para homologar a versão 0.3.0, falta apenas confirmar no hardware:
+Na versão 0.3.0, já foram confirmados no hardware:
 
-- legibilidade da página Clima;
-- atualização assíncrona sem congelar os botões;
-- disco, gateway, throttling e serviços na página SysOps;
-- uma fonte HTTP/JSON escolhida pelo usuário;
-- preservação da configuração e do PIN durante a atualização.
+- legibilidade e dados da página Clima;
+- disco, gateway, histórico de alimentação e serviços na página SysOps;
+- navegação até as páginas 4/5 e 5/5 no ST7789;
+- preservação da configuração e do PIN durante a atualização;
+- serviços, API, carrossel, ordem e botões físicos sem regressão.
 
-Estado em 16/09/2026: versão 0.3.0 implantada, 24 testes aprovados no ARM, serviços/API saudáveis e configuração anterior preservada. As renderizações 240×240 de Clima e SysOps foram geradas no próprio Pi; resta ativá-las e inspecioná-las no TFT físico.
+Estado em 16/09/2026: versão 0.3.0 implantada e homologada visualmente no Raspberry Pi 3, com 24 testes aprovados no ARM, serviços/API saudáveis e configuração anterior preservada. Clima e SysOps foram fotografados no ST7789 real. Resta como teste físico opcional da próxima etapa exibir uma fonte HTTP/JSON criada pelo usuário.
