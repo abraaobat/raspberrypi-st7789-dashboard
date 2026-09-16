@@ -7,6 +7,7 @@ import ipaddress
 import json
 import socket
 import ssl
+import threading
 import time
 from urllib.parse import urlsplit
 
@@ -74,8 +75,10 @@ class _PinnedHTTPS(http.client.HTTPSConnection):
         self.address = address
 
     def connect(self):
+        deadline = time.monotonic() + self.timeout
         sock = socket.create_connection((self.address, self.port), self.timeout)
         try:
+            sock.settimeout(max(0.001, deadline - time.monotonic()))
             self.sock = self._context.wrap_socket(sock, server_hostname=self.host)
         except Exception:
             sock.close()
@@ -100,6 +103,7 @@ def request_json(url: str, *, method="GET", headers=None, payload=None,
     deadline = time.monotonic() + timeout
     response = None
     connection = None
+    watchdog = None
     try:
         # Pin the checked addresses: no second hostname lookup can send a token elsewhere.
         for address in addresses:
@@ -119,6 +123,19 @@ def request_json(url: str, *, method="GET", headers=None, payload=None,
                 connection = None
         if connection is None:
             raise SourceError("fonte HTTP indisponível")
+        transport_socket = connection.sock
+
+        def expire():
+            # Socket read timeouts alone permit a slow stream of response headers.
+            # Shutdown wakes reads even if HTTP/1.0 detached the socket from connection.
+            try:
+                transport_socket.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+
+        watchdog = threading.Timer(max(0.001, deadline - time.monotonic()), expire)
+        watchdog.daemon = True
+        watchdog.start()
         connection.sock.settimeout(max(0.001, deadline - time.monotonic()))
         connection.request(method, endpoint, body=body, headers=request_headers)
         response = connection.getresponse()
@@ -151,7 +168,10 @@ def request_json(url: str, *, method="GET", headers=None, payload=None,
             size += len(chunk)
             if size > MAX_JSON_BYTES:
                 raise SourceError("resposta JSON excede 128 KiB")
-        result = json.loads(b"".join(chunks).decode("utf-8"))
+        try:
+            result = json.loads(b"".join(chunks).decode("utf-8"))
+        except (ValueError, UnicodeError, RecursionError):
+            raise SourceError("a fonte não retornou JSON válido") from None
         if not isinstance(result, (dict, list)):
             raise SourceError("a raiz da resposta deve ser objeto ou lista JSON")
         return result
@@ -160,6 +180,8 @@ def request_json(url: str, *, method="GET", headers=None, payload=None,
     except (OSError, http.client.HTTPException):
         raise SourceError("fonte HTTP indisponível ou tempo limite excedido") from None
     finally:
+        if watchdog is not None:
+            watchdog.cancel()
         if response is not None:
             response.close()
         if connection is not None:

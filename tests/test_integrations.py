@@ -138,6 +138,16 @@ class TransportTests(unittest.TestCase):
 
             def do_GET(self):
                 cls.seen.append(self.path)
+                if self.path == "/drip-headers":
+                    try:
+                        self.connection.sendall(b"HTTP/1.0 200 OK\r\n")
+                        for _ in range(20):
+                            time.sleep(.015)
+                            self.connection.sendall(b"X-Slow: x\r\n")
+                        self.connection.sendall(b"\r\n{}")
+                    except (BrokenPipeError, ConnectionResetError):
+                        pass
+                    return
                 code, body = 200, b'{"value":42}'
                 if self.path == "/redirect":
                     code, body = 302, b""
@@ -188,10 +198,11 @@ class TransportTests(unittest.TestCase):
         self.assertNotIn("/never-follow", self.seen)
 
     def test_deadline_limits_response_wait(self):
-        started = time.monotonic()
-        with self.assertRaises(SourceError):
-            request_json(self.url + "/slow", timeout=.03)
-        self.assertLess(time.monotonic() - started, .3)
+        for path in ["/slow", "/drip-headers"]:
+            started = time.monotonic()
+            with self.subTest(path=path), self.assertRaises(SourceError):
+                request_json(self.url + path, timeout=.03)
+            self.assertLess(time.monotonic() - started, .3)
 
     def test_dns_pinning_keeps_host_and_uses_checked_ip(self):
         rows = [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", self.server.server_port))]
