@@ -114,10 +114,16 @@ Novo backup privado foi criado fora do Git, com prefixo `~/.config/raspberrypi-s
 - nomes YAML ESPHome/UTF-8/subdispositivos codificados por segmento; Shelly só `Switch.GetStatus`, canal 0–63; PromQL codificada e timeout solicitado de 2s;
 - preenchimento/consulta/rascunho/aplicação distintos; confirmação de troca de URL e respostas antigas descartadas após edição/fechamento;
 - sem novas páginas nativas, dependências, apps ou mudanças de botões/serviços; limites de 11 páginas integradas e oito fontes preservados;
-- 165 casos locais em 18,377 s: 162 passaram e três opcionais Mosquitto ignorados; fluxo completo do painel aprovado com serviços fictícios e quatro tamanhos;
+- 165 casos locais em 18,821 s: 162 passaram e três opcionais Mosquitto ignorados; fluxo completo do painel aprovado com serviços fictícios e quatro tamanhos;
 - renderização dos novos exemplos nos três perfis em software; firmware/medição/seletor e autenticação reais precisam do checklist final.
 
 Veja [APP_RECIPES.md](APP_RECIPES.md) e [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md). Os modelos genéricos não ganharam autenticação ESPHome/Digest/Bearer; use integração autorizada em vez de remover proteção do serviço.
+
+## Preparação v0.6.0 → v0.9.0 aprovada em software
+
+A revisão `8108307` está preparada em `~/.cache/st7789-dashboard-update-v0.9.0`, sem mudar o checkout ativo. A suíte ARM executou 165 casos em 67,427 s: 162 passaram e três opcionais Mosquitto foram ignorados. No computador, 162 passaram em 18,821 s, com os mesmos três ignorados. No [CI](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35258059111), todos os 165 passaram em 19,051 s, incluindo os três de Mosquitto real isolado; o fluxo completo do painel também passou.
+
+Foi criado backup privado recente fora do Git, com prefixo `~/.config/raspberrypi-st7789-dashboard.backup-v0.6-before-v0.9-`. Depois dos testes, PIN, configuração e chave de sessão foram comparados sem exibir conteúdos; ausência de cofre também foi preservada. Auditoria confirmou checkout ativo limpo `6358fbf`, API v0.6.0, SPI, dois serviços ativos e estado sem erro. Nenhum serviço/app/broker/driver extra foi instalado no Pi. [GitHub Pages](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35258059137) publicou a v0.9.0; a landing local/publicada passou nas oito combinações de idioma/tamanho, com cinco imagens proporcionais, QR quadrado e Pix confirmado. Instalação mais recente e testes reais continuam agrupados no final.
 
 ## Próximas implementações e gates adiados
 

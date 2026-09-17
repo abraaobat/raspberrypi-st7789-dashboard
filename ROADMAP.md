@@ -144,7 +144,7 @@ O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/va
 
 ## Sequência de retomada
 
-**Evidência local v0.9.0:** 165 casos executados; 162 passaram e três opcionais Mosquitto foram ignorados. Fluxo de navegador com os três serviços fictícios aprovado, além de regressão dos conectores/MQTT/Docker/Desk e quatro tamanhos. Extração/renderização nos três perfis é prova de software, não teste de dispositivos reais. [Contratos de apps](docs/APP_RECIPES.md).
+**Evidência v0.9.0 (`8108307`):** 162 testes passaram no computador/ARM em cópia separada; três opcionais ignorados nesses hosts. Todos os 165 passaram no [CI](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35258059111), com fluxo completo do painel. Landing local/publicada aprovada em oito combinações, fotos/Pix preservados. Backup privado e auditoria posterior confirmaram a v0.6.0 ativa inalterada. Extração/renderização nos três perfis é prova de software, não teste de equipamentos reais. [Contratos](docs/APP_RECIPES.md) e [preparo](docs/NEXT_SESSION.md).
 
 0. **Continuar o desenvolvimento:** distribuição/rollback, outros contratos de apps e refinamentos após os gates de uso real. MQTT e drivers extras têm implementação de software v0.8.0. Os testes abaixo ficam no checklist final, sem serem marcados como aprovados antes de execução real. A v0.6.0 já está instalada; a versão mais recente inclui as anteriores, sem atualizações intermediárias.
 1. **Fonte personalizada no hardware:** criar pelo painel uma página HTTP/JSON de interesse real e confirmar sua legibilidade no ST7789. O núcleo, a extração e a API já possuem testes; esse gate é somente físico.

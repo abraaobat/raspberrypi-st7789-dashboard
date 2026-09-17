@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-17T18:16:55Z",
-  "status": "v0.9.0 • local OK",
+  "updatedAt": "2026-09-17T18:23:17Z",
+  "status": "v0.9.0 • software OK",
   "statusClass": "ops",
   "progress": 92,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "Raspberry acessível: instalação v0.6.0 limpa e saudável, dois serviços/SPI/API/estado aprovados, sem atualizar serviços. v0.9.0 amplia a biblioteca de seis para nove modelos: sensores ESPHome com nomes YAML/UTF-8, potência Shelly Gen2+ somente Switch.GetStatus e métricas escalares Prometheus. Montagem de URL offline autenticada/CSRF, sem DNS/HTTP ou gravação; preenchimento, teste, rascunho e aplicação separados. 165 casos locais: 162 passaram, três opcionais Mosquitto ignorados. Fluxo completo do painel com três serviços fictícios e quatro tamanhos aprovado. Firmware/medição/seletor/autenticação reais e TFT continuam no checklist final; nenhum app, broker ou privilégio instalado no Pi. CI/publicação e preparo ARM da revisão nova em andamento.",
+  "current": "v0.9.0: nove modelos HTTP/JSON, com sensores ESPHome (nomes YAML/UTF-8), potência Shelly Gen2+ somente Switch.GetStatus e métricas escalares Prometheus. Montagem de URL offline autenticada/CSRF, sem DNS/HTTP à fonte ou gravação; modelo, teste, rascunho e aplicação separados. 162 testes aprovados no computador e no ARM em checkout separado (67,427 s); três opcionais Mosquitto ignorados nesses hosts. Todos os 165 passaram no CI (19,051 s), com fluxo completo do painel e regressão MQTT/Docker/Desk. Landing local/publicada aprovada em oito combinações; fotos/Pix preservados. Backup privado e auditoria posterior confirmaram PIN/configuração/chave de sessão/cofre e instalação ativa v0.6.0 limpa/saudável inalterados. Nenhum app, broker, driver extra ou privilégio instalado no Pi. Apps reais/TFT e atualização ativa ficam no checklist final.",
   "architecture": "Browser → Auth API → Config/Registry + 9 Templates/closed offline URL recipes/Desk → bounded GET-only HTTP + Docker/MQTT read providers → Pillow + native OLED → ST7789 / optional SSD1306+ILI9341 / safe Preview",
   "next": "Distribuição/rollback e outros contratos de apps. Atualizar diretamente a versão mais recente e homologar apenas fontes/apps de interesse no checklist final; não instalar serviços nem remover autenticação só para testar. Search Console depende de login.",
   "action": "Checklist único em docs/FINAL_VALIDATION.md; modelos/URLs e limites em docs/APP_RECIPES.md. Credenciais apenas no painel privado; instalar versão mais recente quando conveniente, sem versões intermediárias.",
@@ -60,18 +60,20 @@
     "v0.8.0 deployment + real MQTT / extra displays — deferred final checklist",
     "ESPHome/Shelly Gen2+/Prometheus scalar recipes + offline URL builder ✓ simulated services",
     "Pomodoro physical gestures — future work",
-    "162 v0.9 tests ✓ local / 3 optional Mosquitto skipped; isolated app recipe/browser regression ✓",
-    "v0.9.0 deployment + real app sources/TFT — deferred final checklist"
+    "162 v0.9 tests ✓ local + ARM staged / all 165 ✓ CI; full isolated browser flow ✓",
+    "v0.9.0 deployment + real app sources/TFT — deferred final checklist",
+    "Private pre-v0.9 backup + unchanged active v0.6 PIN/config/session/vault and health audit ✓",
+    "v0.9 local/public landing ✓ 8 language/viewport combinations; confirmed photos/PIX unchanged"
   ],
   "runtime": {
     "label": "Página pública do projeto",
     "url": "https://abraaobat.github.io/raspberrypi-st7789-dashboard/",
     "status": "available",
-    "note": "Landing v0.9.0 preparada; fotos/Pix confirmados preservados. Painel Raspberry permanece local/tailnet v0.6.0, atualização final pendente."
+    "note": "Landing v0.9.0 e Pix publicados/verificados. Painel Raspberry continua local/tailnet v0.6.0 saudável; atualização/testes reais finais pendentes."
   },
   "activity": {
     "date": "2026-09-17",
     "type": "update",
-    "text": "Raspberry acessível: instalação v0.6.0 limpa e saudável, dois serviços/SPI/API/estado aprovados, sem atualizar serviços. v0.9.0 amplia a biblioteca de seis para nove modelos: sensores ESPHome com nomes YAML/UTF-8, potência Shelly Gen2+ somente Switch.GetStatus e métricas escalares Prometheus. Montagem de URL offline autenticada/CSRF, sem DNS/HTTP ou gravação; preenchimento, teste, rascunho e aplicação separados. 165 casos locais: 162 passaram, três opcionais Mosquitto ignorados. Fluxo completo do painel com três serviços fictícios e quatro tamanhos aprovado. Firmware/medição/seletor/autenticação reais e TFT continuam no checklist final; nenhum app, broker ou privilégio instalado no Pi. CI/publicação e preparo ARM da revisão nova em andamento."
+    "text": "v0.9.0: nove modelos HTTP/JSON, com sensores ESPHome (nomes YAML/UTF-8), potência Shelly Gen2+ somente Switch.GetStatus e métricas escalares Prometheus. Montagem de URL offline autenticada/CSRF, sem DNS/HTTP à fonte ou gravação; modelo, teste, rascunho e aplicação separados. 162 testes aprovados no computador e no ARM em checkout separado (67,427 s); três opcionais Mosquitto ignorados nesses hosts. Todos os 165 passaram no CI (19,051 s), com fluxo completo do painel e regressão MQTT/Docker/Desk. Landing local/publicada aprovada em oito combinações; fotos/Pix preservados. Backup privado e auditoria posterior confirmaram PIN/configuração/chave de sessão/cofre e instalação ativa v0.6.0 limpa/saudável inalterados. Nenhum app, broker, driver extra ou privilégio instalado no Pi. Apps reais/TFT e atualização ativa ficam no checklist final."
   }
 }

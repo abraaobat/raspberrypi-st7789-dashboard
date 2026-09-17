@@ -140,7 +140,7 @@ Requisitos:
 | `PUT` / `DELETE` | `/api/mqtt/credential` | guardar `{brokerUrl, username, password}` ou remover credencial privada, com sessão/CSRF |
 | `POST` | `/api/pomodoro/command` | ação fechada `start`, `pause`, `resume` ou `reset`; usa duração aplicada |
 
-IDs permitidos: `pihole` e `homeassistant`. Todos esses endpoints exigem sessão autenticada; mudanças e testes também exigem CSRF. O teste usa a credencial digitada ou, se ausente, a credencial local vinculada ao endereço. Não há `GET` de credencial. Exemplo de ajustes não secretos:
+IDs dos conectores guiados: `pihole` e `homeassistant`. Os endpoints de configuração/fontes/integrações exigem sessão autenticada; mudanças e testes também exigem CSRF. Saúde/estado da autenticação e o fluxo de entrada são as exceções de acesso. O teste guiado usa a credencial digitada ou, se ausente, a credencial local vinculada ao endereço. Não há `GET` de credencial. Exemplo de ajustes não secretos:
 
 ```json
 {
@@ -226,3 +226,5 @@ A v0.7.0 acrescenta Docker opcional, filtros exatos, frequência, consulta dos a
 A v0.8.0 inclui MQTT opcional, até quatro sensores/tópicos distintos, texto/JSON e cofre vinculado ao broker, sem PUBLISH/controle. Assinaturas são curtas e favorecem valores retidos; não é histórico contínuo de eventos nem confirmação da hora de medição. TLS validado ou consentimento de MQTT sem TLS somente na rede local/tailnet. Guardar segredo não aplica ajustes; consulta considera somente os ajustes já aplicados. [Limites MQTT](MQTT_MONITOR.md).
 
 **Visualização do display** permite simular ST7789/OLED/ILI9341 sem mudança física. Sem simulação, a prévia reflete o perfil configurado pelo administrador. O botão de seleção envia apenas a página, não o perfil simulado. OLED recebe layout compacto nativo e ILI9341 conserva proporção com margens. Drivers opcionais ainda não têm evidência física; a seleção deles fica fora da configuração web. [Matriz de compatibilidade](DISPLAY_COMPATIBILITY.md).
+
+A v0.9.0 amplia `sourceTemplates` para nove itens. Três incluem metadados opcionais `endpoint` (`help`, `docsUrl`, `parameters`) para o assistente de URL, sem destino ou segredo. `POST /api/sources/build-url` aceita somente `{templateId, baseUrl, parameters}`; IDs fechados `esphome-sensor`, `shelly-power`, `prometheus-scalar`. Parâmetros são, respectivamente, `{entityName, deviceName}`, `{channel}` e `{expression}`. Retorna `{ok, url}` sem DNS/HTTP para a fonte ou gravação. Campos extras, base com credenciais/caminho/query e limites excedidos são recusados. **Montar URL** pode substituir a URL do formulário somente com confirmação; **Usar modelo** preserva URL/ID. Nenhuma ação grava/seleciona página até guardar/aplicar/selecionar explicitamente. [Contratos e limitações](APP_RECIPES.md).
