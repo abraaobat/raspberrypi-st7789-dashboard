@@ -43,6 +43,6 @@ O backup pelo painel inclui `clock` e `pomodoro.minutes`, não o ciclo ativo, su
 
 ## Evidência e teste físico pendente
 
-A v0.5.0 tem 84 testes automatizados no computador, incluindo tempo injetado para conclusão/reboot, persistência entre processos, permissões, concorrência, configuração, API e renderização. O fluxo de navegador isolado cobre ativação, iniciar/pausar/retomar/reiniciar, proteção contra resposta antiga de atualização, recarregamento, login, restauração e layout em 1440/980/390/320 px. Serviços externos e credenciais desse teste são fictícios.
+A v0.5.0 tem 84 testes automatizados aprovados no computador e no ARM do Raspberry em checkout separado, incluindo tempo injetado para conclusão/reboot, persistência entre processos, permissões, concorrência, configuração, API e renderização. O fluxo de navegador isolado cobre ativação, iniciar/pausar/retomar/reiniciar, proteção contra resposta antiga de atualização, recarregamento, login, restauração e layout em 1440/980/390/320 px. Serviços externos e credenciais desse teste são fictícios.
 
-O Pi não respondeu nos endereços conhecidos nesta retomada. A última implantação física comprovada continua sendo v0.3.0. Depois de atualizar, faça um ciclo de 1 minuto no painel, confirme a contagem e o estado final no TFT, pause/retome e confira Relógio com os botões. Esses testes não foram registrados como homologados.
+O Pi está acessível e a instalação ativa v0.3.0 passou na auditoria automática. A atualização final exige senha de administrador no terminal; veja [UPDATE_TO_V05.md](UPDATE_TO_V05.md). Depois de atualizar, faça um ciclo de 1 minuto no painel, confirme a contagem e o estado final no TFT, pause/retome e confira Relógio com os botões. Esses testes não foram registrados como homologados.

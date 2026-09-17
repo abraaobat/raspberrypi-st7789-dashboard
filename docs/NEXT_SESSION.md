@@ -36,7 +36,7 @@ Não é necessário repetir os testes já aprovados de Clima e SysOps. Esse test
 - tempo monotônico e estado privado compartilhado: reiniciar serviço preserva o ciclo; reboot interrompe execução, sem estimativa falsa;
 - configurações de mesa no backup, sem exportar o ciclo ativo nem reiniciá-lo ao restaurar;
 - 84 testes automatizados no computador e navegador isolado com comandos, resposta antiga de atualização, reload/login, backup e layout em quatro tamanhos;
-- prévias RELÓGIO/POMODORO verificadas no computador; teste físico e execução no ARM permanecem pendentes.
+- prévias RELÓGIO/POMODORO verificadas no computador; 84 testes aprovados também no ARM em cópia separada; observação das novas páginas no TFT permanece pendente.
 
 Veja [DESK_MODE.md](DESK_MODE.md) para o checklist de um ciclo curto e os limites implementados.
 
@@ -66,11 +66,15 @@ O Search Console exige login no navegador disponível. Essa é a única etapa de
 
 Abra o painel existente com o mesmo PIN. Em **Integrações guiadas**, configure o serviço desejado, teste, marque a ativação, guarde os ajustes e aplique. Depois confirme PI-HOLE/CASA com os botões. Nenhuma dessas etapas exige enviar credenciais nesta conversa. Veja [checklist e backup](BACKUP_AND_CREDENTIALS.md).
 
-## Atualização do Raspberry Pi pendente nesta retomada
+## Raspberry acessível — instalação final aguarda senha de administrador
 
-O Pi não respondeu por SSH nos IPs anteriormente conhecidos (`192.168.100.94` e `192.168.100.11`), inclusive na nova tentativa da v0.5.0. Não houve reinício, alteração do estado, cadastro de credenciais nem execução dos 84 testes no ARM nesta retomada. A v0.3.0 continua sendo a última implantação comprovada.
+Em 16/09/2026, o Pi respondeu por SSH nos dois IPs conhecidos (`192.168.100.94` e `192.168.100.11`). A instalação ativa está limpa na revisão `6618be8`, a API responde `0.3.0`, os dois serviços estão ativos e a auditoria de SPI/estado/API foi aprovada.
 
-Quando a conexão voltar, execute no próprio Raspberry Pi:
+Foi criada uma cópia privada completa do estado, fora do Git, com diretório `0700`. PIN, configuração e chave de sessão foram comparados sem exibir seus conteúdos e permaneceram intactos após os testes. A cópia usa o prefixo `~/.config/raspberrypi-st7789-dashboard.backup-v0.3-before-v0.5-`.
+
+A revisão v0.5.0 `04fce39` foi preparada em `~/.cache/st7789-dashboard-update-v0.5.0`, como checkout separado. Os 84 testes passaram no ARM. Dependências e unidades de serviço não mudaram entre as duas revisões, e o ambiente Python não apresenta dependências quebradas. Esses resultados não representam implantação da v0.5.0 nem homologação visual no TFT.
+
+O Raspberry exige senha para `sudo`; não houve alteração do checkout ativo, reinício dos serviços, cadastro de credenciais ou tentativa de contornar essa exigência. Execute no próprio Raspberry Pi, como usuário `pi`:
 
 ```bash
 cd ~/raspberrypi-st7789-dashboard
@@ -80,4 +84,6 @@ git pull --ff-only
 ./scripts/validate_install.sh
 ```
 
-Se o primeiro comando de status mostrar alterações próprias, não as descarte: preserve-as antes de atualizar. O instalador usa o usuário/caminhos existentes e executa os testes antes de reiniciar os serviços; ele também reconfere dependências. Guarde privadamente um backup do estado antes de atualizar. Os novos módulos entram desativados e o PIN existente não precisa ser recriado.
+Se o comando de status mostrar alterações próprias, não as descarte: preserve-as antes de atualizar. Informe a senha somente no terminal quando `sudo` pedir, nunca nesta conversa. O instalador usa o usuário/caminhos existentes e executa os testes antes de reiniciar os serviços; ele também reconfere dependências. O backup privado já foi preparado nesta retomada; se houver novos ajustes antes da instalação, faça outra cópia. Os novos módulos entram desativados e o PIN existente não precisa ser recriado.
+
+Veja [UPDATE_TO_V05.md](UPDATE_TO_V05.md) para conferir a versão implantada, ativar as páginas e realizar o checklist final. Tetris foi cancelado e não foi implementado.

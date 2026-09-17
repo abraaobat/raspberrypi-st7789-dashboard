@@ -209,4 +209,4 @@ Todos os itens do MVP foram homologados no Raspberry Pi 3 real em desktop e celu
 
 Os assistentes/cofre/backup da v0.4.0 passaram por testes de API e navegador com serviços simulados, em 1440/980/390/320 px. Acesso a Pi-hole/Home Assistant reais e leitura das novas páginas no TFT permanecem pendentes. Veja [limites e recuperação das credenciais](BACKUP_AND_CREDENTIALS.md).
 
-A v0.5.0 acrescenta Relógio/Pomodoro, com 84 testes de software e fluxo de comandos verificado no navegador isolado. Testes de reboot/conclusão usam tempo injetado; não representam reinicialização física nem observação do TFT. Atualização e homologação dessas páginas no Pi permanecem pendentes por conectividade.
+A v0.5.0 acrescenta Relógio/Pomodoro, com 84 testes de software aprovados também no ARM em checkout separado e fluxo de comandos verificado no navegador isolado. Testes de reboot/conclusão usam tempo injetado; não representam reinicialização física nem observação do TFT. O Pi está acessível, mas os serviços ativos continuam na v0.3.0; a atualização exige senha de administrador no terminal. Veja o [roteiro de implantação](UPDATE_TO_V05.md).

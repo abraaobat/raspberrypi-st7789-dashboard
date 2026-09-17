@@ -27,7 +27,7 @@ Pelo computador ou celular, o usuário pode:
 
 O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0 estão homologados no Raspberry Pi 3. A atualização preservou a configuração anterior e adicionou as integrações de forma opt-in, sem regressão nos botões, na prévia ou no carrossel.
 
-O software da versão 0.5.0 possui 84 testes automatizados e verificação de ponta a ponta no navegador com serviços simulados. Pi-hole/Home Assistant reais e legibilidade de PI-HOLE/CASA/RELÓGIO/POMODORO no ST7789 aguardam homologação manual. Os novos módulos permanecem desativados na atualização. A última implantação física comprovada é v0.3.0; o Pi não respondeu por SSH nesta retomada.
+O software da versão 0.5.0 possui 84 testes automatizados, aprovados também no ARM do Raspberry em uma cópia separada, e verificação de ponta a ponta no navegador com serviços simulados. Pi-hole/Home Assistant reais e legibilidade de PI-HOLE/CASA/RELÓGIO/POMODORO no ST7789 aguardam homologação manual. Os novos módulos permanecem desativados na atualização. O Pi está acessível, com backup privado preparado; os serviços ativos continuam na v0.3.0, pois o instalador exige senha de administrador. Veja o [roteiro para concluir a atualização](docs/UPDATE_TO_V05.md).
 
 - [Roadmap do produto](ROADMAP.md)
 - [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)

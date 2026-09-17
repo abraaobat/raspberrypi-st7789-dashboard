@@ -34,6 +34,8 @@ Atualizações preservam o diretório de estado. Integrações novas permanecem 
 
 O backup pelo navegador serve para ajustes; o backup local completo serve para recuperação do dispositivo. Se precisar restaurar a versão anterior, pare os serviços, volte à revisão conhecida e recupere o estado a partir da cópia local validada. Não execute rollback destrutivo em um checkout com alterações próprias.
 
+Na preparação da atualização v0.3.0 → v0.5.0 em 16/09/2026, foi criado no próprio Pi um backup completo com acesso privado, fora do Git. PIN, configuração e chave de sessão foram comparados sem exibir conteúdos e não mudaram. Os 84 testes rodaram em checkout separado, sem alterar a instalação ativa. O instalador ainda precisa ser executado no terminal com senha de administrador; veja [UPDATE_TO_V05.md](UPDATE_TO_V05.md). Se mudar a configuração antes dessa instalação, prepare outro backup privado.
+
 ## Checklist manual pendente
 
 1. Pi-hole **6 real**: gerar senha de aplicativo, testar, ativar e comparar resumo do painel/display com a API local.

@@ -126,12 +126,13 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A v0.5.0 soma Relógio/Pomodoro offline ao cofre, Pi-hole 6/Home Assistant e backup/restauração da v0.4.0. São 84 testes automatizados e fluxo de navegador isolado, incluindo comandos do timer e persistência. A página bilíngue e o Pix confirmado permanecem publicados. A atualização do Pi aguarda conectividade: os dois IPs conhecidos não responderam por SSH. Search Console aguarda login do mantenedor; conectores reais, fonte personalizada e novas páginas aguardam observação física. MQTT, Docker detalhado, gestos físicos do Pomodoro e drivers adicionais continuam como evoluções, não como recursos prontos.
+D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A v0.5.0 soma Relógio/Pomodoro offline ao cofre, Pi-hole 6/Home Assistant e backup/restauração da v0.4.0. São 84 testes automatizados aprovados no computador e no ARM, mais fluxo de navegador isolado, incluindo comandos do timer e persistência. No Pi, os testes usaram uma cópia separada, sem substituir a instalação ativa. A página bilíngue e o Pix confirmado permanecem publicados. O Raspberry voltou a responder por SSH; backup privado e auditoria da instalação atual estão aprovados. A implantação da v0.5.0 aguarda execução local do instalador com senha de administrador; os serviços ativos continuam na v0.3.0. Search Console aguarda login do mantenedor; conectores reais, fonte personalizada e novas páginas aguardam observação física. MQTT, Docker detalhado, gestos físicos do Pomodoro e drivers adicionais continuam como evoluções, não como recursos prontos.
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 
 ## Sequência de retomada
 
+0. **Concluir atualização:** executar o [roteiro v0.5.0](docs/UPDATE_TO_V05.md) no terminal do Pi, informando a senha de administrador somente quando o instalador pedir. Confirmar versão `0.5.0` na API e auditoria aprovada antes dos testes abaixo.
 1. **Fonte personalizada no hardware:** criar pelo painel uma página HTTP/JSON de interesse real e confirmar sua legibilidade no ST7789. O núcleo, a extração e a API já possuem testes; esse gate é somente físico.
 2. **Homologar integrações reais:** configurar Pi-hole 6 e Home Assistant pelos assistentes já implementados, comparar dados e observar estados de falha/legibilidade no TFT.
 3. **Desk no hardware:** ativar Relógio/Pomodoro pelo painel, executar um ciclo curto, pausar/retomar e observar contagem/legibilidade no TFT. Os botões continuam anterior/próxima; não há novos gestos para homologar nesta versão.
