@@ -184,6 +184,19 @@ Confira API com versão `0.6.0`, atualize o navegador e use o mesmo PIN. Veja [C
 
 ## Atualização segura v0.10.0 — implementação de software
 
-A v0.10.0 acrescenta atualização por SHA, ambiente isolado e backup privado, troca explícita verificada e retorno de código/ambiente com journal. Não restaura configuração/cofre antigos, não altera grupos/pacotes do sistema e recusa serviços personalizados ou downgrade incompatível. 195 testes passaram no computador (19,344 s); três opcionais Mosquitto foram ignorados. Fluxo completo do painel isolado e landing em oito combinações aprovados; fotos/Pix preservados. ARM e CI desta versão serão conferidos após publicação. Troca/retorno reais ficam no checklist final; v0.6.0 continua ativa e saudável.
+v0.10.0: preparação por SHA em código/ambiente exclusivos, backups privados, ativação pelo operador com gates de versão/quadro fresco e retorno compatível de código/ambiente com journal. Não restaura estado antigo nem concede privilégios; recusa personalizações e downgrade incompatível. NumPy agora limita a compilação a dois trabalhos; timeout/interrupção limpa o grupo exclusivo da etapa. 197 testes passaram no computador (19,690 s) e no ARM em worktree separado (142,208 s, durante compilação); três opcionais Mosquitto ignorados nesses hosts. Os 35 casos específicos passaram no ARM (9,105 s). Todos os 200 passaram no CI final (20,029 s), com fluxo completo do painel fictício. Landing local/publicada aprovada em oito combinações, fotos/Pix preservados; 15 fontes do Command Dashboard validadas. A preparação real inicial de NumPy foi encerrada seletivamente para fechar a rodada, preservando backups/artefatos; não há release pronto para ativação. Instalação ativa v0.6.0 continua saudável; nova preparação com limite corrigido, ativação/retorno reais e módulos/TFT ficam no checklist final.
 
 [Contrato e roteiro](SAFE_UPDATES.md). Ferramenta somente no terminal, sem endpoint de instalação no painel. O instalador agora recusa serviços existentes. Não faça pull do checkout ativo. Novos passos preparatórios não substituem ativação/homologação físicas.
+
+**Revisões/evidência v0.10:** entrega `3959371`, correções `c16e272`/`13d272d`, proteção de processos/compilação `c861adb`. [CI final de 200 casos](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35263652860) e [Pages final](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35263652977) aprovados. Tool corrigida separada `~/.cache/st7789-update-tool-v0.10.0-c861adb`, revisão `c861adb`; tool inicial `~/.cache/st7789-update-tool-v0.10.0`, revisão `13d272d`, foi preservada. Backup privado recente com prefixo `~/.config/raspberrypi-st7789-dashboard.backup-v0.6-before-v0.10-`, sem segredos no Git. Tentativa `release-c16e2720d164-8bd6df32` falhou antes do ambiente novo. Tentativa `release-13d272da63c8-c93e8748` teve sua árvore de compilação privada validada/interrompida, ficando incompleta/`failed`; não ativar. Nenhum release está `prepared` e nenhuma troca/retorno real foi realizada.
+
+Na retomada, a tool corrigida já está disponível no Raspberry. Preparar uma nova tentativa com a revisão fixa abaixo (pode ser demorado no ARM); artefatos anteriores permanecem privados, não removê-los para forçar retomada:
+
+```bash
+cd ~/.cache/st7789-update-tool-v0.10.0-c861adb
+python3 -B scripts/update_dashboard.py preflight
+python3 -B scripts/update_dashboard.py prepare --revision c861adb104327b837ee731c2543103806dfb01c0
+python3 -B scripts/update_dashboard.py status
+```
+
+Só após `prepared`, usar identificador real e seguir [ativação explícita](SAFE_UPDATES.md#3-ativar-somente-no-teste-final). PIN/configuração/chave/cofre existentes não são substituídos pela preparação.
