@@ -20,6 +20,7 @@ from .http_client import HTTP_TIMEOUT_SECONDS, MAX_JSON_BYTES, request_json, val
 from .integration_settings import INTEGRATION_IDS
 from .integrations import fetch_integration
 from .desk import DeskError, PomodoroStore, clock_snapshot
+from .docker_monitor import fetch_docker
 
 
 def run(command: list[str], timeout: float = 2.0) -> str | None:
@@ -485,6 +486,12 @@ class DataHub:
 
     def get(self, config: dict, page_id: str, maximum_age: float = 1.0) -> dict:
         # Time pages do not need a CPU/system scan or any network integration.
+        if page_id == "docker":
+            settings = config["docker"]
+            return {"docker": self.external.get(
+                "docker", self._signature(settings), max(15, maximum_age),
+                lambda: fetch_docker(settings),
+            )}
         if page_id == "clock":
             return {"clock": clock_snapshot(config["clock"])}
         if page_id == "pomodoro":

@@ -149,6 +149,15 @@ def create_app(test_config=None):
     def get_config():
         return jsonify(load_config(state_override))
 
+    @app.get("/api/docker/state")
+    @require_auth
+    def docker_state():
+        if request.args:
+            return jsonify({"error": "a consulta Docker não aceita parâmetros"}), 400
+        config = load_config(state_override)
+        page = next(item for item in config["pages"] if item["id"] == "docker")
+        return jsonify(data.get(config, "docker", page["refreshSeconds"])["docker"])
+
     @app.put("/api/config")
     @require_auth
     @require_csrf

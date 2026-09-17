@@ -83,7 +83,8 @@ Critério de saída: uma alteração feita no celular aparece no display em pouc
 - uso de disco, gateway, SSID, sinal e ping; ◐ disco, gateway e ping entregues
 - saúde de alimentação e throttling; ✅
 - estado de serviços `systemd` permitidos por configuração; ✅
-- Docker e Tailscale opcionais;
+- Docker local opcional: contêineres, filtros, saúde e cache; ✅ software v0.7.0; daemon real/TFT pendentes
+- Tailscale opcional; ◐ endereço na página Rede; diagnóstico detalhado futuro
 - integração guiada Pi-hole 6 com senha de aplicativo; ✅ software, homologação real pendente
 - estados `OK`, `ALERTA`, `OFFLINE`, `SEM DADOS` e `DESATUALIZADO`; ◐
 - cache e frequências de atualização específicas por provedor. ✅
@@ -91,6 +92,8 @@ Critério de saída: uma alteração feita no celular aparece no display em pouc
 Situação: primeiro corte implementado e homologado visualmente no ST7789 real na versão 0.3.0, com disco, gateway, alimentação/throttling, serviços limitados por allowlist e coleta assíncrona.
 
 A v0.4.0 acrescenta coleta autenticada do resumo Pi-hole 6, sem controle de DNS, com cache e encerramento da própria sessão. Validado com API simulada; Pi-hole 5 não é suportado por este conector.
+
+A v0.7.0 acrescenta uma página Docker local, com até quatro nomes exatos ou visão geral, execução/parados/saúde, problemas priorizados, cache e diagnóstico de socket/permissão. Emite somente dois GET fechados via Unix, sem bibliotecas adicionais, instalação de Docker, `sudo` ou concessão de privilégios. Acesso ao daemon continua podendo ser equivalente a administrador. Validado com Engine fictício; não é homologação real do Docker.
 
 Critério de saída: falhas de serviços e rede são visíveis sem comprometer o loop do display.
 
@@ -101,7 +104,7 @@ Critério de saída: falhas de serviços e rede são visíveis sem comprometer o
 - gestos físicos para controlar Pomodoro sem alterar anterior/próxima; pendente, requer desenho de interação e homologação
 - meteorologia com cache e localização explícita; ✅ hardware
 - Home Assistant somente de leitura, até quatro entidades escolhidas; ✅ software
-- MQTT/Node-RED opcionais; pendente
+- MQTT nativo opcional; pendente. Node-RED HTTP/JSON já possui modelo/roteiro.
 - página Casa para sensores, portas, luzes e energia; ✅ software; notificações pendentes
 - ticker financeiro opcional, com limites e indicação de atualização.
 - páginas HTTP/JSON criadas pelo usuário a partir de modelos seguros; ✅ software
@@ -128,17 +131,17 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A instalação v0.5.0 está ativa e passou na auditoria do Raspberry em 17/09/2026; isso não substitui observação visual de Relógio/Pomodoro e conectores. A v0.6.0 acrescenta seis modelos HTTP/JSON, conferência de caminhos com exemplos sem conexão e status desconhecidos neutros. São 100 testes aprovados no computador e no ARM em checkout separado, mais fluxo de navegador isolado. Backup privado preparado; instalação final v0.6.0 aguarda senha de administrador no terminal. A biblioteca não instala código de terceiros, não inventa URLs e não cria fontes automaticamente. A página bilíngue e o Pix confirmado permanecem publicados. Search Console aguarda login do mantenedor. Conectores reais, fonte personalizada e novas páginas aguardam observação física. MQTT, Docker detalhado, gestos físicos do Pomodoro e drivers adicionais continuam como evoluções, não como recursos prontos.
+D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A instalação v0.6.0 foi confirmada ativa e saudável no Raspberry em 17/09/2026. Isso não substitui observação visual das novas páginas. Por decisão do mantenedor, os testes manuais ficam para o final e não bloqueiam as expansões independentes. A v0.7.0 acrescenta Docker local somente de leitura, filtros, contagem de saúde e cache. São 118 testes de software e fluxo completo de navegador isolado aprovados. O socket padrão Docker não existe no Pi; não houve instalação nem autorização de acesso. A biblioteca mantém os seis modelos HTTP/JSON, sem instalar código de terceiros ou criar fontes automaticamente. A página bilíngue e o Pix confirmado são preservados. Search Console aguarda login. MQTT nativo, gestos físicos do Pomodoro e drivers adicionais continuam futuros; Docker real e novas páginas ainda não estão homologados no TFT.
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 
 ## Sequência de retomada
 
-0. **Instalar os modelos:** executar o [roteiro v0.6.0](docs/CUSTOM_TEMPLATES.md) no terminal do Pi, informando a senha de administrador somente quando o instalador pedir. Confirmar versão `0.6.0` na API e auditoria aprovada antes dos testes abaixo. A atualização anterior v0.5.0 já foi confirmada.
+0. **Continuar o desenvolvimento:** MQTT nativo opcional, contratos específicos de apps e compatibilidade de drivers. Os testes abaixo ficam no checklist final, sem serem marcados como aprovados antes de execução real. A v0.6.0 já está instalada; v0.7.0 pode ser instalada junto das próximas entregas pelo [roteiro de atualização](docs/DOCKER_MONITOR.md), sem versões intermediárias.
 1. **Fonte personalizada no hardware:** criar pelo painel uma página HTTP/JSON de interesse real e confirmar sua legibilidade no ST7789. O núcleo, a extração e a API já possuem testes; esse gate é somente físico.
 2. **Homologar integrações reais:** configurar Pi-hole 6 e Home Assistant pelos assistentes já implementados, comparar dados e observar estados de falha/legibilidade no TFT.
 3. **Desk no hardware:** ativar Relógio/Pomodoro pelo painel, executar um ciclo curto, pausar/retomar e observar contagem/legibilidade no TFT. Os botões continuam anterior/próxima; não há novos gestos para homologar nesta versão.
-4. **Expansões independentes:** MQTT nativo, Docker detalhado e contratos/templates específicos de outros apps. Node-RED já tem modelo GET/JSON e roteiro; não foi homologado com fluxo real. Tokens arbitrários no assistente HTTP/JSON não estão habilitados.
+4. **Docker real, opcional:** em um host onde o daemon e acesso local já estejam autorizados, comparar execução/saúde, nomes ausentes e cache com o monitor. Não instalar Docker nem conceder privilégios só para testar o display. Node-RED HTTP/JSON já tem modelo/roteiro, com fluxo real pendente; tokens arbitrários no assistente genérico continuam não habilitados.
 5. **Outros displays:** implementar e homologar drivers SSD1306 e ILI9341. Os perfis e a adaptação do framebuffer não substituem o teste físico de cada módulo.
 
 O roteiro de continuidade e os gates pendentes estão em [docs/NEXT_SESSION.md](docs/NEXT_SESSION.md).

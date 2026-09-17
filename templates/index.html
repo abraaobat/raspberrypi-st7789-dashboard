@@ -178,6 +178,21 @@
           </div>
         </article>
 
+        <article class="panel custom-panel docker-panel">
+          <div class="panel-head">
+            <div><p class="section-kicker">HOMELAB LOCAL</p><h2>Contêineres Docker</h2></div>
+            <span class="muted small">Opcional • sem controle</span>
+          </div>
+          <p class="muted small">Ative Docker em Conteúdo e ordem. Consulte execução, contêineres parados e saúde, sem iniciar ou reiniciar nada.</p>
+          <div class="integration-grid">
+            <label class="compact-field"><span>Nomes que deseja acompanhar</span><input id="dockerNames" class="text-input" maxlength="323" placeholder="Ex.: pihole, homeassistant, jellyfin"><small>Até quatro nomes exatos, separados por vírgula. Vazio acompanha todos; a tela prioriza problemas e mostra até quatro.</small></label>
+            <label class="select-field"><span>Atualização dos contêineres</span><select id="dockerRefresh"><option value="15">A cada 15 segundos</option><option value="30">A cada 30 segundos</option><option value="60">A cada minuto</option></select></label>
+          </div>
+          <p class="muted small">O serviço precisa ter acesso já autorizado ao socket local. O painel não concede permissões: acesso ao Docker pode equivaler a acesso de administrador.</p>
+          <button id="checkDocker" class="button secondary" type="button">Consultar Docker aplicado</button>
+          <p id="dockerStatus" class="source-test-result" role="status" aria-live="polite">Não consultado. Os filtros só entram em vigor após Aplicar alterações.</p>
+        </article>
+
         <article class="panel custom-panel">
           <div class="panel-head">
             <div><p class="section-kicker">HOMELAB E CASA</p><h2>Integrações guiadas</h2></div>

@@ -1,4 +1,4 @@
-# Backup e credenciais — v0.6.0
+# Backup e credenciais — v0.7.0
 
 ## Backup pelo painel
 
@@ -37,6 +37,8 @@ O backup pelo navegador serve para ajustes; o backup local completo serve para r
 Na preparação da atualização v0.3.0 → v0.5.0 em 16/09/2026, foi criado no próprio Pi um backup completo com acesso privado, fora do Git. PIN, configuração e chave de sessão foram comparados sem exibir conteúdos e não mudaram. Os 84 testes rodaram em checkout separado. A instalação v0.5.0 foi confirmada em 17/09/2026; o roteiro anterior fica como referência em [UPDATE_TO_V05.md](UPDATE_TO_V05.md).
 
 Na v0.6.0, uma fonte criada a partir de modelo é uma página personalizada normal e entra no backup. O catálogo de modelos e exemplos digitados não entram. A conferência de exemplos não grava estado; remova segredos antes de colar JSON no painel. Veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md).
+
+A instalação v0.6.0 foi confirmada saudável no Pi em 17/09/2026. Na v0.7.0, filtros por nome e frequência do Docker são ajustes exportáveis; socket local e respostas do daemon não entram no backup. Não conceda acesso ao Docker automaticamente: a autorização do socket pode ser equivalente a administrador. Testes manuais foram agrupados no [checklist final](FINAL_VALIDATION.md).
 
 ## Checklist manual pendente
 

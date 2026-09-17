@@ -4,7 +4,7 @@ Dashboard compacto para Raspberry Pi com display TFT ST7789 1.3" 240×240 via SP
 
 ![Raspberry Pi ST7789 Dashboard](docs/images/hero.jpg)
 
-O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.6.0 acrescenta seis modelos para fontes HTTP/JSON e conferência de caminhos com exemplos, sem conexão. Mantém Relógio/Pomodoro offline, assistentes Pi-hole 6/Home Assistant, credenciais locais privadas, backup/restauração, Clima e SysOps.
+O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.7.0 acrescenta monitor Docker local opcional, com filtros, contêineres em execução/parados e saúde. Mantém os seis modelos HTTP/JSON e conferência offline da v0.6.0, Relógio/Pomodoro, Pi-hole 6/Home Assistant, credenciais privadas, backup, Clima e SysOps.
 
 ## Visão do produto
 
@@ -17,6 +17,7 @@ Pelo computador ou celular, o usuário pode:
 - configurar limites de alerta e unidade de temperatura;
 - configurar previsão do tempo por latitude e longitude;
 - monitorar disco, gateway, alimentação e serviços `systemd` permitidos;
+- acompanhar contêineres Docker locais, sem iniciar/reiniciar nada nem conceder permissões;
 - criar páginas para APIs HTTP/JSON sem alterar o código;
 - configurar Pi-hole 6 e até quatro entidades do Home Assistant com credenciais separadas dos ajustes;
 - exportar e restaurar a configuração sem alterar PIN ou credenciais locais;
@@ -27,7 +28,7 @@ Pelo computador ou celular, o usuário pode:
 
 O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0 estão homologados no Raspberry Pi 3. A atualização preservou a configuração anterior e adicionou as integrações de forma opt-in, sem regressão nos botões, na prévia ou no carrossel.
 
-A instalação ativa v0.5.0 foi confirmada no Raspberry em 17/09/2026, com SPI, serviços, API e estado do display aprovados. A v0.6.0 tem 100 testes automatizados aprovados no computador e no ARM em checkout separado, mais fluxo de navegador com serviços fictícios. Backup privado preparado; a nova biblioteca precisa ser instalada pelo terminal com senha de administrador. Pi-hole/Home Assistant reais e legibilidade de PI-HOLE/CASA/RELÓGIO/POMODORO/fontes personalizadas no ST7789 aguardam homologação manual. Os novos módulos permanecem desativados na migração; nenhuma fonte é criada automaticamente. Veja [modelos e atualização](docs/CUSTOM_TEMPLATES.md).
+A instalação ativa v0.6.0 foi confirmada no Raspberry em 17/09/2026, com SPI, serviços, API e estado do display aprovados. A v0.7.0 tem 118 testes automatizados e fluxo de navegador com serviços fictícios aprovados. Isso não substitui homologação real de Docker/Pi-hole/Home Assistant ou leitura das novas páginas no ST7789. Os testes manuais foram adiados pelo mantenedor para o final; Docker entra desativado na migração e não instala/autoriza acesso ao daemon. O socket padrão não estava presente no Pi. Veja [monitor Docker e atualização](docs/DOCKER_MONITOR.md) e [modelos HTTP/JSON](docs/CUSTOM_TEMPLATES.md).
 
 ### Modelos para seu próprio app
 
@@ -38,6 +39,8 @@ Em **Adicionar fonte**, escolha Métrica, Status, Temperatura, Energia, Node-RED
 - [Integrações, clima e fontes personalizadas](docs/INTEGRATIONS.md)
 - [Backup, credenciais e atualização](docs/BACKUP_AND_CREDENTIALS.md)
 - [Relógio e Pomodoro offline](docs/DESK_MODE.md)
+- [Docker local: contêineres e saúde](docs/DOCKER_MONITOR.md)
+- [Checklist final dos testes manuais adiados](docs/FINAL_VALIDATION.md)
 - [Página pública do projeto](https://abraaobat.github.io/raspberrypi-st7789-dashboard/)
 
 ## Recursos
@@ -140,6 +143,16 @@ O cofre é um arquivo privado com permissão `0600`, não criptografia de disco.
 - GPIO23/GPIO24 mantêm anterior/próxima página. Sem ciclos de pausa automáticos, alarme sonoro ou novos gestos físicos nesta versão.
 
 Veja [uso, persistência e checklist físico](docs/DESK_MODE.md). Alterar duração ou restaurar ajustes não altera o ciclo em andamento.
+
+### 10. DOCKER — módulo opcional
+
+- contêineres em execução, parados e explicitamente não saudáveis;
+- até quatro nomes exatos ou visão do host inteiro;
+- problemas priorizados e estados desconhecidos neutros;
+- coleta local assíncrona, cache identificado e diagnósticos sem zeros inventados;
+- socket Unix já autorizado; sem controle, instalação, `sudo` ou mudança de permissões.
+
+O acesso ao socket Docker pode ser privilegiado, mesmo com consultas somente de leitura. Não execute o painel como administrador nem conceda acesso automaticamente. [Guia e limites](docs/DOCKER_MONITOR.md).
 
 ## Hardware usado
 
@@ -327,18 +340,20 @@ O projeto não grava configuração nem credenciais dentro do repositório. Por 
 ├── auth.json
 ├── session-secret.bin
 ├── control.json
-└── display-state.json
+├── display-state.json
+├── credentials.json        # opcional: cofre privado
+└── pomodoro.json           # estado do ciclo, separado dos ajustes
 ```
 
-`config.json` contém opções do dashboard, localização e URLs de fontes configuradas. O PIN é armazenado como hash PBKDF2 com salt; o PIN em texto puro não é salvo. A versão atual não armazena tokens de APIs externas.
+`config.json` contém opções do dashboard, localização, filtros e URLs de fontes configuradas. O PIN é armazenado como hash PBKDF2 com salt; o PIN em texto puro não é salvo. Credenciais dos conectores ficam no cofre privado separado, não no backup da configuração. Estado de Pomodoro e arquivos de bloqueio também permanecem privados.
 
 ## Próximas evoluções
 
 - homologar uma página HTTP/JSON personalizada no ST7789 real;
-- adicionar credenciais externas por cofre local, sem devolvê-las ao navegador;
-- criar conectores guiados para Home Assistant, MQTT e Pi-hole;
+- homologar Pi-hole 6/Home Assistant reais, Relógio/Pomodoro e Docker onde já autorizado;
+- implementar MQTT nativo opcional, mantendo credenciais privadas e contrato somente de leitura;
 - implementar drivers físicos para SSD1306 e ILI9341 sobre os perfis já definidos;
-- adicionar exportação, backup e restauração da configuração.
+- expandir contratos de apps e distribuição/rollback, preservando backup/restauração já entregues.
 
 ## Comandos úteis
 

@@ -21,10 +21,12 @@ try {
   await page.locator("#pinInput").fill("2468");
   await page.locator("#authButton").click();
   await page.locator("#app").waitFor({state: "visible"});
-  assert.equal(await page.locator(".page-row").count(), 9);
+  assert.equal(await page.locator(".page-row").count(), 10);
+  assert.equal(await page.getByRole("checkbox", {name: "Ativar Docker", exact: true}).isChecked(), false);
   assert.equal(await page.getByRole("checkbox", {name: "Ativar Relógio", exact: true}).isChecked(), false);
   assert.equal(await page.getByRole("checkbox", {name: "Ativar Pomodoro", exact: true}).isChecked(), false);
   const fixture = await (await context.request.get(origin + "/fixture/status")).json();
+  assert.deepEqual(fixture.dockerCalls, [], "disabled Docker must not access its socket on login");
   for (const id of ["pihole", "homeassistant"]) {
     await page.locator(`[data-configure-integration="${id}"]`).click();
     await page.locator("#integrationUrl").fill(fixture.baseUrl);
@@ -242,11 +244,57 @@ try {
   assert.match(frame.headers()["content-type"], /image\/png/);
   await page.waitForFunction(async () => (await (await fetch("/fixture/status")).json()).calls.filter(call => call.path === "/examples/node-red").length >= 2);
   if (output) await fs.writeFile(`${output}/node-red-preview.png`, await (await context.request.get(origin + `/api/preview?page=${encodeURIComponent(custom.id)}`)).body());
-  const calls = (await (await context.request.get(origin + "/fixture/status")).json()).calls;
+  // Docker uses a fake local Unix Engine, never a real socket or privileged CLI.
+  await page.setViewportSize({width: 1440, height: 1000});
+  await page.locator("#dockerNames").fill("pihole, homeassistant, jellyfin, absent");
+  await page.locator("#dockerRefresh").selectOption("15");
+  assert.deepEqual((await (await context.request.get(origin + "/api/config")).json()).docker.names, [], "filters remain a draft");
+  await page.locator("#checkDocker").click();
+  await page.waitForFunction(() => !document.querySelector("#checkDocker").disabled);
+  await page.waitForFunction(async () => (await (await fetch("/api/docker/state")).json()).available === true);
+  await page.locator("#checkDocker").click();
+  await page.waitForFunction(() => document.querySelector("#dockerStatus").textContent.includes("5 contêiner"));
+  await page.getByRole("checkbox", {name: "Ativar Docker", exact: true}).check();
+  await page.locator("#saveButton").click();
+  await page.waitForFunction(() => document.querySelector("#saveState").textContent === "Configuração aplicada");
+  const dockerConfig = await (await context.request.get(origin + "/api/config")).json();
+  assert.deepEqual(dockerConfig.docker.names, ["pihole", "homeassistant", "jellyfin", "absent"]);
+  assert.equal(dockerConfig.pages.find(item => item.id === "docker").refreshSeconds, 15);
+  await page.waitForFunction(async () => (await (await fetch("/api/docker/state")).json()).total === 3);
+  await page.locator("#checkDocker").click();
+  await page.waitForFunction(() => document.querySelector("#dockerStatus").textContent.includes("Nomes ausentes: absent"));
+  assert.match(await page.locator("#dockerStatus").innerText(), /3 contêiner.*2 rodando.*1 parado.*1 não saudável/);
+  const dockerFrame = await context.request.get(origin + "/api/preview?page=docker");
+  assert.equal(dockerFrame.status(), 200);
+  assert.match(dockerFrame.headers()["content-type"], /image\/png/);
+  if (output) await fs.writeFile(`${output}/docker-preview.png`, await dockerFrame.body());
+  for (const width of [1440, 980, 390, 320]) {
+    await page.setViewportSize({width, height: 1000});
+    await page.locator("#checkDocker").scrollIntoViewIfNeeded();
+    assert(await page.locator(".docker-panel").evaluate(element => element.scrollWidth <= element.clientWidth + 1));
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+    if (output) await page.screenshot({path: `${output}/docker-${width}.png`});
+  }
+  await page.reload();
+  await page.locator("#app").waitFor({state: "visible"});
+  assert.equal(await page.locator("#dockerNames").inputValue(), "pihole, homeassistant, jellyfin, absent");
+  assert.equal(await page.getByRole("checkbox", {name: "Ativar Docker", exact: true}).isChecked(), true);
+  const dockerExport = await (await context.request.get(origin + "/api/config/export")).json();
+  assert.deepEqual(dockerExport.docker, {names: ["pihole", "homeassistant", "jellyfin", "absent"]});
+  assert(!JSON.stringify(dockerExport).includes("engine.sock"));
+  await page.locator("#dockerNames").fill("bad;command");
+  await page.locator("#dockerRefresh").focus();
+  await page.locator("#saveButton").click();
+  await page.waitForFunction(() => document.querySelector("#toast").textContent.includes("nome de contêiner inválido"));
+  assert.deepEqual((await (await context.request.get(origin + "/api/config")).json()).docker, dockerExport.docker);
+  const finalFixture = await (await context.request.get(origin + "/fixture/status")).json();
+  assert(finalFixture.dockerCalls.length >= 4);
+  assert(finalFixture.dockerCalls.every(call => call.method === "GET" && /^\/version$|^\/v1\.47\/containers\/json\?all=1$/.test(call.path)));
+  const calls = finalFixture.calls;
   assert(calls.filter(call => call.path.startsWith("/api/states/")).every(call => call.method === "GET"));
   assert(calls.every(call => call.method === "GET" || call.path === "/api/auth"));
   assert.deepEqual(errors, []);
-  console.log("PASS: source templates, offline JSON inspection, scalar-safe feedback, draft/apply isolation, preserved edit URL/ID, responsive dialogs; connectors, clock, Pomodoro, backup/restore and preserved PIN. Fake services only.");
+  console.log("PASS: optional read-only Docker over fake Unix socket, applied/draft filters, health counts, absent names, refresh, preview, backup, reload, invalid save and four screen sizes; source templates, offline inspection, connectors, clock, Pomodoro and preserved PIN. Fake services only.");
 } catch (error) {
   if (output) {
     await fs.mkdir(output, {recursive: true});

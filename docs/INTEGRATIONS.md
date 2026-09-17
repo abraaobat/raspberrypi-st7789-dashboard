@@ -33,6 +33,10 @@ A página **SysOps** combina:
 
 Os nomes dos serviços aceitam apenas letras, números, `@`, `_`, `.`, `-` e sufixo opcional `.service`. O backend chama `systemctl is-active` com argumentos separados e nunca interpola shell.
 
+## Docker local (versão 0.7.0)
+
+A página opcional **Docker** consulta somente o Engine local via socket Unix já autorizado, com até quatro filtros por nome, contagem de execução/parados/saúde e cache assíncrono. Não instala Docker nem concede permissões. Acesso ao daemon pode equivaler a administrador, mesmo usando somente GET. Veja [DOCKER_MONITOR.md](DOCKER_MONITOR.md) para configuração, limites, ausência de socket e testes reais adiados.
+
 ## Fonte HTTP/JSON
 
 Use **Adicionar fonte** para cadastrar:
@@ -65,7 +69,7 @@ Layout: Métrica
 
 Listas usam índice numérico: `items.0.status`.
 
-O botão **Testar conexão** consulta a fonte sem salvar. Depois de aprovada, a página entra ativa no final do carrossel e pode ser desativada ou reordenada como qualquer página nativa.
+O botão **Testar conexão** consulta a fonte sem salvar. **Guardar no rascunho** prepara a página no final do carrossel; ela só chega ao display após **Aplicar alterações**. Pode ser desativada ou reordenada como qualquer página nativa.
 
 ### Limites de segurança
 

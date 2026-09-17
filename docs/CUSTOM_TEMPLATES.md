@@ -1,6 +1,6 @@
-# Modelos para fontes personalizadas — v0.6.0
+# Modelos para fontes personalizadas — desde v0.6.0
 
-A lista não é fechada: as nove páginas integradas continuam disponíveis, e o usuário pode criar até oito páginas HTTP/JSON sem editar o código. Os seis modelos são pontos de partida, não plugins instaláveis nem contratos oficiais de APIs de terceiros.
+A lista não é fechada: as páginas integradas continuam disponíveis, e o usuário pode criar até oito páginas HTTP/JSON sem editar o código. Os seis modelos são pontos de partida, não plugins instaláveis nem contratos oficiais de APIs de terceiros. A v0.7.0 mantém os modelos e acrescenta a décima página integrada, Docker opcional.
 
 ## Modelos incluídos
 
@@ -54,9 +54,9 @@ Fontes reais continuam somente GET/JSON, sem headers de autenticação arbitrár
 
 Os modelos viram páginas personalizadas normais e entram no backup de configuração, sem incluir o catálogo ou o exemplo digitado. Não exigem novas dependências nem mudanças de GPIO/driver. MQTT, Docker detalhado, plugins executáveis e novos drivers permanecem etapas futuras.
 
-## Atualizar para v0.6.0
+## Atualização — roteiro da v0.6.0
 
-A instalação v0.5.0 foi confirmada no Raspberry em 17/09/2026. Backup privado completo foi preparado para a próxima atualização, e os 100 testes v0.6.0 passaram no ARM em checkout separado. Não houve troca dos serviços ativos: a instalação final exige senha de administrador no terminal.
+A instalação v0.6.0 foi confirmada ativa e saudável no Raspberry em 17/09/2026. Antes dela, foi preparado backup privado e os 100 testes passaram no ARM em checkout separado. O roteiro abaixo é histórico; a atualização seguinte v0.7.0 já inclui estes modelos e pode ser agrupada às próximas entregas. Veja [DOCKER_MONITOR.md](DOCKER_MONITOR.md). Os testes visuais/fonte real foram adiados para o final pelo mantenedor.
 
 Para instalar a biblioteca de modelos, como usuário `pi`, confirme antes que `git status --short` não mostra alterações próprias e prepare outro backup privado se mudou seus ajustes depois dessa preparação. Depois:
 

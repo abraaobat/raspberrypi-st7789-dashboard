@@ -14,6 +14,7 @@ from .catalog import PAGE_CATALOG, catalog_by_id
 from .display_profiles import DEFAULT_PROFILE_ID, PROFILE_BY_ID
 from .integration_settings import INTEGRATION_IDS, integration_settings
 from .desk_settings import DeskError, clock_settings, pomodoro_settings
+from .docker_monitor import DockerError, docker_settings
 
 APP_DIR_NAME = "raspberrypi-st7789-dashboard"
 CUSTOM_ID_PATTERN = re.compile(r"custom:[a-z0-9][a-z0-9-]{0,31}$")
@@ -63,6 +64,7 @@ def default_config() -> dict:
         "sysops": {
             "services": [],
         },
+        "docker": {"names": []},
         "customPages": [],
         "clock": clock_settings({}),
         "pomodoro": pomodoro_settings({}),
@@ -275,6 +277,11 @@ def normalize_config(payload: dict | None) -> dict:
         if service not in normalized_services:
             normalized_services.append(service)
     result["sysops"] = {"services": normalized_services}
+
+    try:
+        result["docker"] = docker_settings(payload.get("docker", {}))
+    except DockerError as exc:
+        raise ConfigError(str(exc)) from exc
 
     try:
         result["clock"] = clock_settings(payload.get("clock", {}))

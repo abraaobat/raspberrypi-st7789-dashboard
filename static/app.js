@@ -14,6 +14,7 @@ const state = {
   pomodoro: null,
   pomodoroBusy: false,
   pomodoroGeneration: 0,
+  dockerGeneration: 0,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -96,6 +97,9 @@ $("#authForm").addEventListener("submit", async (event) => {
 
 async function loadApplication() {
   state.pomodoroGeneration++;
+  state.dockerGeneration++;
+  $("#checkDocker").disabled = false;
+  $("#dockerStatus").textContent = "Não consultado. Os filtros só entram em vigor após Aplicar alterações.";
   const [catalog, config, integrations] = await Promise.all([
     requestJSON("/api/catalog"),
     requestJSON("/api/config"),
@@ -175,6 +179,18 @@ function renderSettings() {
   $("#weatherLongitude").value = state.config.weather.longitude ?? "";
   $("#weatherRefresh").value = String(state.config.weather.refreshMinutes);
   $("#sysopsServices").value = state.config.sysops.services.join(", ");
+  $("#dockerNames").value = state.config.docker.names.join(", ");
+  const dockerPage = state.config.pages.find(page => page.id === "docker");
+  const dockerRefresh = $("#dockerRefresh");
+  dockerRefresh.querySelector('[data-existing-refresh]')?.remove();
+  if (![15, 30, 60].includes(dockerPage.refreshSeconds)) {
+    const option = document.createElement("option");
+    option.value = dockerPage.refreshSeconds;
+    option.textContent = `A cada ${dockerPage.refreshSeconds} segundos`;
+    option.dataset.existingRefresh = "true";
+    dockerRefresh.append(option);
+  }
+  dockerRefresh.value = dockerPage.refreshSeconds;
   renderDisplayProfiles();
   renderCustomPages();
   renderIntegrations();
@@ -479,6 +495,9 @@ function clampPreview() {
 
 function markDirty() {
   state.dirty = true;
+  state.dockerGeneration++;
+  $("#checkDocker").disabled = false;
+  $("#dockerStatus").textContent = "Os filtros só entram em vigor após Aplicar alterações. A consulta usa os ajustes já aplicados.";
   $("#saveState").textContent = "Alterações não aplicadas";
 }
 
@@ -574,6 +593,39 @@ $("#sysopsServices").addEventListener("change", (event) => {
     .map((item) => item.trim())
     .filter(Boolean);
   markDirty();
+});
+
+$("#dockerNames").addEventListener("change", event => {
+  state.config.docker.names = event.target.value.split(",").map(name => name.trim()).filter(Boolean);
+  markDirty();
+});
+$("#dockerRefresh").addEventListener("change", event => {
+  state.config.pages.find(page => page.id === "docker").refreshSeconds = Number(event.target.value);
+  markDirty();
+});
+$("#checkDocker").addEventListener("click", async () => {
+  const generation = ++state.dockerGeneration;
+  const button = $("#checkDocker");
+  const feedback = $("#dockerStatus");
+  button.disabled = true;
+  feedback.textContent = "Consultando a configuração aplicada, sem alterar contêineres…";
+  try {
+    const result = await requestJSON("/api/docker/state");
+    if (generation !== state.dockerGeneration || app.hidden) return;
+    if (!result.available) {
+      feedback.textContent = result.loading ? "Coletando em segundo plano. Consulte novamente em alguns segundos." : result.error || "Docker local indisponível.";
+    } else {
+      let text = `${result.total} contêiner(es): ${result.running} rodando, ${result.stopped} parado(s), ${result.unhealthy} não saudável(is)`;
+      if (result.other) text += `, ${result.other} em outros estados`;
+      if (result.missingNames.length) text += `. Nomes ausentes: ${result.missingNames.join(", ")}`;
+      if (result.stale || result.error) text += ". CACHE: dados antigos; a última consulta não confirmou estes estados";
+      feedback.textContent = text + ".";
+    }
+  } catch (error) {
+    if (generation === state.dockerGeneration && !app.hidden) feedback.textContent = error.message;
+  } finally {
+    if (generation === state.dockerGeneration) button.disabled = false;
+  }
 });
 
 $("#displayProfile").addEventListener("change", (event) => {
@@ -791,6 +843,9 @@ $("#saveButton").addEventListener("click", async () => {
     renderSettings();
     refreshPreview();
     state.pomodoroGeneration++;
+    state.dockerGeneration++;
+    $("#checkDocker").disabled = false;
+    $("#dockerStatus").textContent = "Ajustes aplicados. Consulte novamente para conferir os contêineres.";
     refreshPomodoro();
     toast("Display atualizado com sucesso.");
   } catch (error) {
@@ -842,6 +897,7 @@ $("#logoutButton").addEventListener("click", async () => {
     state.integrationsStatus = {};
     state.pomodoro = null;
     state.pomodoroGeneration++;
+    state.dockerGeneration++;
     showAuth(true);
   }
 });

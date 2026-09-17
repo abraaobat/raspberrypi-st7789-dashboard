@@ -386,6 +386,67 @@ def draw_sysops_page(snapshot: dict, config: dict, page_number: int, page_count:
     return image
 
 
+def docker_container_label(item):
+    state, health = item.get("state"), item.get("health")
+    if state == "running":
+        if health == "unhealthy":
+            return "FALHA", RED
+        if health == "starting":
+            return "TESTANDO", ORANGE
+        return ("SAUDÁVEL", GREEN) if health == "healthy" else ("RODANDO", CYAN)
+    return {
+        "created": ("CRIADO", GRAY), "exited": ("PARADO", GRAY), "dead": ("FALHA", RED),
+        "paused": ("PAUSADO", ORANGE), "restarting": ("REINÍCIO", ORANGE), "removing": ("REMOÇÃO", GRAY),
+    }.get(state, ("SEM DADOS", GRAY))
+
+
+def draw_docker_page(snapshot: dict, config: dict, page_number: int, page_count: int):
+    del config
+    values = snapshot.get("docker") or {}
+    if not values.get("available"):
+        message = "Consultando contêineres locais." if values.get("loading") else values.get("error") or "Docker local indisponível. Consulte o painel."
+        return _state_message("DOCKER", message, page_number, page_count)
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(image)
+    header(draw, "DOCKER", page_number, page_count)
+    for box, label, key, color in (
+        ((8, 48, 78, 105), "RODANDO", "running", CYAN),
+        ((85, 48, 155, 105), "PARADOS", "stopped", GRAY),
+        ((162, 48, 232, 105), "SAÚDE !", "unhealthy", RED),
+    ):
+        card(draw, box)
+        x = box[0] + 7
+        draw.text((x, 55), label, font=load_font(9, True), fill=color)
+        _draw_value(draw, (x, 73), values.get(key), 55, 24, 16, color)
+    containers = values.get("containers") or []
+    if not containers:
+        hint = "Nomes não encontrados" if values.get("missingNames") else "Nenhum contêiner local"
+        draw.text((12, 134), hint, font=load_font(13, True), fill=GRAY)
+    for index, item in enumerate(containers[:4]):
+        y = 116 + index * 24
+        label, color = docker_container_label(item)
+        draw.ellipse((12, y + 5, 19, y + 12), fill=color)
+        name, font = fit_text(draw, item.get("name"), 125, 12, 9, True)
+        draw.text((25, y), name, font=font, fill=WHITE)
+        label, font = fit_text(draw, label, 65, 10, 8, True)
+        draw.text((228 - text_width(draw, label, font), y + 2), label, font=font, fill=color)
+    draw.line((12, 214, 228, 214), fill=CARD_BORDER)
+    if values.get("stale") or values.get("error"):
+        footer, color = "CACHE · DADOS ANTIGOS", ORANGE
+    elif values.get("missingNames"):
+        footer, color = f"{len(values['missingNames'])} NOME(S) AUSENTE(S)", ORANGE
+    else:
+        footer = f"{values.get('total', 0)} TOTAL"
+        if values.get("other"):
+            footer += f" · {values['other']} OUTROS"
+        if values.get("hiddenCount"):
+            footer += f" · +{values['hiddenCount']}"
+        color = GRAY
+    footer, font = fit_text(draw, footer, 216, 10, 8, True)
+    draw.text((12, 220), footer, font=font, fill=color)
+    return image
+
+
 def custom_status(value):
     if value is None:
         return "SEM DADOS", GRAY
@@ -574,6 +635,7 @@ RENDERERS = {
     "homeassistant": draw_homeassistant_page,
     "clock": draw_clock_page,
     "pomodoro": draw_pomodoro_page,
+    "docker": draw_docker_page,
 }
 
 

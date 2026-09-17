@@ -148,7 +148,7 @@ def main():
                     image = render_page(current_page, snapshot, config)
                     display.display(image)
                     runtime.update_display(current_page)
-                    provider_key = current_page if current_page in {"weather", "sysops", "pihole", "homeassistant"} else "custom"
+                    provider_key = current_page if current_page in {"weather", "sysops", "pihole", "homeassistant", "docker"} else "custom"
                     provider_state = snapshot.get(provider_key)
                 except Exception as exc:  # keep service alive and report the fault
                     runtime.update_display(current_page, str(exc))

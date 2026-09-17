@@ -131,6 +131,7 @@ Requisitos:
 | `GET` | `/api/config/export` | baixar os ajustes aplicados, sem PIN/cofre |
 | `POST` | `/api/config/import` | restaurar configuração validada, preservando PIN/cofre |
 | `GET` | `/api/pomodoro/state` | estado, duração do ciclo, restante e progresso; sem boot/prazo interno |
+| `GET` | `/api/docker/state` | resumo/cache do Docker local aplicado; sem parâmetros, comandos ou socket fornecido pelo navegador |
 | `POST` | `/api/pomodoro/command` | ação fechada `start`, `pause`, `resume` ou `reset`; usa duração aplicada |
 
 IDs permitidos: `pihole` e `homeassistant`. Todos esses endpoints exigem sessão autenticada; mudanças e testes também exigem CSRF. O teste usa a credencial digitada ou, se ausente, a credencial local vinculada ao endereço. Não há `GET` de credencial. Exemplo de ajustes não secretos:
@@ -168,6 +169,7 @@ Exemplo conceitual:
   ],
   "weather": {"locationName": "", "latitude": null, "longitude": null, "refreshMinutes": 15},
   "sysops": {"services": []},
+  "docker": {"names": []},
   "customPages": []
 }
 ```
@@ -212,3 +214,5 @@ Os assistentes/cofre/backup da v0.4.0 passaram por testes de API e navegador com
 A v0.5.0 acrescenta Relógio/Pomodoro, com 84 testes de software aprovados também no ARM em checkout separado e fluxo de comandos verificado no navegador isolado. Testes de reboot/conclusão usam tempo injetado; não representam reinicialização física nem observação do TFT. Sua instalação foi confirmada no Raspberry em 17/09/2026, com auditoria automática aprovada.
 
 A v0.6.0 acrescenta seis modelos em **Adicionar fonte**, **Conferir exemplo, sem conexão** e status desconhecidos neutros. `GET /api/catalog` inclui `sourceTemplates`; `POST /api/sources/inspect` exige sessão/CSRF e aceita somente `sample`, `valuePath` e `secondaryPath`, sem acesso à rede nem gravação. O exemplo tem limite de 32 KiB e não entra no backup. URL/identificação são preservadas ao aplicar um modelo a uma fonte existente. **Guardar no rascunho** não altera o display até **Aplicar alterações**. Veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md).
+
+A v0.7.0 acrescenta Docker opcional, filtros exatos, frequência, consulta dos ajustes aplicados e prévia compartilhada, com 118 testes e fluxo de navegador isolado. O daemon local precisa estar previamente acessível; falta de socket/permissão não é corrigida automaticamente. Execução sem healthcheck não é rotulada como saudável; falha de consulta conserva dados somente com indicação de cache. Nenhum endpoint permite controlar contêineres. Veja [DOCKER_MONITOR.md](DOCKER_MONITOR.md). Os gates manuais foram adiados para o final; a instalação v0.6.0 foi confirmada automaticamente no Pi, sem socket Docker padrão presente.
