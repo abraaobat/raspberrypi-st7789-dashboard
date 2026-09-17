@@ -62,7 +62,7 @@ packages.txt           inventário dos pacotes preparados
 manifest.json          revisão, versões, integridade e fase da troca
 ```
 
-Backups incluem PIN/cofre/chave de sessão: **não publique nem envie ao suporte**. Preparação copia arquivos individualmente, não é fotografia global instantânea com serviços ativos. Na ativação, backup é refeito após parar serviços, sem outros processos escrevendo no estado. Mudanças posteriores à preparação são reconferidas.
+Backups incluem PIN/cofre/chave de sessão: **não publique nem envie ao suporte**. Preparação copia arquivos individualmente, não é fotografia global instantânea com serviços ativos. Temporários conhecidos dos escritores atômicos não são registros recuperáveis e ficam fora da cópia. Na ativação, backup é refeito após parar serviços, sem outros processos escrevendo no estado. Mudanças posteriores à preparação são reconferidas.
 
 ## 3. Ativar somente no teste final
 

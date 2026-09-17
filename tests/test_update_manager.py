@@ -286,6 +286,8 @@ class UpdateTests(unittest.TestCase):
             updates.snapshot_state(self.state, self.home / "backup")
 
     def test_backup_preserves_bytes_and_private_modes_in_nested_directories(self):
+        (self.state / "display-state.json.tmp").write_text("transient-not-durable")
+        (self.state / ".config-fixture.tmp").write_text("transient-not-durable")
         (self.state / "nested").mkdir(mode=0o700)
         (self.state / "nested/deeper").mkdir(mode=0o700)
         updates.private_write(self.state / "nested/deeper/private", b"fixture")
@@ -294,6 +296,8 @@ class UpdateTests(unittest.TestCase):
         for path in (backup, backup / "nested", backup / "nested/deeper", backup / "nested/deeper/private"):
             self.assertEqual(path.stat().st_mode & 0o077, 0)
         self.assertEqual((backup / "auth.json").read_bytes(), self.private["auth.json"])
+        self.assertFalse((backup / "display-state.json.tmp").exists())
+        self.assertFalse((backup / ".config-fixture.tmp").exists())
 
     def test_health_requires_expected_version_fresh_frame_and_no_error(self):
         now = time.time()

@@ -137,6 +137,10 @@ def snapshot_state(state, destination):
     entries = []
     total = 0
     for path in sorted(state.rglob("*")):
+        if path.parent == state and (path.name in {"display-state.json.tmp", "control.json.tmp", "auth.tmp", "session-secret.tmp"}
+                or re.fullmatch(r"\.(config|credentials|pomodoro)-[^/]+\.tmp", path.name)):
+            # Atomic writers rename these transient files; they are never recovery records.
+            continue
         if len(entries) >= 2048:
             raise UpdateError("Estado excede o limite de arquivos de backup.")
         if path.is_symlink():
