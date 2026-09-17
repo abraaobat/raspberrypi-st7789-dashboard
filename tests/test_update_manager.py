@@ -257,11 +257,19 @@ class UpdateTests(unittest.TestCase):
         for path in (self.home, self.home / "../outside", self.home / "name space"):
             with self.subTest(path=path), self.assertRaises(updates.UpdateError):
                 updates.checked_path(path, self.home)
+        self.home.chmod(0o755)
         folder = self.home / "shared"
         folder.mkdir(mode=0o777)
         folder.chmod(0o777)
         with self.assertRaises(updates.UpdateError):
             updates.checked_path(folder / "release", self.home)
+        self.home.chmod(0o700)
+        self.assertEqual(updates.checked_path(folder / "release", self.home), folder / "release")
+        self.home.chmod(0o755)
+        folder.chmod(0o700)
+        (folder / "inner").mkdir(mode=0o775)
+        (folder / "inner").chmod(0o775)
+        self.assertEqual(updates.checked_path(folder / "inner/release", self.home), folder / "inner/release")
 
     def test_symlink_parent_refused(self):
         (self.home / "linked").symlink_to(self.state, target_is_directory=True)

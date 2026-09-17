@@ -56,6 +56,7 @@ def checked_path(value, home):
         raise UpdateError("Destino precisa estar em um subdiretório da home do operador.")
     if home.is_symlink() or home.stat().st_uid != os.geteuid() or home.stat().st_mode & 0o022:
         raise UpdateError("Home do operador precisa ser própria, protegida e sem links.")
+    private_boundary = not bool(home.stat().st_mode & 0o077)
     current = home
     for part in path.relative_to(home).parts:
         current = current / part
@@ -63,8 +64,11 @@ def checked_path(value, home):
             raise UpdateError("Links simbólicos não são suportados.")
         if current.exists():
             details = current.stat()
-            if details.st_uid != os.geteuid() or details.st_mode & 0o022:
+            if details.st_uid != os.geteuid() or (details.st_mode & 0o022 and not private_boundary):
                 raise UpdateError("Caminho precisa pertencer ao operador e não permitir escrita por terceiros.")
+            # Owner-only traversal on an ancestor protects existing inner umask-0002 paths.
+            # Do not change legacy directory permissions or trust shared primary groups.
+            private_boundary = private_boundary or not bool(details.st_mode & 0o077)
     return path
 
 

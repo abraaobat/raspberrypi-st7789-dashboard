@@ -16,7 +16,7 @@ Checkout/ambiente anteriores não são atualizados. Nenhum pacote do sistema, gr
 
 - Linux/systemd, usuário normal, ST7789 padrão com SPI `/dev/spidev0.0` e painel na porta 8080.
 - Dois serviços padrão em `/etc/systemd/system`, de root, sem drop-ins/personalizações; usuário/home/caminhos adaptados pelo instalador original são aceitos.
-- Home/código próprios sem escrita por terceiros, espaços ou links simbólicos; estado privado `0700`, arquivos regulares privados.
+- Home/código próprios sem escrita por terceiros, espaços ou links simbólicos; estado privado `0700`, arquivos regulares privados. Um ancestral próprio `0700` também protege pastas internas existentes `775`; não há alteração de permissões ou confiança implícita em grupos compartilhados.
 - Configuração/cofre válidos; versão anterior/nova precisam compreender dados atuais sem perder campos.
 - Dependências de sistema e acesso SPI/GPIO já autorizados. Pacote Python que exige biblioteca/ferramenta ausente pode impedir preparação, sem alterar a versão em execução.
 
