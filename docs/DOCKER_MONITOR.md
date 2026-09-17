@@ -53,7 +53,9 @@ O provedor negocia a versão anunciada por `GET /version`, aceita somente format
 
 ## Estado de entrega e testes finais
 
-118 testes de software e o fluxo completo no navegador passaram com um Engine Unix fictício. Casos incluem saúde ausente/desconhecida, problemas, aliases, nomes ausentes, permissões, respostas inválidas/excessivas/incompletas, cabeçalhos lentos, cache após falha, API autenticada, backup e layouts de 1440/980/390/320 px. Esses resultados não homologam um Docker real nem a leitura no TFT.
+118 testes de software passaram no computador, no ARM do Raspberry em checkout separado e no CI; o fluxo completo no navegador passou com um Engine Unix fictício. Casos incluem saúde ausente/desconhecida, problemas, aliases, nomes ausentes, permissões, respostas inválidas/excessivas/incompletas, cabeçalhos lentos, cache após falha, API autenticada, backup e layouts de 1440/980/390/320 px. Esses resultados não homologam um Docker real nem a leitura no TFT.
+
+A revisão `b339eab` foi preparada em `~/.cache/st7789-dashboard-update-v0.7.0`; os 118 testes passaram no ARM em 50,746 s. Dependências e unidades de serviço não mudaram. Um backup privado completo foi criado fora do Git, com prefixo `~/.config/raspberrypi-st7789-dashboard.backup-v0.6-before-v0.7-`. PIN, configuração e chave de sessão foram comparados sem mostrar conteúdos; os serviços ativos não foram atualizados. [CI de testes/navegador](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35226090881) e [GitHub Pages](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35226090871) concluíram com sucesso. Página pública v0.7.0 conferida, com fotos/Pix preservados.
 
 Na auditoria de 17/09/2026, a instalação v0.6.0 do Raspberry estava ativa e saudável, e o socket padrão do Docker não existia. Nenhuma instalação ou mudança de privilégio foi feita. É possível continuar usando todas as páginas anteriores sem Docker. **Não é necessário instalar Docker apenas para testar o display.**
 

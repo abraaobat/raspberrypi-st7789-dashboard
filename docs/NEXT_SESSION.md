@@ -81,6 +81,12 @@ O mantenedor pediu para deixar a fonte real/TFT e demais testes manuais para o f
 
 Veja [DOCKER_MONITOR.md](DOCKER_MONITOR.md). Leitura do socket pode ser privilegiada: somente as consultas do conector são de leitura, não a autorização geral do daemon. Docker real não está homologado e não foi instalado no Pi.
 
+## Preparação v0.6.0 → v0.7.0 aprovada
+
+A revisão `b339eab` está preparada em `~/.cache/st7789-dashboard-update-v0.7.0`, sem trocar o checkout ativo. Os 118 testes passaram no ARM em 50,746 s. Dependências/unidades não mudaram. Um backup privado completo foi criado com prefixo `~/.config/raspberrypi-st7789-dashboard.backup-v0.6-before-v0.7-`, fora do Git; PIN, configuração e chave de sessão foram comparados sem exibir conteúdos. A instalação ativa permanece v0.6.0; atualização e testes reais podem ser agrupados no final.
+
+Na revisão `b339eab`, [CI de testes/navegador](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35226090881) e [publicação GitHub Pages](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35226090871) concluíram com sucesso. A landing local passou em oito combinações de idioma/tamanho, mantendo cinco imagens proporcionais e QR/Pix confirmado; a página publicada já apresenta v0.7.0.
+
 ## Próximas implementações
 
 1. Homologar Pi-hole 6/Home Assistant reais e as duas novas páginas no TFT quando o usuário puder configurar suas credenciais.

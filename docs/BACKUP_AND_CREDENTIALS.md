@@ -40,6 +40,8 @@ Na v0.6.0, uma fonte criada a partir de modelo é uma página personalizada norm
 
 A instalação v0.6.0 foi confirmada saudável no Pi em 17/09/2026. Na v0.7.0, filtros por nome e frequência do Docker são ajustes exportáveis; socket local e respostas do daemon não entram no backup. Não conceda acesso ao Docker automaticamente: a autorização do socket pode ser equivalente a administrador. Testes manuais foram agrupados no [checklist final](FINAL_VALIDATION.md).
 
+Antes da v0.7.0, foi preparado backup privado completo do estado v0.6.0 no próprio Pi, com diretório `0700` e prefixo `~/.config/raspberrypi-st7789-dashboard.backup-v0.6-before-v0.7-`. Os 118 testes rodaram em checkout separado, sem atualizar os serviços ativos. Se os ajustes mudarem depois dessa preparação, faça outro backup antes da instalação; não restaure uma cópia antiga por cima de escolhas mais recentes sem conferir.
+
 ## Checklist manual pendente
 
 1. Pi-hole **6 real**: gerar senha de aplicativo, testar, ativar e comparar resumo do painel/display com a API local.

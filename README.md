@@ -28,7 +28,7 @@ Pelo computador ou celular, o usuário pode:
 
 O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0 estão homologados no Raspberry Pi 3. A atualização preservou a configuração anterior e adicionou as integrações de forma opt-in, sem regressão nos botões, na prévia ou no carrossel.
 
-A instalação ativa v0.6.0 foi confirmada no Raspberry em 17/09/2026, com SPI, serviços, API e estado do display aprovados. A v0.7.0 tem 118 testes automatizados e fluxo de navegador com serviços fictícios aprovados. Isso não substitui homologação real de Docker/Pi-hole/Home Assistant ou leitura das novas páginas no ST7789. Os testes manuais foram adiados pelo mantenedor para o final; Docker entra desativado na migração e não instala/autoriza acesso ao daemon. O socket padrão não estava presente no Pi. Veja [monitor Docker e atualização](docs/DOCKER_MONITOR.md) e [modelos HTTP/JSON](docs/CUSTOM_TEMPLATES.md).
+A instalação ativa v0.6.0 foi confirmada no Raspberry em 17/09/2026, com SPI, serviços, API e estado do display aprovados. A v0.7.0 tem 118 testes aprovados no computador, no ARM em checkout separado e no CI, mais fluxo de navegador com serviços fictícios. Backup privado recente preparado, sem alterar PIN/configuração ou os serviços ativos. Isso não substitui homologação real de Docker/Pi-hole/Home Assistant ou leitura das novas páginas no ST7789. Os testes manuais foram adiados pelo mantenedor para o final; Docker entra desativado na migração e não instala/autoriza acesso ao daemon. O socket padrão não estava presente no Pi. Veja [monitor Docker e atualização](docs/DOCKER_MONITOR.md) e [modelos HTTP/JSON](docs/CUSTOM_TEMPLATES.md).
 
 ### Modelos para seu próprio app
 
