@@ -101,6 +101,12 @@ Na revisão `b339eab`, [CI de testes/navegador](https://github.com/abraaobat/ras
 
 Veja [MQTT_MONITOR.md](MQTT_MONITOR.md) e [DISPLAY_COMPATIBILITY.md](DISPLAY_COMPATIBILITY.md). MQTT não garante captura de eventos transitórios; RETIDO/recebido não informa hora da medição. Drivers adicionais e novas páginas no TFT continuam sem homologação física. A instalação final pode ir direto à versão mais recente, sem instalar v0.7.0 primeiro.
 
+## Preparação v0.6.0 → v0.8.0 aprovada em software
+
+A revisão `90902db` está preparada em `~/.cache/st7789-dashboard-update-v0.8.0`, sem mudar o checkout ativo. No ARM, a suíte executou 148 casos em 62,947 s: 145 passaram e três de Mosquitto foram ignorados por falta das ferramentas opcionais. No computador, os mesmos 145 passaram; no [CI](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35229790027), os 148 passaram em 18,876 s, incluindo Mosquitto real isolado, autenticação/ACL, valores retidos e rejeição de certificado não confiável. O fluxo completo do painel também passou no CI.
+
+Novo backup privado foi criado fora do Git, com prefixo `~/.config/raspberrypi-st7789-dashboard.backup-v0.6-before-v0.8-`. PIN, configuração e chave de sessão foram comparados sem mostrar conteúdos; ausência de cofre também foi preservada. Auditoria posterior confirmou SPI, serviços, API v0.6.0 e estado do display sem erro. Nenhuma dependência opcional, broker ou driver extra foi instalado no Pi. [GitHub Pages](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35229789931) publicou a v0.8.0; a landing local passou em oito combinações de idioma/tamanho, mantendo fotos e Pix. Isso não homologa sensores, novos módulos físicos ou páginas novas no TFT.
+
 ## Próximas implementações
 
 1. Homologar Pi-hole 6/Home Assistant reais e as duas novas páginas no TFT quando o usuário puder configurar suas credenciais.

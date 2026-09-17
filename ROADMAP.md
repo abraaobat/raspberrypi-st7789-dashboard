@@ -139,6 +139,8 @@ D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homolo
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 
+**Evidência v0.8.0:** 145 testes passaram no computador e no ARM em checkout separado; os três casos opcionais com Mosquitto foram ignorados nesses hosts. No [CI](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35229790027), todos os 148 passaram, assim como o fluxo completo do painel. Backup privado recente e auditoria posterior confirmaram a instalação ativa v0.6.0 preservada. Simulação/layouts e construtores dos drivers extras têm testes de software, não homologação física. [Detalhes da preparação](docs/NEXT_SESSION.md).
+
 ## Sequência de retomada
 
 0. **Continuar o desenvolvimento:** contratos específicos de apps, distribuição/rollback e refinamentos após os gates de uso real. MQTT e drivers extras têm implementação de software v0.8.0. Os testes abaixo ficam no checklist final, sem serem marcados como aprovados antes de execução real. A v0.6.0 já está instalada; a versão mais recente inclui as anteriores, sem atualizações intermediárias.

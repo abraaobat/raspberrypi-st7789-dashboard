@@ -43,4 +43,6 @@ Software e navegador são verificados com broker fictício local, incluindo text
 
 Seu broker/dispositivos reais e a página MQTT no TFT permanecem no [checklist final](FINAL_VALIDATION.md). Não instale broker nem configure serviços só para esse teste; use os que já possui. A instalação ativa do Pi foi preservada na v0.6.0 durante o desenvolvimento.
 
+Em 17/09/2026, a revisão `90902db` passou em 145 casos no computador e no ARM em checkout separado; três casos opcionais de Mosquitto foram ignorados nestes hosts. No [CI](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35229790027), os 148 passaram, incluindo os três casos com broker real isolado e o fluxo de navegador. [Preparação/backup e instalação preservada](NEXT_SESSION.md).
+
 Referências primárias do contrato: [MQTT 3.1.1 — OASIS](https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html), [autenticação/ACL — Mosquitto](https://mosquitto.org/man/mosquitto-conf-5.html).

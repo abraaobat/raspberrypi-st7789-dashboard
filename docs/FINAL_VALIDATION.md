@@ -6,7 +6,7 @@ O mantenedor optou por adiar os testes manuais. Este documento reúne os gates r
 
 Use a versão mais recente publicada, que já inclui as anteriores. Confira checkout limpo e faça backup privado recente do diretório de estado, sem enviar PIN/cofre à conversa. Execute `scripts/install.sh` e depois `scripts/validate_install.sh` no terminal do Raspberry. A senha de administrador, se solicitada, fica somente no terminal. Atualize o navegador e entre com o mesmo PIN.
 
-A auditoria de 17/09/2026 confirmou v0.6.0 ativa e saudável. v0.8.0 inclui as entregas v0.7.0 e v0.8.0; não houve instalação delas nos serviços ativos durante o desenvolvimento. A instalação pode ser agrupada com outras entregas, sem atualizar versão por versão. Para manter o ST7789 atual, não instale extras Luma nem defina perfil experimental.
+A auditoria de 17/09/2026 confirmou v0.6.0 ativa e saudável. A v0.8.0 já inclui Docker e as entregas anteriores; não houve instalação da atualização nos serviços ativos durante o desenvolvimento. A instalação pode ser agrupada com outras entregas, sem atualizar versão por versão. Para manter o ST7789 atual, não instale extras Luma nem defina perfil experimental. [Testes ARM/CI e backup preparados](NEXT_SESSION.md).
 
 ## 2. Novos recursos, só os que pretende usar
 
