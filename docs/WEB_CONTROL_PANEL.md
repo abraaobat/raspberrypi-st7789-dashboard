@@ -125,6 +125,8 @@ Requisitos:
 | `GET` | `/api/preview?page=status&profile=ssd1306-128x64` | simulação nativa, sem trocar hardware; ILI9341 também disponível |
 | `POST` | `/api/display/page` | selecionar página ativa permitida |
 | `POST` | `/api/sources/test` | validar e consultar uma fonte HTTP/JSON sem salvá-la |
+| `POST` | `/api/sources/inspect` | conferir exemplo JSON e caminhos, sem consulta nem gravação |
+| `POST` | `/api/sources/build-url` | montar URL de leitura para três modelos fechados; sessão/CSRF, sem DNS/HTTP nem gravação |
 | `GET` | `/api/integrations/status` | presença da credencial e endereço vinculado, sem segredo |
 | `PUT` | `/api/integrations/<id>/credential` | guardar/substituir `{baseUrl, secret}` para ID fechado |
 | `DELETE` | `/api/integrations/<id>/credential` | apagar somente a credencial local |

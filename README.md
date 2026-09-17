@@ -4,7 +4,7 @@ Dashboard compacto para Raspberry Pi com display TFT ST7789 1.3" 240×240 via SP
 
 ![Raspberry Pi ST7789 Dashboard](docs/images/hero.jpg)
 
-O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.8.0 acrescenta MQTT somente de leitura, sensores de texto/JSON e drivers opcionais experimentais SSD1306/ILI9341, com simulação segura no painel e layout OLED nativo. Mantém Docker local, seis modelos HTTP/JSON, Relógio/Pomodoro, Pi-hole 6/Home Assistant, credenciais privadas, backup, Clima e SysOps.
+O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.9.0 amplia a biblioteca para nove modelos HTTP/JSON: sensores ESPHome, potência Shelly Gen2+ e métricas escalares Prometheus agora têm montagem de URL sem conexão e exemplos próprios. Mantém MQTT somente leitura, Docker local, drivers experimentais SSD1306/ILI9341, simulação segura, Relógio/Pomodoro, Pi-hole 6/Home Assistant, credenciais privadas, backup, Clima e SysOps. Os modelos não instalam apps nem removem sua autenticação.
 
 ## Visão do produto
 
@@ -21,6 +21,7 @@ Pelo computador ou celular, o usuário pode:
 - exibir até quatro sensores MQTT, com tópicos exatos e credenciais privadas, sem publicar comandos;
 - simular telas monocromáticas/retangulares sem trocar o display físico;
 - criar páginas para APIs HTTP/JSON sem alterar o código;
+- montar URLs de leitura ESPHome/Shelly/Prometheus sem consultar o serviço ou salvar ajustes;
 - configurar Pi-hole 6 e até quatro entidades do Home Assistant com credenciais separadas dos ajustes;
 - exportar e restaurar a configuração sem alterar PIN ou credenciais locais;
 - configurar relógio com data, fuso e formato de 12/24 horas;
@@ -36,7 +37,9 @@ Na v0.8.0, 145 testes passaram no computador e no ARM em checkout separado, sem 
 
 ### Modelos para seu próprio app
 
-Em **Adicionar fonte**, escolha Métrica, Status, Temperatura, Energia, Node-RED ou Item de uma lista. Use **Usar modelo**, adapte os campos e confira os caminhos em um exemplo JSON sem consultar a API. Depois teste a URL real, guarde no rascunho e aplique. A lista de apps não é fixa: qualquer endpoint GET/JSON compatível pode alimentar uma das oito páginas personalizadas, respeitando os limites de segurança. [Guia completo](docs/CUSTOM_TEMPLATES.md).
+Em **Adicionar fonte**, escolha um dos nove modelos. ESPHome/Shelly/Prometheus oferecem **Montar URL, sem conexão**; **Usar modelo** preenche os demais campos preservando identificação e URL. Confira caminhos em um exemplo JSON, depois teste a URL real, guarde no rascunho e aplique. A lista de apps não é fixa: endpoints GET/JSON compatíveis podem alimentar até oito páginas personalizadas, respeitando os limites de segurança. APIs protegidas exigem uma integração autorizada; não remova autenticação para adaptar o modelo. [Guia completo](docs/CUSTOM_TEMPLATES.md) e [contratos dos três apps](docs/APP_RECIPES.md).
+
+Na v0.9.0, a suíte local executou 165 casos em 18,377 s: 162 passaram, três casos opcionais Mosquitto foram ignorados. O fluxo completo do painel passou com serviços fictícios, incluindo os três contratos, montagem offline, respostas antigas descartadas e quatro tamanhos de tela. Novos modelos renderizam nos três perfis em testes de software; serviços reais e TFT continuam no checklist final. Evidências ARM/CI e publicação são registradas em [NEXT_SESSION.md](docs/NEXT_SESSION.md), sem confundir preparo com implantação.
 
 - [Roadmap do produto](ROADMAP.md)
 - [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)
@@ -45,6 +48,7 @@ Em **Adicionar fonte**, escolha Métrica, Status, Temperatura, Energia, Node-RED
 - [Relógio e Pomodoro offline](docs/DESK_MODE.md)
 - [Docker local: contêineres e saúde](docs/DOCKER_MONITOR.md)
 - [MQTT: sensores retidos e limites](docs/MQTT_MONITOR.md)
+- [ESPHome, Shelly e Prometheus: modelos de leitura](docs/APP_RECIPES.md)
 - [Compatibilidade: drivers opcionais e simulação](docs/DISPLAY_COMPATIBILITY.md)
 - [Checklist final dos testes manuais adiados](docs/FINAL_VALIDATION.md)
 - [Página pública do projeto](https://abraaobat.github.io/raspberrypi-st7789-dashboard/)

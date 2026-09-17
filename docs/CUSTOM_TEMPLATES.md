@@ -1,6 +1,6 @@
 # Modelos para fontes personalizadas — desde v0.6.0
 
-A lista não é fechada: as páginas integradas continuam disponíveis, e o usuário pode criar até oito páginas HTTP/JSON sem editar o código. Os seis modelos são pontos de partida, não plugins instaláveis nem contratos oficiais de APIs de terceiros. A v0.7.0 mantém os modelos e acrescenta a décima página integrada, Docker opcional.
+A lista não é fechada: as 11 páginas integradas continuam disponíveis, e o usuário pode criar até oito páginas HTTP/JSON sem editar o código. A v0.9.0 oferece nove modelos: seis genéricos e três contratos específicos de leitura, baseados nas documentações oficiais dos apps. Não são plugins instaláveis, não descobrem dispositivos nem instalam serviços. Compatibilidade com o firmware/serviço real ainda deve ser conferida.
 
 ## Modelos incluídos
 
@@ -12,6 +12,9 @@ A lista não é fechada: as páginas integradas continuam disponíveis, e o usu�
 | Consumo de energia | `meter.power` | `meter.detail` |
 | Node-RED via HTTP | `dashboard.value` | `dashboard.detail` |
 | Item de uma lista | `items.0.status` | `items.0.name` |
+| Sensor ESPHome (web API) | `value` | `state` |
+| Potência Shelly (Gen2+, com medição) | `apower` | sem detalhe |
+| Prometheus (resultado escalar) | `data.result.1` | sem detalhe |
 
 Cada modelo contém título, rótulo, unidade, layout, cor e exemplo fictício. Nenhum inclui endereço, token ou script. Unidades não são convertidas: o sensor deve fornecer a unidade indicada. Índices de listas só são adequados quando a ordem da API for estável.
 
@@ -27,7 +30,15 @@ Cada modelo contém título, rótulo, unidade, layout, cor e exemplo fictício. 
 
 Cancelar o diálogo não aplica campos nem adiciona uma fonte. O exemplo digitado é descartado ao fechar e não faz parte do backup. Respostas antigas de testes não substituem o resultado depois de editar campos ou fechar o diálogo.
 
-## Exemplo de Node-RED
+## Montar URL para um app — v0.9.0
+
+Nos três modelos específicos, informe endereço base `http(s)://host:porta` e os parâmetros próprios. **Montar URL, sem conexão** só preenche a URL do formulário, pedindo confirmação se houver outra URL. Não faz DNS/HTTP, não testa a expressão PromQL e não grava configuração. **Usar modelo** continua separado e preserva URL/ID. Depois confira exemplo, unidade e conexão; guardar no rascunho ainda exige **Aplicar alterações**.
+
+O helper não aceita caminhos de proxy, query, fragmento, credenciais ou métodos arbitrários no endereço base. Para proxy com prefixo, informe manualmente a URL completa no campo existente. Nomes ESPHome são segmentos codificados; canal Shelly fica entre 0 e 63; PromQL tem até 512 caracteres e a URL final até 2048. Endereço tem até 512 caracteres, nomes até 80. Literais de IP inseguros são recusados; DNS/destino efetivo são verificados somente na consulta real pelo cliente HTTP existente.
+
+Autenticação ESPHome/Digest Shelly/Bearer Prometheus não foi adicionada ao modelo genérico. Não cole tokens em URLs nem remova proteção. Use Home Assistant, MQTT ou uma ponte de leitura já autorizada quando necessário. [Contratos, exemplos e limitações](APP_RECIPES.md).
+
+## Exemplo de Node-RED via HTTP
 
 Crie uma rota GET específica de leitura, por exemplo `/st7789-demo`, ligando **HTTP In → Template → Change → HTTP Response**. No Template, use este JSON fictício como `msg.payload`:
 

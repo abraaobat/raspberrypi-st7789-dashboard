@@ -152,6 +152,9 @@ select option:disabled { color: #59606d; }
 .source-note code { color: #b9d6ff; }
 .source-template-box { padding: 14px; margin-bottom: 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(60,210,235,.035); }
 .source-template-box .source-note { margin: 0 0 12px; }
+.source-template-box #sourceUrlBuilder { padding: 16px 0 0; }
+.source-template-box #sourceUrlBuilder .compact-field { margin-bottom: 12px; min-width: 0; }
+.source-template-box #sourceUrlDocs { display: block; overflow-wrap: anywhere; }
 .source-sample { margin-top: 16px; border: 1px solid var(--line); border-radius: 12px; padding: 12px; min-width: 0; }
 .source-sample summary { cursor: pointer; color: var(--muted); font-size: 12px; }
 .source-sample[open] summary { margin-bottom: 12px; }

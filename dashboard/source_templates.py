@@ -1,4 +1,4 @@
-"""Built-in HTTP/JSON starting points; no endpoints, credentials or executable code."""
+"""HTTP/JSON starting points; no destinations, credentials or executable code."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import json
 
 from .config import JSON_PATH_PATTERN
 from .providers import extract_custom_values
+from .app_recipes import APP_SOURCE_TEMPLATES
 
 
 SOURCE_TEMPLATES = (
@@ -46,7 +47,7 @@ SOURCE_TEMPLATES = (
         "fields": {"title": "Meu dispositivo", "valueLabel": "ESTADO", "unit": "", "layout": "status", "accent": "cyan", "valuePath": "items.0.status", "secondaryPath": "items.0.name"},
         "sample": {"items": [{"name": "Bancada", "status": "ONLINE"}]},
     },
-)
+) + APP_SOURCE_TEMPLATES
 
 
 def public_source_templates() -> list[dict]:

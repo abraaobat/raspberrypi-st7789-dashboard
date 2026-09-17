@@ -27,10 +27,10 @@ def inspect_payload(sample, value_path="value", secondary_path=""):
 class SourceTemplateTests(unittest.TestCase):
     def test_catalog_has_unique_ids_and_no_destinations_or_commands(self):
         templates = public_source_templates()
-        self.assertEqual(len(templates), 6)
-        self.assertEqual(len({item["id"] for item in templates}), 6)
+        self.assertEqual(len(templates), 9)
+        self.assertEqual(len({item["id"] for item in templates}), 9)
         for template in templates:
-            self.assertEqual(set(template), {"id", "name", "description", "fields", "sample"})
+            self.assertEqual(set(template) - {"endpoint"}, {"id", "name", "description", "fields", "sample"})
             self.assertNotIn("url", template["fields"])
             self.assertNotIn("secret", template["fields"])
             self.assertNotIn("script", template["fields"])
@@ -134,7 +134,7 @@ class SourceTemplateApiTests(unittest.TestCase):
         self.assertEqual(self.client.post("/api/sources/inspect", json=payload).status_code, 403)
         self.assertEqual(self.client.post("/api/sources/inspect", json=payload, headers={"X-CSRF-Token": "bad"}).status_code, 403)
         self.assertEqual(self.client.post("/api/sources/inspect", json=payload, headers={"X-CSRF-Token": csrf}).status_code, 200)
-        self.assertEqual(len(self.client.get("/api/catalog").get_json()["sourceTemplates"]), 6)
+        self.assertEqual(len(self.client.get("/api/catalog").get_json()["sourceTemplates"]), 9)
 
     def test_inspection_does_not_query_network_write_state_or_echo_unused_fields(self):
         csrf = self.login()
@@ -160,18 +160,21 @@ class SourceTemplateApiTests(unittest.TestCase):
 
     def test_created_template_is_plain_custom_page_in_backup_and_restore(self):
         csrf = self.login()
-        item = definition(public_source_templates()[3])
-        config = default_config()
-        config["customPages"] = [item]
-        saved = self.client.put("/api/config", json=config, headers={"X-CSRF-Token": csrf})
-        self.assertEqual(saved.status_code, 200)
-        exported = json.loads(self.client.get("/api/config/export").data)
-        self.assertEqual(exported["customPages"][0]["source"]["valuePath"], "meter.power")
-        self.assertNotIn("sourceTemplates", exported)
-        self.assertNotIn("sample", exported["customPages"][0])
-        restored = self.client.post("/api/config/import", json=exported, headers={"X-CSRF-Token": csrf})
-        self.assertEqual(restored.status_code, 200)
-        self.assertEqual(restored.get_json(), exported)
+        for template in public_source_templates():
+            with self.subTest(template=template["id"]):
+                item = definition(template)
+                config = default_config()
+                config["customPages"] = [item]
+                saved = self.client.put("/api/config", json=config, headers={"X-CSRF-Token": csrf})
+                self.assertEqual(saved.status_code, 200)
+                exported = json.loads(self.client.get("/api/config/export").data)
+                self.assertEqual(exported["customPages"][0]["source"]["valuePath"], item["source"]["valuePath"])
+                self.assertNotIn("sourceTemplates", exported)
+                self.assertNotIn("sample", exported["customPages"][0])
+                self.assertNotIn("endpoint", exported["customPages"][0])
+                restored = self.client.post("/api/config/import", json=exported, headers={"X-CSRF-Token": csrf})
+                self.assertEqual(restored.status_code, 200)
+                self.assertEqual(restored.get_json(), exported)
 
 
 if __name__ == "__main__":

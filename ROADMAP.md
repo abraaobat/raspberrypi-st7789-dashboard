@@ -109,6 +109,7 @@ Critério de saída: falhas de serviços e rede são visíveis sem comprometer o
 - ticker financeiro opcional, com limites e indicação de atualização.
 - páginas HTTP/JSON criadas pelo usuário a partir de modelos seguros; ✅ software
 - seis modelos HTTP/JSON, conferência offline de caminhos e isolamento rascunho/aplicação; ✅ software v0.6.0
+- modelos ESPHome/Shelly Gen2+/Prometheus escalar com montagem de URL offline, parâmetros fechados e sem instalar apps; ✅ software v0.9.0; serviços reais/TFT pendentes
 - Node-RED via endpoint HTTP/JSON; ✅ modelo e roteiro; sensores MQTT também disponíveis na v0.8.0
 
 MQTT usa assinaturas curtas QoS 0, sem PUBLISH/will/sessão persistente e sem dependências obrigatórias. Prefere valores retidos; não garante captura de eventos transitórios nem deduz idade da medição. TLS é validado, e MQTT sem TLS exige consentimento na LAN/tailnet. [Contrato e limites](docs/MQTT_MONITOR.md).
@@ -135,7 +136,7 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A instalação v0.6.0 foi confirmada ativa e saudável no Raspberry em 17/09/2026. Isso não substitui observação visual das novas páginas. Por decisão do mantenedor, os testes manuais ficam para o final e não bloqueiam as expansões independentes. A v0.7.0 acrescenta Docker local somente de leitura, filtros, contagem de saúde e cache. São 118 testes de software e fluxo completo de navegador isolado aprovados. O socket padrão Docker não existe no Pi; não houve instalação nem autorização de acesso. A biblioteca mantém os seis modelos HTTP/JSON, sem instalar código de terceiros ou criar fontes automaticamente. A página bilíngue e o Pix confirmado são preservados. Search Console aguarda login. MQTT e drivers opcionais SSD1306/ILI9341 têm implementação v0.8.0, ainda sem homologação dos serviços/módulos reais. OLED tem resumo nativo, e simulação no painel não troca hardware. Gestos físicos do Pomodoro continuam futuros; Docker real e novas páginas ainda não estão homologados no TFT.
+D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A instalação v0.6.0 foi confirmada ativa e saudável no Raspberry em 17/09/2026. Isso não substitui observação visual das novas páginas. Por decisão do mantenedor, os testes manuais ficam para o final e não bloqueiam as expansões independentes. A v0.7.0 acrescenta Docker local somente de leitura, filtros, contagem de saúde e cache. São 118 testes de software e fluxo completo de navegador isolado aprovados. O socket padrão Docker não existe no Pi; não houve instalação nem autorização de acesso. A biblioteca v0.9.0 oferece nove modelos HTTP/JSON, incluindo ESPHome, Shelly e Prometheus escalar, com montagem offline de URL. Não instala código de terceiros nem cria fontes automaticamente. A página bilíngue e o Pix confirmado são preservados. Search Console aguarda login. MQTT e drivers opcionais SSD1306/ILI9341 têm implementação v0.8.0, ainda sem homologação dos serviços/módulos reais. OLED tem resumo nativo, e simulação no painel não troca hardware. Gestos físicos do Pomodoro continuam futuros; Docker real e novas páginas ainda não estão homologados no TFT.
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 
@@ -143,7 +144,9 @@ O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/va
 
 ## Sequência de retomada
 
-0. **Continuar o desenvolvimento:** contratos específicos de apps, distribuição/rollback e refinamentos após os gates de uso real. MQTT e drivers extras têm implementação de software v0.8.0. Os testes abaixo ficam no checklist final, sem serem marcados como aprovados antes de execução real. A v0.6.0 já está instalada; a versão mais recente inclui as anteriores, sem atualizações intermediárias.
+**Evidência local v0.9.0:** 165 casos executados; 162 passaram e três opcionais Mosquitto foram ignorados. Fluxo de navegador com os três serviços fictícios aprovado, além de regressão dos conectores/MQTT/Docker/Desk e quatro tamanhos. Extração/renderização nos três perfis é prova de software, não teste de dispositivos reais. [Contratos de apps](docs/APP_RECIPES.md).
+
+0. **Continuar o desenvolvimento:** distribuição/rollback, outros contratos de apps e refinamentos após os gates de uso real. MQTT e drivers extras têm implementação de software v0.8.0. Os testes abaixo ficam no checklist final, sem serem marcados como aprovados antes de execução real. A v0.6.0 já está instalada; a versão mais recente inclui as anteriores, sem atualizações intermediárias.
 1. **Fonte personalizada no hardware:** criar pelo painel uma página HTTP/JSON de interesse real e confirmar sua legibilidade no ST7789. O núcleo, a extração e a API já possuem testes; esse gate é somente físico.
 2. **Homologar integrações reais:** configurar Pi-hole 6 e Home Assistant pelos assistentes já implementados, comparar dados e observar estados de falha/legibilidade no TFT.
 3. **Desk no hardware:** ativar Relógio/Pomodoro pelo painel, executar um ciclo curto, pausar/retomar e observar contagem/legibilidade no TFT. Os botões continuam anterior/próxima; não há novos gestos para homologar nesta versão.

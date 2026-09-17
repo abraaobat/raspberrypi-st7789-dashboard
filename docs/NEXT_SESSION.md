@@ -107,12 +107,24 @@ A revisão `90902db` está preparada em `~/.cache/st7789-dashboard-update-v0.8.0
 
 Novo backup privado foi criado fora do Git, com prefixo `~/.config/raspberrypi-st7789-dashboard.backup-v0.6-before-v0.8-`. PIN, configuração e chave de sessão foram comparados sem mostrar conteúdos; ausência de cofre também foi preservada. Auditoria posterior confirmou SPI, serviços, API v0.6.0 e estado do display sem erro. Nenhuma dependência opcional, broker ou driver extra foi instalado no Pi. [GitHub Pages](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35229789931) publicou a v0.8.0; a landing local passou em oito combinações de idioma/tamanho, mantendo fotos e Pix. Isso não homologa sensores, novos módulos físicos ou páginas novas no TFT.
 
-## Próximas implementações
+## Entregas adicionais da v0.9.0
+
+- biblioteca ampliada de seis para nove modelos: sensor ESPHome web API, potência Shelly Gen2+ e consulta instantânea escalar Prometheus;
+- montagem de URL com métodos/caminhos/parâmetros fechados, sem DNS/HTTP, credenciais ou gravação;
+- nomes YAML ESPHome/UTF-8/subdispositivos codificados por segmento; Shelly só `Switch.GetStatus`, canal 0–63; PromQL codificada e timeout solicitado de 2s;
+- preenchimento/consulta/rascunho/aplicação distintos; confirmação de troca de URL e respostas antigas descartadas após edição/fechamento;
+- sem novas páginas nativas, dependências, apps ou mudanças de botões/serviços; limites de 11 páginas integradas e oito fontes preservados;
+- 165 casos locais em 18,377 s: 162 passaram e três opcionais Mosquitto ignorados; fluxo completo do painel aprovado com serviços fictícios e quatro tamanhos;
+- renderização dos novos exemplos nos três perfis em software; firmware/medição/seletor e autenticação reais precisam do checklist final.
+
+Veja [APP_RECIPES.md](APP_RECIPES.md) e [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md). Os modelos genéricos não ganharam autenticação ESPHome/Digest/Bearer; use integração autorizada em vez de remover proteção do serviço.
+
+## Próximas implementações e gates adiados
 
 1. Homologar Pi-hole 6/Home Assistant reais e as duas novas páginas no TFT quando o usuário puder configurar suas credenciais.
 2. Homologar Relógio/Pomodoro no TFT com um ciclo de 1 minuto, pausa e retomada; não alterar os dois gestos físicos existentes.
 3. Homologar MQTT v0.8.0 com broker/sensores reais e Docker v0.7.0 com Engine real/TFT quando conveniente. Node-RED via GET/JSON já tem modelo/roteiro, com teste real pendente.
-4. Contratos específicos de outros apps, além dos seis modelos genéricos, mantendo contrato fechado e sem execução remota.
+4. Modelos ESPHome/Shelly/Prometheus escalar implementados na v0.9.0 com URL offline; outros contratos e distribuição/rollback permanecem próximos, sem execução remota.
 5. Homologar drivers experimentais SSD1306/ILI9341 da v0.8.0 por módulo/placa, sem habilitá-los na montagem ST7789 só para simular.
 
 ## Limites a preservar

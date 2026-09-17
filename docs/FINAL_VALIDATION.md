@@ -6,13 +6,14 @@ O mantenedor optou por adiar os testes manuais. Este documento reúne os gates r
 
 Use a versão mais recente publicada, que já inclui as anteriores. Confira checkout limpo e faça backup privado recente do diretório de estado, sem enviar PIN/cofre à conversa. Execute `scripts/install.sh` e depois `scripts/validate_install.sh` no terminal do Raspberry. A senha de administrador, se solicitada, fica somente no terminal. Atualize o navegador e entre com o mesmo PIN.
 
-A auditoria de 17/09/2026 confirmou v0.6.0 ativa e saudável. A v0.8.0 já inclui Docker e as entregas anteriores; não houve instalação da atualização nos serviços ativos durante o desenvolvimento. A instalação pode ser agrupada com outras entregas, sem atualizar versão por versão. Para manter o ST7789 atual, não instale extras Luma nem defina perfil experimental. [Testes ARM/CI e backup preparados](NEXT_SESSION.md).
+A auditoria de 17/09/2026 confirmou v0.6.0 ativa e saudável. A v0.9.0 já inclui os nove modelos, MQTT, Docker e as entregas anteriores; não houve instalação da atualização nos serviços ativos durante o desenvolvimento. A instalação pode ser agrupada com outras entregas, sem atualizar versão por versão. Para manter o ST7789 atual, não instale extras Luma nem defina perfil experimental. [Testes ARM/CI e backup preparados](NEXT_SESSION.md).
 
 ## 2. Novos recursos, só os que pretende usar
 
 | Recurso | Teste manual curto | Resultado esperado |
 |---|---|---|
 | Fonte HTTP/JSON | Escolher modelo, conferir exemplo, testar uma URL de leitura real, guardar/aplicar e selecionar | Valor principal/detalhe legíveis na prévia e no TFT; editar/cancelar não aplica mudanças |
+| Modelos ESPHome/Shelly/Prometheus | Apenas para app já existente: usar modelo, montar URL, conferir unidade/seletor e testar GET real | Nome YAML/firmware compatível; Shelly possui medição; Prometheus escalar de uma série; dados coerentes no TFT, sem remover autenticação |
 | Relógio | Escolher fuso e 12/24 h; ativar e selecionar | Hora/data coerentes com o relógio do Pi e inteiras na tela |
 | Pomodoro | Aplicar duração de um minuto; iniciar, pausar, retomar e esperar concluir | Mesmo estado no painel/TFT, conclusão correta; sem mudança dos dois botões |
 | Pi-hole 6 | Configurar endereço/senha de aplicativo no painel privado; testar/ativar/aplicar | Resumo coerente com a API real e legível; sem controle do DNS |

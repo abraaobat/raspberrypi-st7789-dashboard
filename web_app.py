@@ -22,6 +22,7 @@ from dashboard.rendering import render_page
 from dashboard.runtime import RuntimeStore
 from dashboard.desk import DeskError
 from dashboard.source_templates import inspect_source_sample, public_source_templates
+from dashboard.app_recipes import build_source_url
 from dashboard.mqtt_settings import encode_credentials, broker_url
 
 
@@ -355,6 +356,15 @@ def create_app(test_config=None):
         try:
             return jsonify(data.pomodoro.snapshot(load_config(state_override)["pomodoro"]["minutes"]))
         except DeskError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    @app.post("/api/sources/build-url")
+    @require_auth
+    @require_csrf
+    def source_build_url():
+        try:
+            return jsonify(build_source_url(request.get_json(silent=True)))
+        except ValueError as exc:
             return jsonify({"error": str(exc)}), 400
 
     @app.post("/api/pomodoro/command")

@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-17T14:00:53Z",
-  "status": "v0.8.0 • software OK",
+  "updatedAt": "2026-09-17T18:16:55Z",
+  "status": "v0.9.0 • local OK",
   "statusClass": "ops",
   "progress": 92,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "Instalação v0.6.0 saudável e preservada no Raspberry. v0.8.0: MQTT 3.1.1 somente leitura, até quatro tópicos exatos de texto/JSON, TLS e cofre privado vinculado ao broker; consultas curtas favorecem valores retidos, sem garantia de eventos ou hora da medição. Drivers opcionais experimentais SSD1306/ILI9341, OLED nativo 128×64 e simulação web sem trocar hardware. 145 testes aprovados no computador e no ARM em checkout separado (62,947 s); três testes opcionais Mosquitto ignorados nesses hosts. Todos os 148 passaram no CI, incluindo Mosquitto real isolado e fluxo completo do painel. Landing local/publicada aprovada em oito combinações, fotos/Pix preservados. Novo backup privado e auditoria posterior confirmaram PIN/configuração/chave de sessão e serviços ativos inalterados. Nenhum broker, driver extra ou privilégio instalado no Pi. Atualização e testes reais agrupados para o final.",
-  "architecture": "Browser → Auth API → Config/Registry + Templates/Desk → bounded read-only HTTP/Docker/MQTT providers → Pillow + native OLED → ST7789 / optional SSD1306+ILI9341 / safe Preview",
-  "next": "Avançar contratos específicos de apps e distribuição/rollback. Atualização para a versão mais recente e homologação de fontes/TFT, Desk, conectores, Docker, MQTT e displays extras permanecem no checklist final. Não instalar brokers/Docker nem autorizar sockets ou trocar display automaticamente. Search Console depende de login.",
-  "action": "Instalar diretamente a versão mais recente quando conveniente, sem versões intermediárias. Checklist único em docs/FINAL_VALIDATION.md; limites MQTT em docs/MQTT_MONITOR.md e módulos experimentais em docs/DISPLAY_COMPATIBILITY.md. Credenciais somente no painel privado.",
+  "current": "Raspberry acessível: instalação v0.6.0 limpa e saudável, dois serviços/SPI/API/estado aprovados, sem atualizar serviços. v0.9.0 amplia a biblioteca de seis para nove modelos: sensores ESPHome com nomes YAML/UTF-8, potência Shelly Gen2+ somente Switch.GetStatus e métricas escalares Prometheus. Montagem de URL offline autenticada/CSRF, sem DNS/HTTP ou gravação; preenchimento, teste, rascunho e aplicação separados. 165 casos locais: 162 passaram, três opcionais Mosquitto ignorados. Fluxo completo do painel com três serviços fictícios e quatro tamanhos aprovado. Firmware/medição/seletor/autenticação reais e TFT continuam no checklist final; nenhum app, broker ou privilégio instalado no Pi. CI/publicação e preparo ARM da revisão nova em andamento.",
+  "architecture": "Browser → Auth API → Config/Registry + 9 Templates/closed offline URL recipes/Desk → bounded GET-only HTTP + Docker/MQTT read providers → Pillow + native OLED → ST7789 / optional SSD1306+ILI9341 / safe Preview",
+  "next": "Distribuição/rollback e outros contratos de apps. Atualizar diretamente a versão mais recente e homologar apenas fontes/apps de interesse no checklist final; não instalar serviços nem remover autenticação só para testar. Search Console depende de login.",
+  "action": "Checklist único em docs/FINAL_VALIDATION.md; modelos/URLs e limites em docs/APP_RECIPES.md. Credenciais apenas no painel privado; instalar versão mais recente quando conveniente, sem versões intermediárias.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
@@ -58,18 +58,20 @@
     "Full isolated browser flow + 8 public/local site views ✓",
     "Private v0.6 pre-v0.8 backup + live PIN/config/session preserved ✓",
     "v0.8.0 deployment + real MQTT / extra displays — deferred final checklist",
-    "Specific app contracts — future work",
-    "Pomodoro physical gestures — future work"
+    "ESPHome/Shelly Gen2+/Prometheus scalar recipes + offline URL builder ✓ simulated services",
+    "Pomodoro physical gestures — future work",
+    "162 v0.9 tests ✓ local / 3 optional Mosquitto skipped; isolated app recipe/browser regression ✓",
+    "v0.9.0 deployment + real app sources/TFT — deferred final checklist"
   ],
   "runtime": {
     "label": "Página pública do projeto",
     "url": "https://abraaobat.github.io/raspberrypi-st7789-dashboard/",
     "status": "available",
-    "note": "Landing v0.8.0 e Pix publicados/verificados; painel do Raspberry permanece local/tailnet na v0.6.0, aguardando atualização final."
+    "note": "Landing v0.9.0 preparada; fotos/Pix confirmados preservados. Painel Raspberry permanece local/tailnet v0.6.0, atualização final pendente."
   },
   "activity": {
     "date": "2026-09-17",
     "type": "update",
-    "text": "Instalação v0.6.0 saudável e preservada no Raspberry. v0.8.0: MQTT 3.1.1 somente leitura, até quatro tópicos exatos de texto/JSON, TLS e cofre privado vinculado ao broker; consultas curtas favorecem valores retidos, sem garantia de eventos ou hora da medição. Drivers opcionais experimentais SSD1306/ILI9341, OLED nativo 128×64 e simulação web sem trocar hardware. 145 testes aprovados no computador e no ARM em checkout separado (62,947 s); três testes opcionais Mosquitto ignorados nesses hosts. Todos os 148 passaram no CI, incluindo Mosquitto real isolado e fluxo completo do painel. Landing local/publicada aprovada em oito combinações, fotos/Pix preservados. Novo backup privado e auditoria posterior confirmaram PIN/configuração/chave de sessão e serviços ativos inalterados. Nenhum broker, driver extra ou privilégio instalado no Pi. Atualização e testes reais agrupados para o final."
+    "text": "Raspberry acessível: instalação v0.6.0 limpa e saudável, dois serviços/SPI/API/estado aprovados, sem atualizar serviços. v0.9.0 amplia a biblioteca de seis para nove modelos: sensores ESPHome com nomes YAML/UTF-8, potência Shelly Gen2+ somente Switch.GetStatus e métricas escalares Prometheus. Montagem de URL offline autenticada/CSRF, sem DNS/HTTP ou gravação; preenchimento, teste, rascunho e aplicação separados. 165 casos locais: 162 passaram, três opcionais Mosquitto ignorados. Fluxo completo do painel com três serviços fictícios e quatro tamanhos aprovado. Firmware/medição/seletor/autenticação reais e TFT continuam no checklist final; nenhum app, broker ou privilégio instalado no Pi. CI/publicação e preparo ARM da revisão nova em andamento."
   }
 }

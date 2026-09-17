@@ -8,6 +8,7 @@ import tempfile
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlsplit, parse_qs
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -52,8 +53,15 @@ def main():
 
         def do_GET(self):
             calls.append({"method": "GET", "path": self.path})
+            parts = urlsplit(self.path)
             if self.path.startswith("/examples/") and self.path.removeprefix("/examples/") in samples:
                 self.reply(samples[self.path.removeprefix("/examples/")])
+            elif parts.path.startswith("/sensor/"):
+                self.reply(samples["esphome-sensor"])
+            elif parts.path == "/rpc/Switch.GetStatus" and parse_qs(parts.query) == {"id": ["0"]}:
+                self.reply(samples["shelly-power"])
+            elif parts.path == "/api/v1/query" and parse_qs(parts.query) == {"query": ['scalar(up{job="prometheus"})'], "timeout": ["2s"]}:
+                self.reply(samples["prometheus-scalar"])
             elif self.path == "/api/stats/summary":
                 self.reply({"queries": {"total": 1000, "blocked": 245, "percent_blocked": 24.5},
                             "clients": {"active": 8}, "gravity": {"domains_being_blocked": 100000}})

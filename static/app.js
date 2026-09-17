@@ -808,6 +808,9 @@ function invalidateSourceTest() {
   state.sourceGeneration++;
   $("#testCustomSource").disabled = false;
   $("#inspectSourceSample").disabled = false;
+  $("#buildSourceUrl").disabled = false;
+  $("#sourceUrlResult").textContent = "";
+  $("#sourceUrlResult").className = "source-test-result";
   $("#sourceTestResult").textContent = "";
   $("#sourceTestResult").className = "source-test-result";
 }
@@ -824,7 +827,64 @@ function showSourceTemplateExample() {
     : "Escolha um modelo ou preencha livremente. Os caminhos dependem do JSON que seu app fornece.";
   $("#applySourceTemplate").disabled = !template;
   $("#sourceSample").value = JSON.stringify(template?.sample || {}, null, 2);
+  $("#sourceUrlBuilder").hidden = !template?.endpoint;
+  $("#sourceBaseUrl").value = "";
+  $("#sourceUrlParameters").replaceChildren();
+  $("#sourceUrlHelp").textContent = template?.endpoint?.help || "";
+  $("#sourceUrlDocs").removeAttribute("href");
+  if (template?.endpoint) {
+    $("#sourceUrlDocs").href = template.endpoint.docsUrl;
+    for (const field of template.endpoint.parameters) {
+      const label = document.createElement("label");
+      label.className = "compact-field";
+      const span = document.createElement("span");
+      span.textContent = field.label;
+      const input = document.createElement("input");
+      input.id = `sourceParam-${field.name}`;
+      input.dataset.parameter = field.name;
+      input.className = "text-input";
+      input.maxLength = field.maxLength;
+      input.value = field.default;
+      input.autocomplete = "off";
+      label.append(span, input);
+      $("#sourceUrlParameters").appendChild(label);
+    }
+  }
 }
+
+$("#buildSourceUrl").addEventListener("click", async () => {
+  const template = selectedSourceTemplate();
+  if (!template?.endpoint) return;
+  invalidateSourceTest();
+  const generation = state.sourceGeneration;
+  const controller = new AbortController();
+  state.sourceTestController = controller;
+  $("#buildSourceUrl").disabled = true;
+  const result = $("#sourceUrlResult");
+  result.textContent = "Montando URL, sem consultar a origem…";
+  const parameters = Object.fromEntries([...$("#sourceUrlParameters").querySelectorAll("input")].map(input => [input.dataset.parameter, input.value]));
+  try {
+    const payload = await requestJSON("/api/sources/build-url", {method: "POST", signal: controller.signal,
+      body: JSON.stringify({templateId: template.id, baseUrl: $("#sourceBaseUrl").value, parameters})});
+    if (generation !== state.sourceGeneration || !$("#customDialog").open) return;
+    const previous = $("#customUrl").value;
+    if (previous && previous !== payload.url && !confirm("Substituir a URL neste formulário? A identificação e os demais campos serão preservados. Nada será salvo ou enviado ao display agora.")) {
+      result.textContent = "URL anterior preservada.";
+      return;
+    }
+    $("#customUrl").value = payload.url;
+    result.textContent = "URL preenchida, sem conexão. Use Usar modelo para os caminhos e confira a unidade antes de testar ou guardar.";
+  } catch (error) {
+    if (generation !== state.sourceGeneration || error.name === "AbortError") return;
+    result.className = "source-test-result error";
+    result.textContent = error.message;
+  } finally {
+    if (generation === state.sourceGeneration) {
+      state.sourceTestController = null;
+      $("#buildSourceUrl").disabled = false;
+    }
+  }
+});
 
 $("#sourceTemplate").addEventListener("change", showSourceTemplateExample);
 $("#applySourceTemplate").addEventListener("click", () => {
@@ -872,6 +932,8 @@ function closeCustomDialog() {
 $("#customDialog").addEventListener("close", () => {
   invalidateSourceTest();
   $("#sourceSample").value = "";
+  $("#sourceBaseUrl").value = "";
+  $("#sourceUrlParameters").replaceChildren();
 });
 
 function removeCustomPage(id) {

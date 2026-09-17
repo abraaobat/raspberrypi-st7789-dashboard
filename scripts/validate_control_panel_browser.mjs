@@ -166,7 +166,7 @@ try {
     && document.querySelector("#pomodoroCountdown").textContent === "02:00");
   // Templates only fill the dialog after explicit consent; offline checks never query the source.
   await page.locator("#addCustomPage").click();
-  assert.equal(await page.locator("#sourceTemplate option").count(), 7);
+  assert.equal(await page.locator("#sourceTemplate option").count(), 10);
   await page.locator("#sourceTemplate").selectOption("node-red");
   assert.equal(await page.locator("#customTitle").inputValue(), "");
   await page.locator("#applySourceTemplate").click();
@@ -227,10 +227,74 @@ try {
   assert.equal(await page.locator("#customId").inputValue(), custom.id);
   await page.locator("#cancelCustomSource").click();
   assert.equal((await (await context.request.get(origin + "/api/config")).json()).customPages[0].title, "Node-RED");
+  // App-specific helpers are offline; only the explicit connection test sends GET.
+  const appCalls = calls => calls.filter(call => /^(\/sensor\/|\/rpc\/|\/api\/v1\/query)/.test(call.path));
+  for (const [recipe, expected, route] of [["esphome-sensor", "28.1", "/sensor/Temperatura%20externa"], ["shelly-power", "318", "/rpc/Switch.GetStatus?id=0"], ["prometheus-scalar", "1", "/api/v1/query?"]]) {
+    await page.locator("#addCustomPage").click();
+    await page.locator("#sourceTemplate").selectOption(recipe);
+    assert.equal(await page.locator("#customTitle").inputValue(), "");
+    assert(await page.locator("#sourceUrlBuilder").isVisible());
+    await page.locator("#sourceBaseUrl").fill(fixture.baseUrl);
+    const callsBefore = appCalls((await (await context.request.get(origin + "/fixture/status")).json()).calls).length;
+    const configBefore = await (await context.request.get(origin + "/api/config")).json();
+    await page.locator("#buildSourceUrl").click();
+    await page.waitForFunction(() => document.querySelector("#sourceUrlResult").textContent.includes("URL preenchida, sem conexão"));
+    assert((await page.locator("#customUrl").inputValue()).startsWith(fixture.baseUrl + route));
+    assert.equal(await page.locator("#customTitle").inputValue(), "", "The URL builder must not apply template fields");
+    await page.locator("#applySourceTemplate").click();
+    await page.locator("#inspectSourceSample").click();
+    await page.waitForFunction(expected => document.querySelector("#sourceTestResult").textContent.includes("Exemplo conferido, sem conexão: " + expected), expected);
+    assert.equal(appCalls((await (await context.request.get(origin + "/fixture/status")).json()).calls).length, callsBefore);
+    assert.deepEqual(await (await context.request.get(origin + "/api/config")).json(), configBefore);
+    await page.locator("#testCustomSource").click();
+    await page.waitForFunction(expected => document.querySelector("#sourceTestResult").textContent.includes("Conexão aprovada: " + expected), expected);
+    const requested = appCalls((await (await context.request.get(origin + "/fixture/status")).json()).calls);
+    assert.equal(requested.length, callsBefore + 1);
+    assert.equal(requested.at(-1).method, "GET");
+    assert(requested.at(-1).path.startsWith(route));
+    assert.deepEqual(await (await context.request.get(origin + "/api/config")).json(), configBefore, "Connection tests must not save the draft");
+    if (output) await page.screenshot({path: `${output}/${recipe}-assistant.png`});
+    await page.locator("#cancelCustomSource").click();
+    await page.waitForFunction(() => document.querySelector("#sourceBaseUrl").value === "");
+    assert.equal(await page.locator("#sourceUrlParameters input").count(), 0);
+  }
+  // A delayed old builder response must never replace a URL after editing inputs.
+  await page.locator("#addCustomPage").click();
+  await page.locator("#sourceTemplate").selectOption("shelly-power");
+  await page.locator("#sourceBaseUrl").fill(fixture.baseUrl);
+  let releaseBuilder, seeBuilder, finishBuilder;
+  const builderSeen = new Promise(resolve => { seeBuilder = resolve; });
+  const builderWait = new Promise(resolve => { releaseBuilder = resolve; });
+  const builderFinished = new Promise(resolve => { finishBuilder = resolve; });
+  await page.route("**/api/sources/build-url", async intercepted => {
+    seeBuilder();
+    await builderWait;
+    try { await intercepted.fulfill({status: 200, contentType: "application/json", body: JSON.stringify({ok: true, url: "http://old.invalid/rpc/Switch.GetStatus?id=0"})}); }
+    finally { finishBuilder(); }
+  }, {times: 1});
+  await page.locator("#buildSourceUrl").click();
+  await builderSeen;
+  await page.locator("#sourceParam-channel").fill("1");
+  releaseBuilder();
+  await builderFinished;
+  assert.equal(await page.locator("#customUrl").inputValue(), "");
+  assert.equal(await page.locator("#sourceUrlResult").innerText(), "");
+  await page.locator("#cancelCustomSource").click();
+  // Editing still preserves the stable ID; replacing URL is a separate explicit step.
+  await page.locator(".custom-source-row .edit-source").click();
+  await page.locator("#sourceTemplate").selectOption("shelly-power");
+  await page.locator("#applySourceTemplate").click();
+  assert.equal(await page.locator("#customUrl").inputValue(), oldUrl);
+  await page.locator("#sourceBaseUrl").fill(fixture.baseUrl);
+  await page.locator("#buildSourceUrl").click();
+  await page.waitForFunction(() => document.querySelector("#sourceUrlResult").textContent.includes("URL preenchida, sem conexão"));
+  assert.equal(await page.locator("#customId").inputValue(), custom.id);
+  await page.locator("#cancelCustomSource").click();
+  assert.equal((await (await context.request.get(origin + "/api/config")).json()).customPages[0].source.url, oldUrl);
   for (const width of [1440, 980, 390, 320]) {
     await page.setViewportSize({width, height: 1000});
     await page.locator("#addCustomPage").click();
-    await page.locator("#sourceTemplate").selectOption("service");
+    await page.locator("#sourceTemplate").selectOption("esphome-sensor");
     await page.locator("#applySourceTemplate").click();
     assert(await page.locator("#customDialog").evaluate(element => element.scrollWidth <= element.clientWidth + 1));
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
@@ -368,7 +432,7 @@ try {
   assert(calls.filter(call => call.path.startsWith("/api/states/")).every(call => call.method === "GET"));
   assert(calls.every(call => call.method === "GET" || call.path === "/api/auth"));
   assert.deepEqual(errors, []);
-  console.log("PASS: read-only MQTT with fake broker, private credentials, text/JSON sensors, draft/apply, retained warning, backup, reload, invalid wildcard, four screen sizes and no PUBLISH; non-mutating compact/landscape previews; Docker, source templates, connectors, clock and Pomodoro regression. Fake services only.");
+  console.log("PASS: ESPHome/Shelly/Prometheus templates, offline URL builders/inspection, explicit GET tests, preserved configuration and stale-response cancellation; read-only MQTT, credentials, backup, four screen sizes, safe display previews; Docker, connectors, clock and Pomodoro regression. Fake services only.");
 } catch (error) {
   if (output) {
     await fs.mkdir(output, {recursive: true});

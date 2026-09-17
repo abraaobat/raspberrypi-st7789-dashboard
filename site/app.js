@@ -1,9 +1,9 @@
 const translations={
   en:{
     fMqttD:'Up to four exact text/JSON sensor topics, private credentials and verified TLS. Short read-only subscriptions favour retained values, not continuous events or proof of measurement age. Real sensors/TFT validation pending.',
-    releaseNote:'v0.8.0: read-only MQTT and experimental display drivers; real sensors/modules/TFT validation pending',
+    releaseNote:'v0.9.0: ESPHome, Shelly and Prometheus source templates with offline URL building; real service/TFT validation pending',
     fDockerD:'Optional local container counts, exact name filters and health, via an already authorized Unix socket. No container control or permission changes; real Engine/TFT validation pending.',
-    fTemplates:'Source templates',fTemplatesD:'Start with a metric, service, temperature, energy, Node-RED or list-item example. Check JSON paths without querying the source, then apply explicitly.',
+    fTemplates:'Source templates',fTemplatesD:'Nine optional models, including ESPHome, Shelly Gen2+ power and scalar Prometheus metrics. Build read URLs and check JSON offline, then test/apply explicitly. No app installation or authentication removal.',
     fClock:'Offline clock',fClockD:'Time, date, weekday and chosen timezone, with optional seconds and 12/24-hour format. Uses the device clock; TFT validation pending.',
     fPomodoro:'Pomodoro',fPomodoroD:'Start, pause, resume and reset a focus cycle from the protected local panel. No internet or new button gestures; TFT validation pending.',
     fPiholeD:'Guided setup for query and blocking statistics, with an app password kept in a private local file. Read-only collection; real-service validation pending.',
@@ -13,9 +13,9 @@ const translations={
   },
   'pt-BR':{
     fMqttD:'Até quatro tópicos exatos de sensores texto/JSON, cofre privado e TLS validado. Assinaturas curtas favorecem valores retidos, não eventos contínuos nem confirmação da hora da medição. Sensores reais/TFT aguardam homologação.',
-    releaseNote:'v0.8.0: MQTT somente leitura e drivers experimentais; sensores/módulos reais e TFT aguardam homologação',
+    releaseNote:'v0.9.0: modelos ESPHome, Shelly e Prometheus com montagem de URL offline; serviços reais/TFT aguardam homologação',
     fDockerD:'Contagem de contêineres locais, filtros exatos e saúde, via socket Unix já autorizado. Sem controle ou mudança de permissões; Engine real/TFT aguardam homologação.',
-    fTemplates:'Modelos de fontes',fTemplatesD:'Comece com um exemplo de métrica, serviço, temperatura, energia, Node-RED ou item de lista. Confira os caminhos sem consultar a fonte e aplique explicitamente.',
+    fTemplates:'Modelos de fontes',fTemplatesD:'Nove modelos opcionais, incluindo ESPHome, potência Shelly Gen2+ e métrica escalar Prometheus. Monte URLs de leitura e confira JSON offline; depois teste/aplique explicitamente. Sem instalar apps ou remover autenticação.',
     fClock:'Relógio offline',fClockD:'Hora, data, dia da semana e fuso escolhido, com segundos opcionais e formato 12/24 h. Usa a hora do dispositivo; teste no TFT pendente.',
     fPomodoro:'Pomodoro',fPomodoroD:'Inicie, pause, retome e reinicie um ciclo de foco pelo painel local protegido. Sem internet ou novos gestos nos botões; teste no TFT pendente.',
     fPiholeD:'Assistente para estatísticas de consultas e bloqueios, com senha de aplicativo em arquivo local privado. Coleta somente de leitura; validação real pendente.',

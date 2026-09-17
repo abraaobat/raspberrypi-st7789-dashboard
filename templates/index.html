@@ -311,6 +311,15 @@
         <label class="select-field"><span>Começar com um modelo</span><select id="sourceTemplate"><option value="">Configuração livre</option></select></label>
         <p id="sourceTemplateDescription" class="source-note"></p>
         <button id="applySourceTemplate" class="button secondary compact" type="button" disabled>Usar modelo</button>
+        <div id="sourceUrlBuilder" class="source-form" hidden>
+          <label class="compact-field"><span>Endereço base do dispositivo ou serviço</span><input id="sourceBaseUrl" class="text-input" maxlength="512" placeholder="http://192.168.1.10:8080" autocomplete="off"></label>
+          <div id="sourceUrlParameters" class="dialog-grid"></div>
+          <p id="sourceUrlHelp" class="source-note"></p>
+          <a id="sourceUrlDocs" class="source-note" target="_blank" rel="noopener noreferrer">Documentação da API de origem</a>
+          <button id="buildSourceUrl" class="button ghost compact" type="button">Montar URL, sem conexão</button>
+          <div id="sourceUrlResult" class="source-test-result" aria-live="polite"></div>
+          <p class="source-note">Só preenche a URL neste formulário. Não consulta o dispositivo, não salva e não envia ao display. Não cole senhas ou tokens aqui. Para APIs protegidas, use uma integração autorizada, como Home Assistant; não remova autenticação.</p>
+        </div>
       </section>
       <div class="dialog-grid">
         <label class="compact-field"><span>Título</span><input id="customTitle" class="text-input" maxlength="22" required placeholder="Energia"></label>
