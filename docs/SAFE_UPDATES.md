@@ -49,6 +49,8 @@ python3 -B scripts/update_dashboard.py status
 
 Pode levar minutos; requer rede/espaço para ambiente separado. Não solicita administrador nesta etapa. Só release `prepared` pode ser ativado. Guarde identificador impresso `release-…-…`.
 
+No Pi 3, uma dependência sem wheel compatível pode precisar de compilação demorada. NumPy limita a compilação a dois trabalhos paralelos; isso reduz pressão, mas não é um limite global de CPU/memória. Timeout/interrupção encerra o grupo de processos exclusivo daquela etapa, incluindo compiladores, sem sinalizar serviços ativos. Preparação incompleta fica `failed`, com artefatos privados preservados; não deve ser ativada. [Opção oficial Meson-Python](https://mesonbuild.com/meson-python/reference/config-settings.html), [opções por requisito do pip](https://pip.pypa.io/en/stable/reference/requirements-file-format/).
+
 Estrutura privada `~/.config/raspberrypi-st7789-updates/release-…/`:
 
 ```text

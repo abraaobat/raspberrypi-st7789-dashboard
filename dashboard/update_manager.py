@@ -10,6 +10,7 @@ import json
 import os
 import pwd
 import re
+import signal
 import stat
 import subprocess
 import sys
@@ -41,9 +42,27 @@ def run(arguments, *, cwd=None, timeout=30, test_state=None):
     if test_state is not None:
         environment["ST7789_DASHBOARD_STATE_DIR"] = str(test_state)
     try:
-        result = subprocess.run(arguments, cwd=cwd, env=environment, check=True,
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout)
-        return result.stdout
+        # A timeout must stop the build tree, not just pip while compilers keep
+        # holding its output pipes. This new session belongs only to this step.
+        process = subprocess.Popen(arguments, cwd=cwd, env=environment,
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   start_new_session=True)
+        try:
+            output, _ = process.communicate(timeout=timeout)
+        except BaseException:
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            # Do not drain inherited pipes: an escaped child may still hold one.
+            process.wait(timeout=5)
+            raise
+        finally:
+            process.stdout.close()
+            process.stderr.close()
+        if process.returncode:
+            raise subprocess.CalledProcessError(process.returncode, arguments)
+        return output
     except (OSError, subprocess.SubprocessError) as exc:
         raise UpdateError("Etapa externa falhou; serviços ativos não são alterados durante a preparação.") from exc
 

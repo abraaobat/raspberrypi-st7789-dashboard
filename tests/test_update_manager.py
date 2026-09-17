@@ -10,7 +10,7 @@ import time
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from dashboard import update_manager as updates
 from dashboard.config import default_config
@@ -438,20 +438,50 @@ class UpdateTests(unittest.TestCase):
         self.compatibility.start()
 
     def test_environment_controls_do_not_leak_into_commands_and_output_is_not_reported(self):
-        with patch.dict(os.environ, {"ST7789_DASHBOARD_STATE_DIR": "private", "PYTHONPATH": "inject", "PIP_INDEX_URL": "private-url"}), patch.object(subprocess, "run") as external:
-            external.return_value.stdout = b"ok"
+        with patch.dict(os.environ, {"ST7789_DASHBOARD_STATE_DIR": "private", "PYTHONPATH": "inject", "PIP_INDEX_URL": "private-url"}), patch.object(subprocess, "Popen") as external:
+            external.return_value.communicate.return_value = (b"ok", b"")
+            external.return_value.returncode = 0
             self.assertEqual(updates.run(["tool", "arg"]), b"ok")
             env = external.call_args.kwargs["env"]
             self.assertNotIn("ST7789_DASHBOARD_STATE_DIR", env)
             self.assertNotIn("PYTHONPATH", env)
             self.assertNotIn("PIP_INDEX_URL", env)
             self.assertEqual(env["PIP_CONFIG_FILE"], os.devnull)
+            self.assertTrue(external.call_args.kwargs["start_new_session"])
             updates.run(["tool"], test_state=self.home / "isolated-state")
             self.assertEqual(external.call_args.kwargs["env"]["ST7789_DASHBOARD_STATE_DIR"], str(self.home / "isolated-state"))
+            external.return_value.returncode = 1
+            with patch.object(updates.os, "killpg") as stop:
+                with self.assertRaises(updates.UpdateError):
+                    updates.run(["tool"])
+            stop.assert_not_called()  # communicate already reaped this process.
             external.side_effect = subprocess.CalledProcessError(1, ["tool"], output=b"private-output")
             with self.assertRaises(updates.UpdateError) as error:
                 updates.run(["tool"])
             self.assertNotIn("private-output", str(error.exception))
+
+    def test_timeout_stops_own_child_tree_without_waiting_for_inherited_pipes(self):
+        program = "import subprocess,sys,time; subprocess.Popen([sys.executable,'-c','import time; time.sleep(30)']); time.sleep(30)"
+        started = time.monotonic()
+        with patch.object(updates.os, "killpg", wraps=os.killpg) as stop:
+            with self.assertRaises(updates.UpdateError):
+                updates.run([sys.executable, "-c", program], timeout=0.2)
+        self.assertLess(time.monotonic() - started, 5)
+        stop.assert_called_once()
+        self.assertEqual(stop.call_args.args[1], updates.signal.SIGKILL)
+        self.assertGreater(stop.call_args.args[0], 1)
+
+    def test_operator_interruption_cleans_only_the_step_session_and_closes_pipes(self):
+        process = MagicMock()
+        process.pid = 987654
+        process.communicate.side_effect = KeyboardInterrupt
+        with patch.object(subprocess, "Popen", return_value=process), patch.object(updates.os, "killpg") as stop:
+            with self.assertRaises(KeyboardInterrupt):
+                updates.run(["fixture-only"])
+        stop.assert_called_once_with(987654, updates.signal.SIGKILL)
+        process.wait.assert_called_once_with(timeout=5)
+        process.stdout.close.assert_called_once()
+        process.stderr.close.assert_called_once()
 
 
 if __name__ == "__main__":
