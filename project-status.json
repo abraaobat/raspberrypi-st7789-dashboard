@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-17T13:56:24Z",
-  "status": "v0.8.0 MQTT + displays • software aprovado / testes físicos adiados",
+  "updatedAt": "2026-09-17T14:00:53Z",
+  "status": "v0.8.0 • software OK",
   "statusClass": "ops",
   "progress": 92,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
