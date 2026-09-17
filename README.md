@@ -27,7 +27,7 @@ Pelo computador ou celular, o usuário pode:
 
 O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0 estão homologados no Raspberry Pi 3. A atualização preservou a configuração anterior e adicionou as integrações de forma opt-in, sem regressão nos botões, na prévia ou no carrossel.
 
-A instalação ativa v0.5.0 foi confirmada no Raspberry em 17/09/2026, com SPI, serviços, API e estado do display aprovados. A v0.6.0 tem 100 testes automatizados e fluxo de navegador com serviços fictícios; a nova biblioteca precisa ser instalada separadamente. Pi-hole/Home Assistant reais e legibilidade de PI-HOLE/CASA/RELÓGIO/POMODORO/fontes personalizadas no ST7789 aguardam homologação manual. Os novos módulos permanecem desativados na migração; nenhuma fonte é criada automaticamente. Veja [modelos e atualização](docs/CUSTOM_TEMPLATES.md).
+A instalação ativa v0.5.0 foi confirmada no Raspberry em 17/09/2026, com SPI, serviços, API e estado do display aprovados. A v0.6.0 tem 100 testes automatizados aprovados no computador e no ARM em checkout separado, mais fluxo de navegador com serviços fictícios. Backup privado preparado; a nova biblioteca precisa ser instalada pelo terminal com senha de administrador. Pi-hole/Home Assistant reais e legibilidade de PI-HOLE/CASA/RELÓGIO/POMODORO/fontes personalizadas no ST7789 aguardam homologação manual. Os novos módulos permanecem desativados na migração; nenhuma fonte é criada automaticamente. Veja [modelos e atualização](docs/CUSTOM_TEMPLATES.md).
 
 ### Modelos para seu próprio app
 

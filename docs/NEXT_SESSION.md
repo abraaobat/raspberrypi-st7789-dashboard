@@ -56,6 +56,14 @@ A instalação v0.5.0 foi confirmada no Raspberry: checkout limpo `54bef83`, API
 
 Veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md) para modelos, Node-RED via GET/JSON, limites e atualização da biblioteca. MQTT nativo não foi implementado por esse modelo.
 
+## Preparação v0.5.0 → v0.6.0 aprovada
+
+A revisão `5883e11` foi preparada em `~/.cache/st7789-dashboard-update-v0.6.0`, sem alterar o checkout ativo. Os 100 testes passaram no ARM. Dependências e unidades de serviço permanecem iguais. Foi criado outro backup privado completo do estado, com prefixo `~/.config/raspberrypi-st7789-dashboard.backup-v0.5-before-v0.6-`; PIN, configuração e chave de sessão foram conferidos sem exibir seus conteúdos. Nenhuma credencial real foi cadastrada durante os testes.
+
+O Raspberry continua exigindo senha para `sudo`. A instalação ativa ainda é v0.5.0 e passou novamente na auditoria automática. Finalizar o instalador v0.6.0 no terminal é o único passo de implantação restante; fontes reais e observação do TFT são gates manuais separados.
+
+Na revisão `5883e11`, [CI de testes e navegador](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35183650597) e [publicação GitHub Pages](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35183650467) terminaram com sucesso. A conferência local da landing cobriu português/inglês em 1440/980/390/320 px, mantendo as cinco imagens proporcionais e o destino Pix confirmado.
+
 ## Próximas implementações
 
 1. Homologar Pi-hole 6/Home Assistant reais e as duas novas páginas no TFT quando o usuário puder configurar suas credenciais.
@@ -104,6 +112,6 @@ git pull --ff-only
 ./scripts/validate_install.sh
 ```
 
-Se o comando de status mostrar alterações próprias, não as descarte: preserve-as antes de atualizar. Informe a senha somente no terminal quando `sudo` pedir, nunca nesta conversa. O instalador usa o usuário/caminhos existentes e executa os testes antes de reiniciar os serviços; ele também reconfere dependências. O backup privado já foi preparado nesta retomada; se houver novos ajustes antes da instalação, faça outra cópia. Os novos módulos entram desativados e o PIN existente não precisa ser recriado.
+Se o comando de status mostrar alterações próprias, não as descarte: preserve-as antes de atualizar. Informe a senha somente no terminal quando `sudo` pedir, nunca nesta conversa. O instalador usa o usuário/caminhos existentes e executa os testes antes de reiniciar os serviços; ele também reconfere dependências. O backup privado v0.5.0 já foi preparado nesta retomada; se houver novos ajustes antes da instalação, faça outra cópia. Os módulos existentes mantêm suas escolhas e o PIN não precisa ser recriado. Os modelos não adicionam páginas automaticamente.
 
 Confira API com versão `0.6.0`, atualize o navegador e use o mesmo PIN. Veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md) para criar uma fonte com exemplo, aplicar e conferir no TFT. Tetris foi cancelado e não foi implementado.

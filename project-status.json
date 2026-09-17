@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-17T04:53:42Z",
-  "status": "v0.6.0 pronta • modelos HTTP/JSON • Pi ativo na v0.5.0",
+  "updatedAt": "2026-09-17T04:56:17Z",
+  "status": "v0.6.0 testada no ARM • instalação final pendente",
   "statusClass": "ops",
   "progress": 92,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "Instalação v0.5.0 confirmada no Raspberry: serviços/API/SPI/estado aprovados. v0.6.0 soma seis modelos HTTP/JSON, conferência offline de caminhos, rascunho separado de aplicação, respostas antigas descartadas e status desconhecidos neutros. 100 testes locais e fluxo completo de navegador isolado aprovados. ARM v0.6 e instalação final são etapas separadas. Landing bilíngue, fotos e Pix preservados.",
+  "current": "Instalação v0.5.0 confirmada saudável no Raspberry. v0.6.0 soma seis modelos HTTP/JSON, conferência offline de caminhos, rascunho separado de aplicação, respostas antigas descartadas e status desconhecidos neutros. 100 testes aprovados no computador e no ARM em checkout separado, mais fluxo completo de navegador isolado. Backup privado completo preparado; instalação final exige senha de administrador no terminal. Landing bilíngue, fotos e Pix preservados.",
   "architecture": "Browser → Auth API → Config/Registry + Source Templates/Offline JSON + shared Pomodoro → async providers → Pillow → ST7789/Preview",
-  "next": "Validar a v0.6.0 no ARM em cópia separada e concluir instalação com senha de administrador; depois fonte real no TFT, ciclo curto de Relógio/Pomodoro e conectores reais. Search Console depende de login. MQTT nativo, Docker detalhado e novos drivers permanecem futuros.",
+  "next": "Concluir instalação v0.6.0 no terminal do Pi; depois fonte real no TFT, ciclo curto de Relógio/Pomodoro e conectores reais. Search Console depende de login. MQTT nativo, Docker detalhado, contratos específicos de apps e novos drivers permanecem futuros.",
   "action": "Instalar v0.6.0 pelo terminal do Pi, atualizar o painel, escolher modelo em Adicionar fonte, conferir exemplo sem conexão, informar URL real e guardar/aplicar. Credenciais somente no painel privado. Roteiro: docs/CUSTOM_TEMPLATES.md.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
@@ -34,13 +34,13 @@
     "Clock timezone + 12/24h + seconds ✓ software",
     "Pomodoro panel controls + process persistence + reboot safety ✓ software",
     "RELÓGIO / POMODORO — physical validation pending",
-    "100 automated tests ✓ local",
+    "100 automated tests ✓ local + ARM staged checkout",
     "Private pre-update backup + active v0.3 audit ✓",
     "v0.5.0 Raspberry Pi deployment + health audit ✓",
     "Six safe HTTP/JSON templates ✓ software",
     "Offline JSON path inspection + draft/apply separation ✓ browser",
     "Neutral unknown custom statuses + details ✓ software",
-    "v0.6.0 ARM validation / deployment — pending",
+    "v0.6.0 ARM validation ✓ / deployment — administrator password pending",
     "Display profiles foundation ✓ software",
     "Public landing page + Google indexing foundation ✓",
     "Google Search Console — login/verification pending",
@@ -56,6 +56,6 @@
   "activity": {
     "date": "2026-09-17",
     "type": "update",
-    "text": "v0.5.0 confirmada ativa no Raspberry com auditoria aprovada. v0.6.0: seis modelos HTTP/JSON, conferência de exemplos sem conexão, confirmação/rascunho separados da aplicação, respostas antigas descartadas e status desconhecidos neutros; 100 testes locais e navegador isolado aprovados. Landing em oito cenários aprovada, fotos/Pix preservados. MQTT nativo e drivers adicionais continuam futuros; ARM/implantação v0.6 e TFT pendentes."
+    "text": "v0.5.0 confirmada ativa e saudável no Raspberry. v0.6.0: seis modelos HTTP/JSON, conferência de exemplos sem conexão, confirmação/rascunho separados da aplicação, respostas antigas descartadas e status desconhecidos neutros; 100 testes no computador/ARM e navegador isolado aprovados. Novo backup privado preparado, landing em oito cenários aprovada e fotos/Pix preservados. Instalação final exige senha no terminal; fontes reais/TFT, MQTT nativo e drivers adicionais permanecem pendentes."
   }
 }

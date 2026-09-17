@@ -56,7 +56,9 @@ Os modelos viram páginas personalizadas normais e entram no backup de configura
 
 ## Atualizar para v0.6.0
 
-A instalação v0.5.0 foi confirmada no Raspberry em 17/09/2026. Para instalar a biblioteca de modelos, como usuário `pi`, confirme antes que `git status --short` não mostra alterações próprias e prepare outro backup privado se mudou seus ajustes. Depois:
+A instalação v0.5.0 foi confirmada no Raspberry em 17/09/2026. Backup privado completo foi preparado para a próxima atualização, e os 100 testes v0.6.0 passaram no ARM em checkout separado. Não houve troca dos serviços ativos: a instalação final exige senha de administrador no terminal.
+
+Para instalar a biblioteca de modelos, como usuário `pi`, confirme antes que `git status --short` não mostra alterações próprias e prepare outro backup privado se mudou seus ajustes depois dessa preparação. Depois:
 
 ```bash
 cd ~/raspberrypi-st7789-dashboard
