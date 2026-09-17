@@ -104,12 +104,14 @@ Critério de saída: falhas de serviços e rede são visíveis sem comprometer o
 - gestos físicos para controlar Pomodoro sem alterar anterior/próxima; pendente, requer desenho de interação e homologação
 - meteorologia com cache e localização explícita; ✅ hardware
 - Home Assistant somente de leitura, até quatro entidades escolhidas; ✅ software
-- MQTT nativo opcional; pendente. Node-RED HTTP/JSON já possui modelo/roteiro.
+- MQTT 3.1.1 opcional, somente leitura, tópicos exatos/texto/JSON e cofre; ✅ software v0.8.0; broker real/TFT pendentes
 - página Casa para sensores, portas, luzes e energia; ✅ software; notificações pendentes
 - ticker financeiro opcional, com limites e indicação de atualização.
 - páginas HTTP/JSON criadas pelo usuário a partir de modelos seguros; ✅ software
 - seis modelos HTTP/JSON, conferência offline de caminhos e isolamento rascunho/aplicação; ✅ software v0.6.0
-- Node-RED via endpoint HTTP/JSON; ✅ modelo e roteiro; MQTT nativo continua pendente
+- Node-RED via endpoint HTTP/JSON; ✅ modelo e roteiro; sensores MQTT também disponíveis na v0.8.0
+
+MQTT usa assinaturas curtas QoS 0, sem PUBLISH/will/sessão persistente e sem dependências obrigatórias. Prefere valores retidos; não garante captura de eventos transitórios nem deduz idade da medição. TLS é validado, e MQTT sem TLS exige consentimento na LAN/tailnet. [Contrato e limites](docs/MQTT_MONITOR.md).
 
 Critério de saída: módulos podem ser instalados e removidos sem aumentar a superfície obrigatória do núcleo.
 
@@ -124,6 +126,8 @@ Critério de saída: módulos podem ser instalados e removidos sem aumentar a su
 - matriz de Raspberry Pi e módulos ST7789 validados;
 - perfis desacoplados de resolução, cor, rotação e driver; ✅ fundação
 - adaptação de framebuffer testada para 128×64 monocromático e 320×240 colorido; ✅ software
+- layout 128×64 nativo e simulação segura no painel; ✅ software v0.8.0
+- drivers opcionais Luma SSD1306/I2C e ILI9341/SPI escolhidos pelo administrador; ✅ software v0.8.0; homologação física pendente
 - documentação de migração e troubleshooting;
 - releases versionadas e rollback.
 
@@ -131,18 +135,19 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A instalação v0.6.0 foi confirmada ativa e saudável no Raspberry em 17/09/2026. Isso não substitui observação visual das novas páginas. Por decisão do mantenedor, os testes manuais ficam para o final e não bloqueiam as expansões independentes. A v0.7.0 acrescenta Docker local somente de leitura, filtros, contagem de saúde e cache. São 118 testes de software e fluxo completo de navegador isolado aprovados. O socket padrão Docker não existe no Pi; não houve instalação nem autorização de acesso. A biblioteca mantém os seis modelos HTTP/JSON, sem instalar código de terceiros ou criar fontes automaticamente. A página bilíngue e o Pix confirmado são preservados. Search Console aguarda login. MQTT nativo, gestos físicos do Pomodoro e drivers adicionais continuam futuros; Docker real e novas páginas ainda não estão homologados no TFT.
+D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A instalação v0.6.0 foi confirmada ativa e saudável no Raspberry em 17/09/2026. Isso não substitui observação visual das novas páginas. Por decisão do mantenedor, os testes manuais ficam para o final e não bloqueiam as expansões independentes. A v0.7.0 acrescenta Docker local somente de leitura, filtros, contagem de saúde e cache. São 118 testes de software e fluxo completo de navegador isolado aprovados. O socket padrão Docker não existe no Pi; não houve instalação nem autorização de acesso. A biblioteca mantém os seis modelos HTTP/JSON, sem instalar código de terceiros ou criar fontes automaticamente. A página bilíngue e o Pix confirmado são preservados. Search Console aguarda login. MQTT e drivers opcionais SSD1306/ILI9341 têm implementação v0.8.0, ainda sem homologação dos serviços/módulos reais. OLED tem resumo nativo, e simulação no painel não troca hardware. Gestos físicos do Pomodoro continuam futuros; Docker real e novas páginas ainda não estão homologados no TFT.
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 
 ## Sequência de retomada
 
-0. **Continuar o desenvolvimento:** MQTT nativo opcional, contratos específicos de apps e compatibilidade de drivers. Os testes abaixo ficam no checklist final, sem serem marcados como aprovados antes de execução real. A v0.6.0 já está instalada; v0.7.0 pode ser instalada junto das próximas entregas pelo [roteiro de atualização](docs/DOCKER_MONITOR.md), sem versões intermediárias.
+0. **Continuar o desenvolvimento:** contratos específicos de apps, distribuição/rollback e refinamentos após os gates de uso real. MQTT e drivers extras têm implementação de software v0.8.0. Os testes abaixo ficam no checklist final, sem serem marcados como aprovados antes de execução real. A v0.6.0 já está instalada; a versão mais recente inclui as anteriores, sem atualizações intermediárias.
 1. **Fonte personalizada no hardware:** criar pelo painel uma página HTTP/JSON de interesse real e confirmar sua legibilidade no ST7789. O núcleo, a extração e a API já possuem testes; esse gate é somente físico.
 2. **Homologar integrações reais:** configurar Pi-hole 6 e Home Assistant pelos assistentes já implementados, comparar dados e observar estados de falha/legibilidade no TFT.
 3. **Desk no hardware:** ativar Relógio/Pomodoro pelo painel, executar um ciclo curto, pausar/retomar e observar contagem/legibilidade no TFT. Os botões continuam anterior/próxima; não há novos gestos para homologar nesta versão.
 4. **Docker real, opcional:** em um host onde o daemon e acesso local já estejam autorizados, comparar execução/saúde, nomes ausentes e cache com o monitor. Não instalar Docker nem conceder privilégios só para testar o display. Node-RED HTTP/JSON já tem modelo/roteiro, com fluxo real pendente; tokens arbitrários no assistente genérico continuam não habilitados.
-5. **Outros displays:** implementar e homologar drivers SSD1306 e ILI9341. Os perfis e a adaptação do framebuffer não substituem o teste físico de cada módulo.
+5. **MQTT real, opcional:** usar broker existente e tópicos retidos, conferir valores/sem dados/cache e observar a página no TFT. Não instalar broker só para testar; não é captura contínua de eventos.
+6. **Outros displays:** simular sem trocar hardware; homologar os drivers experimentais SSD1306/ILI9341 somente em montagens compatíveis próprias. A implementação e os testes de software não substituem evidência física. [Matriz de compatibilidade](docs/DISPLAY_COMPATIBILITY.md).
 
 O roteiro de continuidade e os gates pendentes estão em [docs/NEXT_SESSION.md](docs/NEXT_SESSION.md).
 

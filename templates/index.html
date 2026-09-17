@@ -50,6 +50,7 @@
           <span id="displayState" class="tiny-pill">Estado desconhecido</span>
         </div>
 
+        <label class="select-field"><span>Visualização do display</span><select id="previewProfile"></select><small id="previewProfileNote">A prévia usa o perfil físico configurado pelo administrador.</small></label>
         <div class="device-stage">
           <div class="display-device">
             <img id="previewImage" width="240" height="240" alt="Prévia do display ST7789">
@@ -172,7 +173,7 @@
               <label class="select-field display-profile-field">
                 <span>Perfil do display</span>
                 <select id="displayProfile"></select>
-                <small>Novos drivers poderão reutilizar as mesmas páginas.</small>
+                <small>O hardware experimental é escolhido pelo administrador, não por esta página. Use a simulação na prévia.</small>
               </label>
             </section>
           </div>
@@ -191,6 +192,25 @@
           <p class="muted small">O serviço precisa ter acesso já autorizado ao socket local. O painel não concede permissões: acesso ao Docker pode equivaler a acesso de administrador.</p>
           <button id="checkDocker" class="button secondary" type="button">Consultar Docker aplicado</button>
           <p id="dockerStatus" class="source-test-result" role="status" aria-live="polite">Não consultado. Os filtros só entram em vigor após Aplicar alterações.</p>
+        </article>
+
+        <article class="panel custom-panel mqtt-panel">
+          <div class="panel-head"><div><p class="section-kicker">SENSORES E IOT</p><h2>MQTT</h2></div><span class="muted small">Opcional • somente leitura</span></div>
+          <p class="muted small">Ative MQTT em Conteúdo e ordem. Esta fonte faz assinaturas curtas a cada atualização; prefira valores retidos pelo broker. Não envia comandos e não é um histórico de eventos.</p>
+          <label class="compact-field"><span>Endereço do broker</span><input id="mqttBroker" class="text-input" maxlength="512" placeholder="mqtts://servidor:8883"><small>Sem usuário/senha na URL. TLS validado por padrão.</small></label>
+          <label class="http-consent"><input id="mqttAllowPlain" type="checkbox"><span>Autorizar MQTT sem TLS somente na minha rede local ou tailnet.</span></label>
+          <label class="select-field"><span>Atualização MQTT (segundos)</span><input id="mqttRefresh" class="text-input" type="number" min="15" max="3600" step="1"></label>
+          <div id="mqttSensors" class="integration-grid"></div>
+          <p class="muted small">Até quatro tópicos exatos, sem + ou #. Sem mensagem significa SEM DADOS, não desligado. Valores retidos não informam, por si só, a hora da medição.</p>
+          <div class="integration-grid">
+            <label class="compact-field"><span>Usuário MQTT (opcional)</span><input id="mqttUsername" class="text-input" maxlength="128" autocomplete="off"></label>
+            <label class="compact-field"><span>Senha MQTT</span><input id="mqttPassword" class="text-input" type="password" maxlength="1024" autocomplete="new-password"><small>Guardada no cofre privado; nunca incluída no backup de configuração.</small></label>
+          </div>
+          <p id="mqttCredentialStatus" class="muted small" role="status">Sem credencial guardada; acesso anônimo.</p>
+          <div class="source-test-actions"><button id="storeMqttCredential" class="button secondary" type="button">Guardar credencial MQTT</button><button id="removeMqttCredential" class="button ghost" type="button">Remover credencial</button></div>
+          <p class="muted small">Use uma conta limitada à leitura dos tópicos e uma rede confiável para cadastrar o segredo. Guardar credencial não aplica os ajustes nem ativa a página.</p>
+          <button id="checkMqtt" class="button secondary" type="button">Consultar MQTT aplicado</button>
+          <p id="mqttStatus" class="source-test-result" role="status" aria-live="polite">Não consultado. A consulta usa apenas os ajustes já aplicados.</p>
         </article>
 
         <article class="panel custom-panel">

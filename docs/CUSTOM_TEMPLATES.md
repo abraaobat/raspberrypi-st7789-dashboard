@@ -52,7 +52,7 @@ O exemplo admite objeto ou lista JSON de até 32 KiB em UTF-8; caminhos têm at�
 
 Fontes reais continuam somente GET/JSON, sem headers de autenticação arbitrários, com limites de tempo/tamanho e bloqueio de destinos inseguros. Para serviços autenticados, use os conectores guiados existentes; não remova a autenticação de um serviço para adaptar este modelo.
 
-Os modelos viram páginas personalizadas normais e entram no backup de configuração, sem incluir o catálogo ou o exemplo digitado. Não exigem novas dependências nem mudanças de GPIO/driver. MQTT, Docker detalhado, plugins executáveis e novos drivers permanecem etapas futuras.
+Os modelos viram páginas personalizadas normais e entram no backup de configuração, sem incluir o catálogo ou o exemplo digitado. Não exigem novas dependências nem mudanças de GPIO/driver. Docker opcional foi implementado na v0.7.0; a v0.8.0 acrescenta [MQTT somente leitura](MQTT_MONITOR.md) e [drivers experimentais](DISPLAY_COMPATIBILITY.md), com testes físicos pendentes. Plugins executáveis não fazem parte destas entregas.
 
 ## Atualização — roteiro da v0.6.0
 

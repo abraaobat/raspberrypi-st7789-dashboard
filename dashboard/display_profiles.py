@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 
 from PIL import Image
 
@@ -45,7 +46,7 @@ PROFILES = (
         width=320,
         height=240,
         color_mode="RGB",
-        rotation=90,
+        rotation=0,
         driver="ili9341",
     ),
 )
@@ -58,6 +59,14 @@ def profile(profile_id: str | None = None) -> DisplayProfile:
     return PROFILE_BY_ID.get(profile_id or DEFAULT_PROFILE_ID, PROFILE_BY_ID[DEFAULT_PROFILE_ID])
 
 
+def runtime_profile(config: dict) -> DisplayProfile:
+    """Only the operator's service environment can select experimental hardware."""
+    selected = os.environ.get("ST7789_DISPLAY_PROFILE") or config.get("displayProfile", DEFAULT_PROFILE_ID)
+    if selected not in PROFILE_BY_ID:
+        raise ValueError("ST7789_DISPLAY_PROFILE desconhecido; confira a configuração do serviço")
+    return PROFILE_BY_ID[selected]
+
+
 def public_profiles() -> list[dict]:
     return [
         {
@@ -68,6 +77,9 @@ def public_profiles() -> list[dict]:
             "colorMode": item.color_mode,
             "driver": item.driver,
             "available": item.available,
+            "previewAvailable": True,
+            "driverImplemented": True,
+            "hardwareValidated": item.driver == "st7789",
         }
         for item in PROFILES
     ]

@@ -11,7 +11,7 @@ import signal
 import time
 
 from dashboard.config import ConfigStore, enabled_pages
-from dashboard.display_profiles import profile
+from dashboard.display_backends import create_display
 from dashboard.providers import DataHub
 from dashboard.rendering import render_page
 from dashboard.runtime import RuntimeStore
@@ -19,26 +19,6 @@ from dashboard.runtime import RuntimeStore
 GPIO_CHIP = "/dev/gpiochip0"
 BUTTON_PREV = 23
 BUTTON_NEXT = 24
-
-
-def create_display(config):
-    import st7789
-
-    target = profile(config.get("displayProfile"))
-    if target.driver != "st7789" or not target.available:
-        raise RuntimeError(f"driver de display indisponível: {target.driver}")
-    display = st7789.ST7789(
-        height=target.height,
-        width=target.width,
-        rotation=target.rotation,
-        port=0,
-        cs=0,
-        dc=25,
-        rst=27,
-        spi_speed_hz=40_000_000,
-    )
-    display.begin()
-    return display
 
 
 def create_buttons():
@@ -62,7 +42,13 @@ def main():
     config_store = ConfigStore()
     initial_config = config_store.load(force=True)
     display = create_display(initial_config)
-    buttons = create_buttons()
+    try:
+        buttons = create_buttons()
+    except Exception:
+        cleanup = getattr(display, "cleanup", None)
+        if cleanup:
+            cleanup()
+        raise
     runtime = RuntimeStore()
     data = DataHub()
     running = True
@@ -148,7 +134,7 @@ def main():
                     image = render_page(current_page, snapshot, config)
                     display.display(image)
                     runtime.update_display(current_page)
-                    provider_key = current_page if current_page in {"weather", "sysops", "pihole", "homeassistant", "docker"} else "custom"
+                    provider_key = current_page if current_page in {"weather", "sysops", "pihole", "homeassistant", "docker", "mqtt"} else "custom"
                     provider_state = snapshot.get(provider_key)
                 except Exception as exc:  # keep service alive and report the fault
                     runtime.update_display(current_page, str(exc))
@@ -161,6 +147,9 @@ def main():
             buttons.release()
         except Exception:
             pass
+        cleanup = getattr(display, "cleanup", None)
+        if cleanup:
+            cleanup()
 
 
 if __name__ == "__main__":

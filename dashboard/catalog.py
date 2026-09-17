@@ -80,6 +80,10 @@ PAGE_CATALOG = (
         "id": "docker", "title": "Docker", "description": "Contêineres locais: execução, parados e saúde, sem controle.",
         "kind": "integration", "defaultEnabled": False, "defaultRefreshSeconds": 30, "minRefreshSeconds": 15,
     },
+    {
+        "id": "mqtt", "title": "MQTT", "description": "Até quatro sensores ou estados de tópicos MQTT exatos, somente leitura.",
+        "kind": "integration", "defaultEnabled": False, "defaultRefreshSeconds": 30, "minRefreshSeconds": 15,
+    },
 )
 
 PAGE_BY_ID = {page["id"]: page for page in PAGE_CATALOG}

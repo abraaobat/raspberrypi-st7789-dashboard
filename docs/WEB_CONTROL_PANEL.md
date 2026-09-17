@@ -122,6 +122,7 @@ Requisitos:
 | `GET` | `/api/config` | configuração pública atual |
 | `PUT` | `/api/config` | validar e salvar configuração |
 | `GET` | `/api/preview?page=status` | PNG 240×240 da página |
+| `GET` | `/api/preview?page=status&profile=ssd1306-128x64` | simulação nativa, sem trocar hardware; ILI9341 também disponível |
 | `POST` | `/api/display/page` | selecionar página ativa permitida |
 | `POST` | `/api/sources/test` | validar e consultar uma fonte HTTP/JSON sem salvá-la |
 | `GET` | `/api/integrations/status` | presença da credencial e endereço vinculado, sem segredo |
@@ -132,6 +133,9 @@ Requisitos:
 | `POST` | `/api/config/import` | restaurar configuração validada, preservando PIN/cofre |
 | `GET` | `/api/pomodoro/state` | estado, duração do ciclo, restante e progresso; sem boot/prazo interno |
 | `GET` | `/api/docker/state` | resumo/cache do Docker local aplicado; sem parâmetros, comandos ou socket fornecido pelo navegador |
+| `GET` | `/api/mqtt/state` | sensores/cache MQTT dos ajustes aplicados, sem parâmetros/publicação |
+| `GET` | `/api/mqtt/credential/status` | metadados de presença/broker vinculado, sem usuário/senha |
+| `PUT` / `DELETE` | `/api/mqtt/credential` | guardar `{brokerUrl, username, password}` ou remover credencial privada, com sessão/CSRF |
 | `POST` | `/api/pomodoro/command` | ação fechada `start`, `pause`, `resume` ou `reset`; usa duração aplicada |
 
 IDs permitidos: `pihole` e `homeassistant`. Todos esses endpoints exigem sessão autenticada; mudanças e testes também exigem CSRF. O teste usa a credencial digitada ou, se ausente, a credencial local vinculada ao endereço. Não há `GET` de credencial. Exemplo de ajustes não secretos:
@@ -207,7 +211,7 @@ Um banco de dados não é necessário no MVP. Estado transitório pode permanece
 - configuração inválida é rejeitada sem corromper o último estado válido;
 - não existe execução de comandos arbitrários pela API.
 
-Todos os itens do MVP foram homologados no Raspberry Pi 3 real em desktop e celular. Clima e SysOps também foram homologados visualmente no ST7789 físico. Fontes personalizadas e perfis experimentais de display possuem testes automatizados e verificação em navegador; resta somente a homologação física de uma página HTTP/JSON e de futuros drivers adicionais.
+Todos os itens do MVP foram homologados no Raspberry Pi 3 real em desktop e celular. Clima e SysOps também foram homologados visualmente no ST7789 físico. As entregas posteriores possuem evidências de software separadas da homologação física: fontes HTTP/JSON, conectores, Desk, Docker, MQTT e drivers opcionais adicionais aguardam os testes reais agrupados em [FINAL_VALIDATION.md](FINAL_VALIDATION.md).
 
 Os assistentes/cofre/backup da v0.4.0 passaram por testes de API e navegador com serviços simulados, em 1440/980/390/320 px. Acesso a Pi-hole/Home Assistant reais e leitura das novas páginas no TFT permanecem pendentes. Veja [limites e recuperação das credenciais](BACKUP_AND_CREDENTIALS.md).
 
@@ -216,3 +220,7 @@ A v0.5.0 acrescenta Relógio/Pomodoro, com 84 testes de software aprovados tamb�
 A v0.6.0 acrescenta seis modelos em **Adicionar fonte**, **Conferir exemplo, sem conexão** e status desconhecidos neutros. `GET /api/catalog` inclui `sourceTemplates`; `POST /api/sources/inspect` exige sessão/CSRF e aceita somente `sample`, `valuePath` e `secondaryPath`, sem acesso à rede nem gravação. O exemplo tem limite de 32 KiB e não entra no backup. URL/identificação são preservadas ao aplicar um modelo a uma fonte existente. **Guardar no rascunho** não altera o display até **Aplicar alterações**. Veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md).
 
 A v0.7.0 acrescenta Docker opcional, filtros exatos, frequência, consulta dos ajustes aplicados e prévia compartilhada, com 118 testes e fluxo de navegador isolado. O daemon local precisa estar previamente acessível; falta de socket/permissão não é corrigida automaticamente. Execução sem healthcheck não é rotulada como saudável; falha de consulta conserva dados somente com indicação de cache. Nenhum endpoint permite controlar contêineres. Veja [DOCKER_MONITOR.md](DOCKER_MONITOR.md). Os gates manuais foram adiados para o final; a instalação v0.6.0 foi confirmada automaticamente no Pi, sem socket Docker padrão presente.
+
+A v0.8.0 inclui MQTT opcional, até quatro sensores/tópicos distintos, texto/JSON e cofre vinculado ao broker, sem PUBLISH/controle. Assinaturas são curtas e favorecem valores retidos; não é histórico contínuo de eventos nem confirmação da hora de medição. TLS validado ou consentimento de MQTT sem TLS somente na rede local/tailnet. Guardar segredo não aplica ajustes; consulta considera somente os ajustes já aplicados. [Limites MQTT](MQTT_MONITOR.md).
+
+**Visualização do display** permite simular ST7789/OLED/ILI9341 sem mudança física. Sem simulação, a prévia reflete o perfil configurado pelo administrador. O botão de seleção envia apenas a página, não o perfil simulado. OLED recebe layout compacto nativo e ILI9341 conserva proporção com margens. Drivers opcionais ainda não têm evidência física; a seleção deles fica fora da configuração web. [Matriz de compatibilidade](DISPLAY_COMPATIBILITY.md).

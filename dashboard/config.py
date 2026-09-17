@@ -15,6 +15,7 @@ from .display_profiles import DEFAULT_PROFILE_ID, PROFILE_BY_ID
 from .integration_settings import INTEGRATION_IDS, integration_settings
 from .desk_settings import DeskError, clock_settings, pomodoro_settings
 from .docker_monitor import DockerError, docker_settings
+from .mqtt_settings import MQTTError, mqtt_settings
 
 APP_DIR_NAME = "raspberrypi-st7789-dashboard"
 CUSTOM_ID_PATTERN = re.compile(r"custom:[a-z0-9][a-z0-9-]{0,31}$")
@@ -65,6 +66,7 @@ def default_config() -> dict:
             "services": [],
         },
         "docker": {"names": []},
+        "mqtt": mqtt_settings({}),
         "customPages": [],
         "clock": clock_settings({}),
         "pomodoro": pomodoro_settings({}),
@@ -281,6 +283,11 @@ def normalize_config(payload: dict | None) -> dict:
     try:
         result["docker"] = docker_settings(payload.get("docker", {}))
     except DockerError as exc:
+        raise ConfigError(str(exc)) from exc
+
+    try:
+        result["mqtt"] = mqtt_settings(payload.get("mqtt", {}))
+    except MQTTError as exc:
         raise ConfigError(str(exc)) from exc
 
     try:

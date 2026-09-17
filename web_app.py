@@ -13,7 +13,7 @@ from dashboard import __version__
 from dashboard.auth import AuthError, AuthStore, LoginLimiter
 from dashboard.catalog import catalog_by_id, public_catalog
 from dashboard.config import ConfigError, enabled_pages, load_config, normalize_config, save_config
-from dashboard.display_profiles import public_profiles
+from dashboard.display_profiles import public_profiles, runtime_profile, PROFILE_BY_ID
 from dashboard.credentials import CredentialError, CredentialStore
 from dashboard.integration_settings import INTEGRATION_IDS, integration_settings
 from dashboard.integrations import fetch_integration
@@ -22,6 +22,7 @@ from dashboard.rendering import render_page
 from dashboard.runtime import RuntimeStore
 from dashboard.desk import DeskError
 from dashboard.source_templates import inspect_source_sample, public_source_templates
+from dashboard.mqtt_settings import encode_credentials, broker_url
 
 
 def create_app(test_config=None):
@@ -142,6 +143,7 @@ def create_app(test_config=None):
     def catalog():
         config = load_config(state_override)
         return jsonify({"pages": public_catalog(config["customPages"]), "displays": public_profiles(),
+                        "activeDisplayProfile": runtime_profile(config).id,
                         "sourceTemplates": public_source_templates()})
 
     @app.get("/api/config")
@@ -169,10 +171,56 @@ def create_app(test_config=None):
             return jsonify({"error": str(exc)}), 400
         return jsonify(normalized)
 
+    @app.get("/api/mqtt/state")
+    @require_auth
+    def mqtt_state():
+        if request.args:
+            return jsonify({"error": "a consulta MQTT não aceita parâmetros"}), 400
+        config = load_config(state_override)
+        page = next(item for item in config["pages"] if item["id"] == "mqtt")
+        return jsonify(data.get(config, "mqtt", page["refreshSeconds"])["mqtt"])
+
+    @app.get("/api/mqtt/credential/status")
+    @require_auth
+    def mqtt_credential_status():
+        try:
+            return jsonify(credentials.status("mqtt", load_config(state_override)["mqtt"]["brokerUrl"]))
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    @app.put("/api/mqtt/credential")
+    @require_auth
+    @require_csrf
+    def put_mqtt_credential():
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict) or set(payload) != {"brokerUrl", "username", "password"}:
+            return jsonify({"error": "informe broker, usuário e senha MQTT"}), 400
+        try:
+            metadata = credentials.put("mqtt", broker_url(payload["brokerUrl"], required=True),
+                                       encode_credentials(payload["username"], payload["password"]))
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        data.external.invalidate("mqtt")
+        return jsonify({"ok": True, **metadata})
+
+    @app.delete("/api/mqtt/credential")
+    @require_auth
+    @require_csrf
+    def delete_mqtt_credential():
+        try:
+            credentials.delete("mqtt")
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        data.external.invalidate("mqtt")
+        return jsonify({"ok": True})
+
     @app.get("/api/preview")
     @require_auth
     def preview():
         page_id = request.args.get("page", "status")
+        target_profile = request.args.get("profile")
+        if target_profile and target_profile not in PROFILE_BY_ID:
+            return jsonify({"error": "perfil de prévia desconhecido"}), 400
         config = load_config(state_override)
         if page_id not in catalog_by_id(config["customPages"]):
             return jsonify({"error": "página desconhecida"}), 404
@@ -183,7 +231,7 @@ def create_app(test_config=None):
                     page["enabled"] = True
             config = preview_config
         page_settings = next(page for page in config["pages"] if page["id"] == page_id)
-        image = render_page(page_id, data.get(config, page_id, page_settings["refreshSeconds"]), config)
+        image = render_page(page_id, data.get(config, page_id, page_settings["refreshSeconds"]), config, target_profile=target_profile)
         buffer = io.BytesIO()
         image.save(buffer, format="PNG")
         buffer.seek(0)
@@ -235,6 +283,8 @@ def create_app(test_config=None):
     @require_auth
     @require_csrf
     def put_credential(connector):
+        if connector not in INTEGRATION_IDS:
+            return jsonify({"error": "integração não suportada"}), 400
         payload = request.get_json(silent=True)
         if not isinstance(payload, dict) or set(payload) - {"baseUrl", "secret"}:
             return jsonify({"error": "informe somente endereço e credencial"}), 400
@@ -249,6 +299,8 @@ def create_app(test_config=None):
     @require_auth
     @require_csrf
     def delete_credential(connector):
+        if connector not in INTEGRATION_IDS:
+            return jsonify({"error": "integração não suportada"}), 400
         try:
             credentials.delete(connector)
         except CredentialError as exc:

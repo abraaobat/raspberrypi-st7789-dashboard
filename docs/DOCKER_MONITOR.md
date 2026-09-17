@@ -71,4 +71,4 @@ git pull --ff-only
 
 Preserve alterações próprias caso o status não esteja limpo. Faça um backup privado recente antes de atualizar. Informe senhas somente no terminal/painel privado, nunca na conversa. A v0.7.0 inclui todos os modelos da v0.6.0, portanto não exige uma instalação intermediária. Depois confira a API `0.7.0` e use o mesmo PIN.
 
-Checklist para o final: fonte HTTP/JSON de interesse real; PI-HOLE/CASA com credenciais privadas; ciclo de Pomodoro de um minuto; Docker real somente onde já autorizado; prévia, legibilidade, seleção, carrossel e os dois botões. MQTT nativo e drivers adicionais continuam futuros.
+Checklist para o final: fonte HTTP/JSON de interesse real; PI-HOLE/CASA com credenciais privadas; ciclo de Pomodoro de um minuto; Docker real somente onde já autorizado; prévia, legibilidade, seleção, carrossel e os dois botões. A v0.8.0 implementa [MQTT somente leitura](MQTT_MONITOR.md) e [drivers opcionais experimentais](DISPLAY_COMPATIBILITY.md), ainda pendentes de homologação com sensores/módulos reais.

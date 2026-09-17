@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-17T13:19:56Z",
-  "status": "v0.7.0 Docker testada no ARM • testes finais adiados",
+  "updatedAt": "2026-09-17T13:51:31Z",
+  "status": "v0.8.0 MQTT + displays experimentais • testes físicos adiados",
   "statusClass": "ops",
   "progress": 92,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "Instalação v0.6.0 confirmada saudável no Raspberry. v0.7.0 soma Docker local opcional, filtros exatos, contagem de execução/parados/saúde, quatro linhas priorizando problemas e cache identificado. 118 testes aprovados no computador, no ARM em checkout separado e no CI; navegador completo com Engine Unix fictício aprovado. Backup privado recente preparado e PIN/configuração preservados; serviços ativos permanecem v0.6.0. Sem dependências adicionais, comandos, instalação de Docker ou mudanças de privilégios. Socket Docker padrão ausente no Pi. Testes manuais adiados para o checklist final; fotos, Pix, PIN e navegação preservados.",
-  "architecture": "Browser → Auth API → Config/Registry + Templates/Desk → async read-only providers + local Unix Docker → Pillow → ST7789/Preview",
-  "next": "Continuar MQTT nativo opcional, contratos específicos de apps e compatibilidade de drivers. Atualização v0.7.0 e gates de fonte real/TFT, Desk, conectores e Docker real podem ser agrupados no final. Não instalar Docker nem conceder acesso ao socket automaticamente. Search Console depende de login.",
-  "action": "Continuar recursos independentes sem esperar testes manuais. Instalar a versão mais recente quando conveniente; checklist único em docs/FINAL_VALIDATION.md e limites Docker em docs/DOCKER_MONITOR.md. Credenciais somente no painel privado.",
+  "current": "Instalação v0.6.0 confirmada saudável no Raspberry e preservada. v0.8.0 acrescenta MQTT 3.1.1 somente leitura, até quatro tópicos exatos de texto/JSON, TLS e credenciais privadas vinculadas ao broker; consultas curtas favorecem valores retidos, sem garantia de eventos ou hora da medição. Drivers opcionais SSD1306/ILI9341, OLED nativo 128×64 e simulação web não alteram o hardware. 145 testes locais aprovados, três testes adicionais com Mosquitto preparados para o CI; fluxo completo de navegador isolado aprovado. Mantém Docker/modelos/conectores/Desk. Nenhum broker, driver extra ou privilégio instalado no Pi. CI e testes ARM da v0.8.0 em preparação; testes reais agrupados para o final, com fotos/Pix/PIN/navegação preservados.",
+  "architecture": "Browser → Auth API → Config/Registry + Templates/Desk → bounded read-only HTTP/Docker/MQTT providers → Pillow + native OLED → ST7789 / optional SSD1306+ILI9341 / safe Preview",
+  "next": "Concluir CI/interoperabilidade e testes ARM isolados da v0.8.0; avançar contratos específicos de apps. Atualização e homologação de fontes/TFT, Desk, conectores, Docker, MQTT e displays extras permanecem no checklist final. Não instalar brokers/Docker nem autorizar sockets ou trocar o display automaticamente. Search Console depende de login.",
+  "action": "Instalar diretamente a versão mais recente quando conveniente, sem versões intermediárias. Checklist único em docs/FINAL_VALIDATION.md; limites MQTT em docs/MQTT_MONITOR.md e módulos experimentais em docs/DISPLAY_COMPATIBILITY.md. Credenciais somente no painel privado.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
@@ -49,7 +49,14 @@
     "Display profiles foundation ✓ software",
     "Public landing page + Google indexing foundation ✓",
     "Google Search Console — login/verification pending",
-    "Native MQTT / app contracts / additional drivers — future work",
+    "MQTT 3.1.1 clean snapshot + exact QoS0 topics + no publish ✓ software",
+    "Private broker-bound MQTT credentials + TLS/local consent ✓ isolated browser",
+    "Optional SSD1306 / ILI9341 drivers + explicit buses ✓ mocked hardware",
+    "Native OLED 128×64 + RGB 320×240 preview ✓ software",
+    "Preview simulation without hardware/config change ✓ browser",
+    "145 local tests ✓ / 3 Mosquitto CI cases prepared",
+    "v0.8.0 deployment + real MQTT / extra displays — deferred final checklist",
+    "Specific app contracts — future work",
     "Pomodoro physical gestures — future work"
   ],
   "runtime": {
@@ -61,6 +68,6 @@
   "activity": {
     "date": "2026-09-17",
     "type": "update",
-    "text": "v0.6.0 confirmada ativa e saudável no Raspberry. v0.7.0: Docker local opcional, filtros, execução/parados/saúde e cache; 118 testes aprovados no computador/ARM/CI e navegador com Engine fictício. Backup privado recente criado; PIN/configuração e serviços ativos preservados. Sem instalar Docker ou mudar privilégios; socket padrão ausente no Pi. Documentação/roadmap/landing atualizados e testes manuais agrupados no checklist final por solicitação do mantenedor. MQTT nativo e novos drivers continuam futuros; fotos/Pix/PIN/navegação preservados."
+    "text": "Instalação v0.6.0 confirmada saudável no Raspberry e preservada. v0.8.0 acrescenta MQTT 3.1.1 somente leitura, até quatro tópicos exatos de texto/JSON, TLS e credenciais privadas vinculadas ao broker; consultas curtas favorecem valores retidos, sem garantia de eventos ou hora da medição. Drivers opcionais SSD1306/ILI9341, OLED nativo 128×64 e simulação web não alteram o hardware. 145 testes locais aprovados, três testes adicionais com Mosquitto preparados para o CI; fluxo completo de navegador isolado aprovado. Mantém Docker/modelos/conectores/Desk. Nenhum broker, driver extra ou privilégio instalado no Pi. CI e testes ARM da v0.8.0 em preparação; testes reais agrupados para o final, com fotos/Pix/PIN/navegação preservados."
   }
 }

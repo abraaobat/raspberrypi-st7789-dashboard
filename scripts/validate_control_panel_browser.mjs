@@ -21,12 +21,13 @@ try {
   await page.locator("#pinInput").fill("2468");
   await page.locator("#authButton").click();
   await page.locator("#app").waitFor({state: "visible"});
-  assert.equal(await page.locator(".page-row").count(), 10);
+  assert.equal(await page.locator(".page-row").count(), 11);
   assert.equal(await page.getByRole("checkbox", {name: "Ativar Docker", exact: true}).isChecked(), false);
   assert.equal(await page.getByRole("checkbox", {name: "Ativar Relógio", exact: true}).isChecked(), false);
   assert.equal(await page.getByRole("checkbox", {name: "Ativar Pomodoro", exact: true}).isChecked(), false);
   const fixture = await (await context.request.get(origin + "/fixture/status")).json();
   assert.deepEqual(fixture.dockerCalls, [], "disabled Docker must not access its socket on login");
+  assert.deepEqual(fixture.mqttCalls, [], "disabled MQTT must not connect on login");
   for (const id of ["pihole", "homeassistant"]) {
     await page.locator(`[data-configure-integration="${id}"]`).click();
     await page.locator("#integrationUrl").fill(fixture.baseUrl);
@@ -287,14 +288,87 @@ try {
   await page.locator("#saveButton").click();
   await page.waitForFunction(() => document.querySelector("#toast").textContent.includes("nome de contêiner inválido"));
   assert.deepEqual((await (await context.request.get(origin + "/api/config")).json()).docker, dockerExport.docker);
+  await page.reload();
+  await page.locator("#app").waitFor({state: "visible"});
+  await page.setViewportSize({width: 1440, height: 1000});
+  const beforeSimulation = await (await context.request.get(origin + "/api/config")).json();
+  for (const [profile, width, height] of [["ssd1306-128x64", 128, 64], ["ili9341-320x240", 320, 240]]) {
+    await page.locator("#previewProfile").selectOption(profile);
+    await page.waitForFunction(({width, height}) => {
+      const image = document.querySelector("#previewImage");
+      return image.complete && image.naturalWidth === width && image.naturalHeight === height;
+    }, {width, height});
+    const size = await page.locator("#previewImage").boundingBox();
+    assert(Math.abs(size.width / size.height - width / height) < 0.02, "preview must not stretch the image");
+    assert.match(await page.locator("#previewProfileNote").innerText(), /não troca o hardware/);
+    const frame = await context.request.get(origin + `/api/preview?page=status&profile=${profile}`);
+    if (output) await fs.writeFile(`${output}/${profile}.png`, await frame.body());
+  }
+  assert.deepEqual((await (await context.request.get(origin + "/api/config")).json()), beforeSimulation);
+  await page.locator("#previewProfile").selectOption("");
+
+  await page.locator("#mqttBroker").fill(fixture.mqttUrl);
+  await page.locator("#mqttAllowPlain").check();
+  await page.locator("#mqttRefresh").fill("15");
+  for (const [index, label, topic, format, path, unit] of [[0, "Sala", "casa/sala/temperatura", "text", "", "°C"], [1, "Energia", "casa/energia", "json", "sensor.power", "W"]]) {
+    const row = page.locator(`[data-mqtt-sensor="${index}"]`);
+    await row.locator('[data-mqtt-field="label"]').fill(label);
+    await row.locator('[data-mqtt-field="topic"]').fill(topic);
+    await row.locator('[data-mqtt-field="format"]').selectOption(format);
+    if (path) await row.locator('[data-mqtt-field="valuePath"]').fill(path);
+    await row.locator('[data-mqtt-field="unit"]').fill(unit);
+  }
+  await page.locator("#mqttUsername").fill("readonly-fixture");
+  await page.locator("#mqttPassword").fill("mqtt-fixture-only-password");
+  await page.locator("#storeMqttCredential").click();
+  await page.waitForFunction(() => document.querySelector("#mqttCredentialStatus").textContent.includes("Credencial guardada"));
+  assert.equal(await page.locator("#mqttPassword").inputValue(), "");
+  assert.equal(await page.locator("#mqttUsername").inputValue(), "");
+  assert.equal((await (await context.request.get(origin + "/api/config")).json()).mqtt.brokerUrl, "", "credential storage must not apply draft settings");
+  assert.deepEqual((await (await context.request.get(origin + "/fixture/status")).json()).mqttCalls, [], "draft MQTT must not connect");
+  await page.getByRole("checkbox", {name: "Ativar MQTT", exact: true}).check();
+  await page.locator("#saveButton").click();
+  await page.waitForFunction(() => document.querySelector("#saveState").textContent === "Configuração aplicada");
+  await page.locator("#checkMqtt").click();
+  await page.waitForFunction(async () => (await (await fetch("/api/mqtt/state")).json()).available === true);
+  await page.locator("#checkMqtt").click();
+  await page.waitForFunction(() => document.querySelector("#mqttStatus").textContent.includes("2 de 2"));
+  assert.match(await page.locator("#mqttStatus").innerText(), /retidos podem ser antigos/);
+  const mqttFrame = await context.request.get(origin + "/api/preview?page=mqtt");
+  if (output) await fs.writeFile(`${output}/mqtt-preview.png`, await mqttFrame.body());
+  const mqttExport = await (await context.request.get(origin + "/api/config/export")).json();
+  assert.equal(mqttExport.mqtt.sensors[1].valuePath, "sensor.power");
+  assert(!JSON.stringify(mqttExport).includes("mqtt-fixture-only-password"));
+  assert(!JSON.stringify(mqttExport).includes("readonly-fixture"));
+  for (const width of [1440, 980, 390, 320]) {
+    await page.setViewportSize({width, height: 1000});
+    await page.locator("#checkMqtt").scrollIntoViewIfNeeded();
+    assert(await page.locator(".mqtt-panel").evaluate(element => element.scrollWidth <= element.clientWidth + 1));
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+    if (output) await page.screenshot({path: `${output}/mqtt-${width}.png`});
+  }
+  await page.reload();
+  await page.locator("#app").waitFor({state: "visible"});
+  assert.equal(await page.locator("#mqttBroker").inputValue(), fixture.mqttUrl);
+  assert.equal(await page.locator('[data-mqtt-sensor="1"] [data-mqtt-field="valuePath"]').inputValue(), "sensor.power");
+  await page.locator('[data-mqtt-sensor="0"] [data-mqtt-field="topic"]').fill("casa/#");
+  await page.locator("#mqttRefresh").focus();
+  await page.locator("#saveButton").click();
+  await page.waitForFunction(() => document.querySelector("#toast").textContent.includes("tópicos exatos"));
+  assert.deepEqual((await (await context.request.get(origin + "/api/config")).json()).mqtt, mqttExport.mqtt);
+  await page.locator("#removeMqttCredential").click();
+  await page.waitForFunction(() => document.querySelector("#mqttCredentialStatus").textContent.includes("acesso anônimo"));
+  assert.equal((await (await context.request.get(origin + "/api/mqtt/credential/status")).json()).credentialConfigured, false);
   const finalFixture = await (await context.request.get(origin + "/fixture/status")).json();
+  assert(finalFixture.mqttCalls.some(call => call.type === 8));
+  assert(finalFixture.mqttCalls.every(call => [1, 8, 14].includes(call.type)), "no outgoing MQTT PUBLISH");
   assert(finalFixture.dockerCalls.length >= 4);
   assert(finalFixture.dockerCalls.every(call => call.method === "GET" && /^\/version$|^\/v1\.47\/containers\/json\?all=1$/.test(call.path)));
   const calls = finalFixture.calls;
   assert(calls.filter(call => call.path.startsWith("/api/states/")).every(call => call.method === "GET"));
   assert(calls.every(call => call.method === "GET" || call.path === "/api/auth"));
   assert.deepEqual(errors, []);
-  console.log("PASS: optional read-only Docker over fake Unix socket, applied/draft filters, health counts, absent names, refresh, preview, backup, reload, invalid save and four screen sizes; source templates, offline inspection, connectors, clock, Pomodoro and preserved PIN. Fake services only.");
+  console.log("PASS: read-only MQTT with fake broker, private credentials, text/JSON sensors, draft/apply, retained warning, backup, reload, invalid wildcard, four screen sizes and no PUBLISH; non-mutating compact/landscape previews; Docker, source templates, connectors, clock and Pomodoro regression. Fake services only.");
 } catch (error) {
   if (output) {
     await fs.mkdir(output, {recursive: true});

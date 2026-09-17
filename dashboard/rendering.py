@@ -7,7 +7,7 @@ from functools import lru_cache
 from PIL import Image, ImageDraw, ImageFont
 
 from .catalog import catalog_by_id
-from .display_profiles import adapt_image, profile
+from .display_profiles import adapt_image, runtime_profile, PROFILE_BY_ID
 
 WIDTH = 240
 HEIGHT = 240
@@ -625,6 +625,30 @@ def draw_pomodoro_page(snapshot: dict, config: dict, page_number: int, page_coun
     return image
 
 
+def draw_mqtt_page(snapshot: dict, config: dict, page_number: int, page_count: int):
+    del config
+    values = snapshot.get("mqtt") or {}
+    if not values.get("available"):
+        return _state_message("MQTT", "Consultando broker..." if values.get("loading") else values.get("error") or "Configure MQTT no painel.", page_number, page_count)
+    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
+    draw = ImageDraw.Draw(image)
+    header(draw, "MQTT", page_number, page_count)
+    for index, sensor in enumerate(values.get("sensors", [])[:4]):
+        y = 45 + index * 43
+        card(draw, (8, y, 232, y + 39))
+        label, font = fit_text(draw, sensor["label"].upper(), 155, 11, 9, True)
+        draw.text((16, y + 3), label, font=font, fill=CYAN)
+        marker = "ERRO" if sensor.get("error") else "RETIDO" if sensor.get("retained") else ""
+        draw.text((185, y + 4), marker, font=load_font(8), fill=ORANGE if sensor.get("error") else GRAY)
+        value = sensor.get("value")
+        shown = "SEM DADOS" if value is None else f"{value} {sensor.get('unit', '')}".strip()
+        text, font = fit_text(draw, shown, 207, 18, 10, True)
+        draw.text((16, y + 16), text, font=font, fill=GRAY if value is None else WHITE)
+    footer = "CACHE / BROKER INDISPONÍVEL" if values.get("error") or values.get("stale") else "RECEBIDO ≠ HORA DA MEDIÇÃO"
+    draw.text((10, 225), footer, font=load_font(9, True), fill=ORANGE if values.get("stale") else GRAY)
+    return image
+
+
 RENDERERS = {
     "status": draw_status_page,
     "network": draw_network_page,
@@ -636,17 +660,23 @@ RENDERERS = {
     "clock": draw_clock_page,
     "pomodoro": draw_pomodoro_page,
     "docker": draw_docker_page,
+    "mqtt": draw_mqtt_page,
 }
 
 
-def render_page(page_id: str, snapshot: dict, config: dict):
+def render_page(page_id: str, snapshot: dict, config: dict, *, target_profile: str | None = None):
     enabled = [page["id"] for page in config["pages"] if page.get("enabled")]
     if page_id not in enabled:
         raise ValueError(f"página não habilitada: {page_id}")
     if page_id not in catalog_by_id(config.get("customPages")):
         raise ValueError(f"página desconhecida: {page_id}")
+    target = PROFILE_BY_ID[target_profile] if target_profile else runtime_profile(config)
+    if target.color_mode == "1" and (target.width, target.height) == (128, 64):
+        from .compact_rendering import render_compact
+
+        return render_compact(page_id, snapshot, config, enabled.index(page_id) + 1, len(enabled))
     if page_id.startswith("custom:"):
         image = draw_custom_page(snapshot, config, page_id, enabled.index(page_id) + 1, len(enabled))
     else:
         image = RENDERERS[page_id](snapshot, config, enabled.index(page_id) + 1, len(enabled))
-    return adapt_image(image, profile(config.get("displayProfile")))
+    return adapt_image(image, target)

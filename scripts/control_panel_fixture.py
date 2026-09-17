@@ -16,6 +16,7 @@ from waitress import serve
 from web_app import create_app
 from dashboard.source_templates import public_source_templates
 from tests.docker_fixture import FakeDocker
+from tests.mqtt_fixture import FakeMQTT
 
 FAKE_SECRET = "browser-fixture-only"
 
@@ -66,14 +67,15 @@ def main():
 
     services = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     threading.Thread(target=services.serve_forever, daemon=True).start()
-    with tempfile.TemporaryDirectory(prefix="st7789-browser-fixture-") as directory, FakeDocker() as docker:
+    with tempfile.TemporaryDirectory(prefix="st7789-browser-fixture-") as directory, FakeDocker() as docker, FakeMQTT() as mqtt:
         os.environ["ST7789_DOCKER_SOCKET"] = docker.path
         app = create_app({"STATE_DIR": directory, "SECRET_KEY": "isolated-browser-fixture-key"})
 
         @app.get("/fixture/status")
         def fixture_status():
             # Metadata is fake and deliberately excludes secrets, even in this fixture.
-            return jsonify({"baseUrl": f"http://127.0.0.1:{services.server_port}", "calls": calls, "dockerCalls": docker.calls})
+            return jsonify({"baseUrl": f"http://127.0.0.1:{services.server_port}", "calls": calls,
+                            "dockerCalls": docker.calls, "mqttUrl": mqtt.url, "mqttCalls": mqtt.calls})
 
         print(f"Isolated control panel fixture on http://127.0.0.1:{args.port}", flush=True)
         try:

@@ -15,6 +15,10 @@ const state = {
   pomodoroBusy: false,
   pomodoroGeneration: 0,
   dockerGeneration: 0,
+  mqttGeneration: 0,
+  mqttCredential: {},
+  activeDisplayProfile: "st7789-240x240",
+  previewProfile: "",
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -63,6 +67,8 @@ async function bootstrap() {
 }
 
 function showAuth(configured) {
+  $("#mqttUsername").value = "";
+  $("#mqttPassword").value = "";
   app.hidden = true;
   authScreen.hidden = false;
   $("#authTitle").textContent = configured ? "Acessar painel" : "Proteja seu painel";
@@ -98,15 +104,22 @@ $("#authForm").addEventListener("submit", async (event) => {
 async function loadApplication() {
   state.pomodoroGeneration++;
   state.dockerGeneration++;
+  state.mqttGeneration++;
+  $("#checkMqtt").disabled = false;
+  $("#mqttStatus").textContent = "Não consultado. A consulta usa apenas os ajustes já aplicados.";
   $("#checkDocker").disabled = false;
   $("#dockerStatus").textContent = "Não consultado. Os filtros só entram em vigor após Aplicar alterações.";
-  const [catalog, config, integrations] = await Promise.all([
+  const [catalog, config, integrations, mqttCredential] = await Promise.all([
     requestJSON("/api/catalog"),
     requestJSON("/api/config"),
     requestJSON("/api/integrations/status"),
+    requestJSON("/api/mqtt/credential/status").catch(error => ({error: error.message})),
   ]);
   state.catalog = catalog.pages;
   state.displays = catalog.displays || [];
+  state.activeDisplayProfile = catalog.activeDisplayProfile;
+  state.previewProfile = "";
+  state.mqttCredential = mqttCredential;
   state.sourceTemplates = catalog.sourceTemplates || [];
   state.config = config;
   state.authConfigured = true;
@@ -191,6 +204,7 @@ function renderSettings() {
     dockerRefresh.append(option);
   }
   dockerRefresh.value = dockerPage.refreshSeconds;
+  renderMqttSettings();
   renderDisplayProfiles();
   renderCustomPages();
   renderIntegrations();
@@ -436,10 +450,104 @@ function renderDisplayProfiles() {
     option.value = display.id;
     option.textContent = display.label;
     option.disabled = !display.available;
-    option.selected = display.id === state.config.displayProfile;
+    option.selected = display.id === state.activeDisplayProfile;
     select.appendChild(option);
   });
+  select.disabled = true;
+  const preview = $("#previewProfile");
+  preview.innerHTML = '<option value="">Display físico configurado</option>';
+  state.displays.forEach(display => {
+    const option = document.createElement("option");
+    option.value = display.id;
+    option.textContent = `Simular ${display.label}`;
+    preview.appendChild(option);
+  });
+  preview.value = state.previewProfile;
 }
+
+function renderMqttSettings() {
+  $("#mqttBroker").value = state.config.mqtt.brokerUrl;
+  $("#mqttAllowPlain").checked = state.config.mqtt.allowInsecureMqtt;
+  $("#mqttRefresh").value = state.config.pages.find(page => page.id === "mqtt").refreshSeconds;
+  $("#mqttSensors").innerHTML = Array.from({length: 4}, (_, index) => {
+    const sensor = state.config.mqtt.sensors[index] || {label: "", topic: "", format: "text", valuePath: "", unit: ""};
+    return `<section class="integration-card mqtt-sensor" data-mqtt-sensor="${index}">
+      <strong>Sensor ${index + 1}</strong>
+      <label class="compact-field"><span>Nome</span><input class="text-input" data-mqtt-field="label" maxlength="18" value="${escapeHTML(sensor.label)}"></label>
+      <label class="compact-field"><span>Tópico exato</span><input class="text-input" data-mqtt-field="topic" maxlength="200" value="${escapeHTML(sensor.topic)}" placeholder="casa/sala/temperatura"></label>
+      <label class="select-field"><span>Formato</span><select data-mqtt-field="format"><option value="text" ${sensor.format === "text" ? "selected" : ""}>Texto simples</option><option value="json" ${sensor.format === "json" ? "selected" : ""}>JSON</option></select></label>
+      <label class="compact-field"><span>Caminho JSON</span><input class="text-input" data-mqtt-field="valuePath" maxlength="120" value="${escapeHTML(sensor.valuePath)}" placeholder="sensor.value" ${sensor.format === "text" ? "disabled" : ""}></label>
+      <label class="compact-field"><span>Unidade</span><input class="text-input" data-mqtt-field="unit" maxlength="10" value="${escapeHTML(sensor.unit)}" placeholder="°C"></label>
+    </section>`;
+  }).join("");
+  renderMqttCredential();
+}
+
+function renderMqttCredential() {
+  const metadata = state.mqttCredential;
+  $("#mqttCredentialStatus").textContent = metadata.error || (metadata.credentialConfigured
+    ? `Credencial guardada para ${metadata.credentialBaseUrl}. Não será exibida novamente; confira se corresponde ao broker escolhido.`
+    : "Sem credencial guardada; acesso anônimo.");
+  $("#removeMqttCredential").disabled = !metadata.credentialConfigured;
+}
+
+$("#mqttSensors").addEventListener("change", event => {
+  const row = event.target.closest("[data-mqtt-sensor]");
+  if (!row) return;
+  const format = row.querySelector('[data-mqtt-field="format"]').value;
+  const path = row.querySelector('[data-mqtt-field="valuePath"]');
+  path.disabled = format === "text";
+  if (format === "text") path.value = "";
+  state.config.mqtt.sensors = Array.from(document.querySelectorAll("[data-mqtt-sensor]")).map(element =>
+    Object.fromEntries(Array.from(element.querySelectorAll("[data-mqtt-field]")).map(input => [input.dataset.mqttField, input.value]))
+  ).filter(sensor => sensor.label || sensor.topic || sensor.valuePath || sensor.unit);
+  markDirty();
+});
+$("#mqttBroker").addEventListener("change", event => { state.config.mqtt.brokerUrl = event.target.value.trim(); markDirty(); });
+$("#mqttAllowPlain").addEventListener("change", event => { state.config.mqtt.allowInsecureMqtt = event.target.checked; markDirty(); });
+$("#mqttRefresh").addEventListener("change", event => { state.config.pages.find(page => page.id === "mqtt").refreshSeconds = Number(event.target.value); markDirty(); });
+$("#storeMqttCredential").addEventListener("click", async () => {
+  const button = $("#storeMqttCredential");
+  button.disabled = true;
+  const generation = ++state.mqttGeneration;
+  try {
+    const metadata = await requestJSON("/api/mqtt/credential", {method: "PUT", body: JSON.stringify({
+      brokerUrl: $("#mqttBroker").value.trim(), username: $("#mqttUsername").value, password: $("#mqttPassword").value,
+    })});
+    $("#mqttUsername").value = "";
+    $("#mqttPassword").value = "";
+    if (generation !== state.mqttGeneration || app.hidden) return;
+    state.mqttCredential = metadata;
+    renderMqttCredential();
+    toast("Credencial MQTT guardada no cofre. Aplique os ajustes separadamente.");
+  } catch (error) { if (!app.hidden) toast(error.message, true); }
+  finally { button.disabled = false; }
+});
+$("#removeMqttCredential").addEventListener("click", async () => {
+  if (!confirm("Remover a credencial MQTT guardada? O acesso anônimo só funcionará se o broker permitir.")) return;
+  try {
+    await requestJSON("/api/mqtt/credential", {method: "DELETE"});
+    state.mqttGeneration++;
+    state.mqttCredential = {};
+    $("#mqttUsername").value = "";
+    $("#mqttPassword").value = "";
+    renderMqttCredential();
+    toast("Credencial MQTT removida.");
+  } catch (error) { toast(error.message, true); }
+});
+$("#checkMqtt").addEventListener("click", async () => {
+  const generation = ++state.mqttGeneration;
+  const button = $("#checkMqtt"), feedback = $("#mqttStatus");
+  button.disabled = true;
+  feedback.textContent = "Consultando os ajustes aplicados, sem publicar comandos…";
+  try {
+    const result = await requestJSON("/api/mqtt/state");
+    if (generation !== state.mqttGeneration || app.hidden) return;
+    feedback.textContent = !result.available ? (result.loading ? "Consultando em segundo plano. Consulte novamente em alguns segundos." : result.error || "MQTT indisponível.")
+      : `${result.received} de ${result.sensors.length} sensor(es) com valor. ${result.missingTopics.length ? "Sem dados: " + result.missingTopics.join(", ") + ". " : ""}${result.stale || result.error ? "CACHE: a consulta atual não confirmou estes valores. " : ""}Recebido não significa medido agora; valores retidos podem ser antigos.`;
+  } catch (error) { if (generation === state.mqttGeneration && !app.hidden) feedback.textContent = error.message; }
+  finally { if (generation === state.mqttGeneration) button.disabled = false; }
+});
 
 function customCatalogEntry(definition) {
   return {
@@ -496,6 +604,9 @@ function clampPreview() {
 function markDirty() {
   state.dirty = true;
   state.dockerGeneration++;
+  state.mqttGeneration++;
+  $("#checkMqtt").disabled = false;
+  $("#mqttStatus").textContent = "A consulta usa apenas os ajustes já aplicados, não este rascunho.";
   $("#checkDocker").disabled = false;
   $("#dockerStatus").textContent = "Os filtros só entram em vigor após Aplicar alterações. A consulta usa os ajustes já aplicados.";
   $("#saveState").textContent = "Alterações não aplicadas";
@@ -513,8 +624,19 @@ function refreshPreview() {
   $("#previewPlaceholder").hidden = !isUnsavedCustom;
   $("#previewImage").hidden = isUnsavedCustom;
   if (isUnsavedCustom) return;
-  $("#previewImage").src = `/api/preview?page=${encodeURIComponent(page.id)}&t=${Date.now()}`;
+  const target = state.displays.find(display => display.id === (state.previewProfile || state.activeDisplayProfile));
+  if (target) {
+    $("#previewImage").width = target.width;
+    $("#previewImage").height = target.height;
+    $("#previewImage").classList.toggle("monochrome-preview", target.colorMode === "1");
+  }
+  $("#previewProfileNote").textContent = state.previewProfile
+    ? "Simulação de layout: não troca o hardware. O botão abaixo envia somente a página ao display físico configurado."
+    : `Perfil físico configurado: ${target?.label || state.activeDisplayProfile}.`;
+  $("#previewImage").src = `/api/preview?page=${encodeURIComponent(page.id)}${state.previewProfile ? "&profile=" + encodeURIComponent(state.previewProfile) : ""}&t=${Date.now()}`;
 }
+
+$("#previewProfile").addEventListener("change", event => { state.previewProfile = event.target.value; refreshPreview(); });
 
 $("#previousPage").addEventListener("click", () => {
   const count = enabledPages().length;
@@ -844,6 +966,9 @@ $("#saveButton").addEventListener("click", async () => {
     refreshPreview();
     state.pomodoroGeneration++;
     state.dockerGeneration++;
+    state.mqttGeneration++;
+    $("#checkMqtt").disabled = false;
+    $("#mqttStatus").textContent = "Ajustes aplicados. Consulte novamente para conferir os sensores.";
     $("#checkDocker").disabled = false;
     $("#dockerStatus").textContent = "Ajustes aplicados. Consulte novamente para conferir os contêineres.";
     refreshPomodoro();
@@ -898,6 +1023,8 @@ $("#logoutButton").addEventListener("click", async () => {
     state.pomodoro = null;
     state.pomodoroGeneration++;
     state.dockerGeneration++;
+    state.mqttGeneration++;
+    state.mqttCredential = {};
     showAuth(true);
   }
 });

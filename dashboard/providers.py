@@ -21,6 +21,7 @@ from .integration_settings import INTEGRATION_IDS
 from .integrations import fetch_integration
 from .desk import DeskError, PomodoroStore, clock_snapshot
 from .docker_monitor import fetch_docker
+from .mqtt_monitor import fetch_mqtt
 
 
 def run(command: list[str], timeout: float = 2.0) -> str | None:
@@ -486,6 +487,19 @@ class DataHub:
 
     def get(self, config: dict, page_id: str, maximum_age: float = 1.0) -> dict:
         # Time pages do not need a CPU/system scan or any network integration.
+        if page_id == "mqtt":
+            settings = config["mqtt"]
+            try:
+                metadata = self.credentials.status("mqtt", settings["brokerUrl"])
+                if metadata["credentialConfigured"] and not metadata["credentialMatches"]:
+                    raise CredentialError("a credencial MQTT pertence a outro broker; guarde a correta ou remova-a para acesso anônimo")
+                revision = self.credentials.revision("mqtt", settings["brokerUrl"])
+            except ValueError as exc:
+                self.external.invalidate("mqtt")
+                return {"mqtt": {"error": str(exc), "configured": False}}
+            signature = self._signature({"settings": settings, "credentialRevision": revision})
+            return {"mqtt": self.external.get("mqtt", signature, max(15, maximum_age),
+                    lambda: fetch_mqtt(settings, self.credentials.read_secret("mqtt", settings["brokerUrl"]) if revision else None))}
         if page_id == "docker":
             settings = config["docker"]
             return {"docker": self.external.get(

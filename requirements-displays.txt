@@ -1,0 +1,4 @@
+# Optional physical drivers; do not install for the existing ST7789 setup.
+luma.oled==3.13.0
+luma.lcd==2.13.0
+luma.core==2.6.0

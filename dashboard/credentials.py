@@ -14,6 +14,13 @@ from pathlib import Path
 
 from .config import state_dir
 from .integration_settings import INTEGRATION_IDS, base_url
+from .mqtt_settings import broker_url, decode_credentials
+
+CREDENTIAL_IDS = (*INTEGRATION_IDS, "mqtt")
+
+
+def credential_address(connector, address):
+    return broker_url(address, required=True) if connector == "mqtt" else base_url(address, required=True)
 
 
 class CredentialError(ValueError):
@@ -21,7 +28,7 @@ class CredentialError(ValueError):
 
 
 def validate_secret(connector: str, value) -> str:
-    if connector not in INTEGRATION_IDS:
+    if connector not in CREDENTIAL_IDS:
         raise CredentialError("integração não suportada")
     if not isinstance(value, str) or not 1 <= len(value) <= 4096:
         raise CredentialError("informe uma credencial de até 4096 caracteres")
@@ -29,6 +36,8 @@ def validate_secret(connector: str, value) -> str:
         raise CredentialError("a credencial não pode conter caracteres de controle")
     if connector == "homeassistant" and (not value.isascii() or any(char.isspace() for char in value)):
         raise CredentialError("o token do Home Assistant deve ser copiado inteiro, sem espaços")
+    if connector == "mqtt":
+        decode_credentials(value)
     return value
 
 
@@ -70,13 +79,13 @@ class CredentialStore:
             if not isinstance(payload, dict) or payload.get("schemaVersion") != 1:
                 raise ValueError()
             entries = payload["entries"]
-            if not isinstance(entries, dict) or set(entries) - set(INTEGRATION_IDS):
+            if not isinstance(entries, dict) or set(entries) - set(CREDENTIAL_IDS):
                 raise ValueError()
             for connector, entry in entries.items():
                 if not isinstance(entry, dict):
                     raise ValueError()
                 validate_secret(connector, entry["secret"])
-                if base_url(entry["baseUrl"], required=True) != entry["baseUrl"]:
+                if credential_address(connector, entry["baseUrl"]) != entry["baseUrl"]:
                     raise ValueError()
                 if not isinstance(entry["revision"], str) or not isinstance(entry["updatedAt"], str):
                     raise ValueError()
@@ -102,7 +111,7 @@ class CredentialStore:
 
     def put(self, connector: str, address: str, secret) -> dict:
         value = validate_secret(connector, secret)
-        address = base_url(address, required=True)
+        address = credential_address(connector, address)
         with self._locked():
             payload = self._read()  # A corrupt vault is never silently overwritten.
             payload["entries"][connector] = {
@@ -115,7 +124,7 @@ class CredentialStore:
         return self.status(connector, address)
 
     def delete(self, connector: str):
-        if connector not in INTEGRATION_IDS:
+        if connector not in CREDENTIAL_IDS:
             raise CredentialError("integração não suportada")
         with self._locked():
             payload = self._read()
@@ -124,7 +133,7 @@ class CredentialStore:
                 self._write(payload)
 
     def status(self, connector: str, address: str = "") -> dict:
-        if connector not in INTEGRATION_IDS:
+        if connector not in CREDENTIAL_IDS:
             raise CredentialError("integração não suportada")
         with self._locked():
             entry = self._read()["entries"].get(connector)

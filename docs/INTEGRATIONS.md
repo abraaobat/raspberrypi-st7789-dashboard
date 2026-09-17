@@ -128,7 +128,13 @@ Armazenamento, transporte e recuperação estão em [Backup e credenciais](BACKU
 
 ## Outros displays
 
-`dashboard/display_profiles.py` descreve resolução, modo de cor, rotação e driver. O ST7789 240×240 continua sendo o único driver físico habilitado, enquanto perfis experimentais para SSD1306 128×64 e ILI9341 320×240 validam a adaptação do framebuffer em testes.
+`dashboard/display_profiles.py` descreve resolução, modo de cor, rotação e driver. O ST7789 240×240 continua padrão e único módulo homologado. A v0.8.0 inclui drivers opcionais SSD1306/I2C e ILI9341/SPI, selecionados somente pelo ambiente do administrador, não pela configuração web. OLED tem layout nativo 128×64; ILI9341 centraliza o quadro RGB sem esticar. A simulação no painel não troca hardware nem abre barramentos. [Matriz e limites](DISPLAY_COMPATIBILITY.md).
+
+## MQTT nativo (v0.8.0)
+
+Página opcional para até quatro tópicos exatos, texto simples ou escalares JSON, nome/unidade e credencial privada vinculada ao broker. TLS verifica certificados; MQTT sem TLS exige consentimento explícito e permanece local/tailnet. A consulta do painel usa somente os ajustes aplicados. Sem mensagem aparece SEM DADOS; erro/cache/retido são identificados.
+
+O conector não envia PUBLISH ou comandos: faz assinaturas curtas MQTT 3.1.1 / QoS 0, preferindo mensagens retidas. Não é escuta contínua/histórico de eventos e não calcula idade da medição. Não instala broker nem adiciona dependências obrigatórias. [Configuração, API e limites](MQTT_MONITOR.md); seus sensores reais/TFT continuam no checklist final.
 
 Para habilitar um novo display é necessário:
 

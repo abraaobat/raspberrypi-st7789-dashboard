@@ -22,7 +22,7 @@
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "Raspberry Pi ST7789 Dashboard",
-    "softwareVersion": "0.7.0",
+    "softwareVersion": "0.8.0",
     "applicationCategory": "UtilitiesApplication",
     "operatingSystem": "Raspberry Pi OS",
     "isAccessibleForFree": true,
@@ -62,7 +62,7 @@
     <section class="hero" id="top">
       <div class="hero-copy">
         <div class="status-line"><span class="status-dot"></span><span data-i18n="validated">v0.3.0 validated on real hardware</span></div>
-        <p class="eyebrow" data-i18n="releaseNote">v0.7.0: optional local Docker monitoring, container states and health; real Engine/TFT validation pending</p>
+        <p class="eyebrow" data-i18n="releaseNote">v0.8.0: read-only MQTT and experimental display drivers; real sensors/modules/TFT validation pending</p>
         <p class="eyebrow" data-i18n="eyebrow">A TINY SCREEN WITH A USEFUL JOB</p>
         <h1 data-i18n="heroTitle">Turn your Raspberry Pi into a glanceable system dashboard</h1>
         <p class="hero-lead" data-i18n="heroLead">Monitor CPU, memory, network, hardware, services and weather on a 240×240 ST7789 display. Configure the pages from your phone or computer, while the display keeps working independently.</p>
@@ -74,7 +74,7 @@
         <ul class="trust-row" aria-label="Project highlights">
           <li><span>240×240</span><b data-i18n="trustDisplay">shared physical + web rendering</b></li>
           <li><span>2</span><b data-i18n="trustButtons">physical navigation buttons</b></li>
-          <li><span>118</span><b data-i18n="trustTests">automated tests passing</b></li>
+          <li><span>145</span><b data-i18n="trustTests">automated tests passing</b></li>
         </ul>
       </div>
 
@@ -88,7 +88,7 @@
     </section>
 
     <section class="proof-strip" aria-label="Project capabilities">
-      <article><strong>10</strong><span data-i18n="proofPages">built-in pages</span></article>
+      <article><strong>11</strong><span data-i18n="proofPages">built-in pages</span></article>
       <article><strong>SPI</strong><span data-i18n="proofBus">validated display bus</span></article>
       <article><strong>LAN</strong><span data-i18n="proofLocal">local-first control panel</span></article>
       <article><strong>JSON</strong><span data-i18n="proofCustom">custom data sources</span></article>
@@ -113,6 +113,7 @@
         <article><span class="feature-number">08</span><h3 data-i18n="fClock">Offline clock</h3><p data-i18n="fClockD">Time, date, weekday and chosen timezone, with optional seconds and 12/24-hour format. Uses the device clock; TFT validation pending.</p></article>
         <article><span class="feature-number">09</span><h3 data-i18n="fPomodoro">Pomodoro</h3><p data-i18n="fPomodoroD">Start, pause, resume and reset a focus cycle from the protected local panel. No internet or new button gestures; TFT validation pending.</p></article>
         <article><span class="feature-number">10</span><h3>Docker</h3><p data-i18n="fDockerD">Optional local container counts, exact name filters and health, via an already authorized Unix socket. No container control or permission changes; real Engine/TFT validation pending.</p></article>
+        <article><span class="feature-number">11</span><h3>MQTT</h3><p data-i18n="fMqttD">Up to four exact text/JSON sensor topics, private credentials and verified TLS. Short read-only subscriptions favour retained values, not continuous events or proof of measurement age. Real sensors/TFT validation pending.</p></article>
         <article><span class="feature-number">↺</span><h3 data-i18n="fBackup">Backup and restore</h3><p data-i18n="fBackupD">Export applied settings and restore a validated JSON file, keeping your local PIN and credential vault untouched.</p></article>
         <article><span class="feature-number">+</span><h3 data-i18n="fCustom">Your own API</h3><p data-i18n="fCustomD">Turn selected values from an HTTP/JSON response into a metric or status page without changing the source code.</p></article>
         <article><span class="feature-number">6</span><h3 data-i18n="fTemplates">Source templates</h3><p data-i18n="fTemplatesD">Start with a metric, service, temperature, energy, Node-RED or list-item example. Check JSON paths without querying the source, then apply explicitly.</p></article>
@@ -165,7 +166,7 @@
         <span data-i18n="flowData">System + integrations</span><b>→</b><span data-i18n="flowPages">Page catalog</span><b>→</b><span>Pillow</span><b>→</b><span>ST7789 / PNG</span>
       </div>
       <div class="architecture-notes">
-        <p><strong data-i18n="profilesTitle">Display profiles.</strong> <span data-i18n="profilesText">The 240×240 ST7789 driver is production-ready. Software profiles for 128×64 monochrome and 320×240 color already validate framebuffer adaptation, while their physical drivers remain future work.</span></p>
+        <p><strong data-i18n="profilesTitle">Display profiles.</strong> <span data-i18n="profilesText">The reference ST7789 remains the default. v0.8.0 adds native 128×64 monochrome summaries, safe web simulations and optional SSD1306/I2C and ILI9341/SPI drivers. Extra drivers are experimental, not physically validated; simulation never changes your hardware.</span></p>
         <p><strong data-i18n="safeTitle">Safe custom sources.</strong> <span data-i18n="safeText">HTTP/JSON requests are read-only, bounded by time and size, block unsafe network destinations and use cached data when a provider is temporarily unavailable.</span></p>
       </div>
     </section>
@@ -224,6 +225,6 @@
     <small>© <span id="year">2026</span> Raspberry Pi ST7789 Dashboard</small>
   </footer>
 
-  <script src="./app.js" defer></script>
+  <script src="./app.js?v=0.8.0" defer></script>
 </body>
 </html>

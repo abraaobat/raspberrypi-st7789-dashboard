@@ -45,7 +45,10 @@ button { color: inherit; }
 
 .device-stage { min-height: 330px; display: grid; place-items: center; background: radial-gradient(circle, rgba(76,150,255,.1), transparent 62%); border-radius: 18px; }
 .display-device { position: relative; background: #080a0e; border: 9px solid #242a35; border-radius: 12px; padding: 3px; box-shadow: 0 22px 55px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.07); line-height: 0; overflow: hidden; }
-.display-device img { width: min(240px, 62vw); height: auto; aspect-ratio: 1; image-rendering: auto; background: #050609; }
+.display-device img { width: min(240px, 62vw); height: auto; image-rendering: auto; background: #050609; }
+.display-device img.monochrome-preview { image-rendering: pixelated; }
+.mqtt-panel { overflow-wrap: anywhere; }
+.mqtt-sensor { min-width: 0; }
 .preview-placeholder { width: min(240px, 62vw); aspect-ratio: 1; display: grid; place-items: center; padding: 28px; text-align: center; line-height: 1.45; color: var(--muted); font-size: 13px; background: #080a0e; }
 .preview-controls { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; text-align: center; gap: 10px; margin: 14px 0 12px; }
 .preview-controls div { display: grid; gap: 2px; }

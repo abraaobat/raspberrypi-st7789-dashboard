@@ -6,7 +6,7 @@ O mantenedor optou por adiar os testes manuais. Este documento reúne os gates r
 
 Use a versão mais recente publicada, que já inclui as anteriores. Confira checkout limpo e faça backup privado recente do diretório de estado, sem enviar PIN/cofre à conversa. Execute `scripts/install.sh` e depois `scripts/validate_install.sh` no terminal do Raspberry. A senha de administrador, se solicitada, fica somente no terminal. Atualize o navegador e entre com o mesmo PIN.
 
-A auditoria de 17/09/2026 confirmou v0.6.0 ativa e saudável. v0.7.0 é a entrega seguinte; não houve instalação dela nos serviços ativos durante o desenvolvimento. A instalação pode ser agrupada com outras entregas, sem atualizar versão por versão.
+A auditoria de 17/09/2026 confirmou v0.6.0 ativa e saudável. v0.8.0 inclui as entregas v0.7.0 e v0.8.0; não houve instalação delas nos serviços ativos durante o desenvolvimento. A instalação pode ser agrupada com outras entregas, sem atualizar versão por versão. Para manter o ST7789 atual, não instale extras Luma nem defina perfil experimental.
 
 ## 2. Novos recursos, só os que pretende usar
 
@@ -18,8 +18,13 @@ A auditoria de 17/09/2026 confirmou v0.6.0 ativa e saudável. v0.7.0 é a entreg
 | Pi-hole 6 | Configurar endereço/senha de aplicativo no painel privado; testar/ativar/aplicar | Resumo coerente com a API real e legível; sem controle do DNS |
 | Casa | Configurar endereço/token e até quatro entidades no painel privado | Estados/unidades correspondem ao Home Assistant; indisponível não vira desligado |
 | Docker, opcional | Só em host com daemon/acesso já autorizados: filtros reais e comparação com a lista do Engine | Contagens do filtro, nomes ausentes e saúde coerentes; sem healthcheck mostra RODANDO, não SAUDÁVEL |
+| MQTT, opcional | Usar broker já existente, conta de leitura e tópicos retidos reais; guardar credencial/aplicar/selecionar | Valores/unidades coerentes na prévia/TFT; RETIDO não implica medição recente; ausência não vira desligado |
+| Simulação de display | Selecionar OLED/ILI9341 na prévia e voltar ao perfil físico | Imagem nativa sem esticar; hardware/configuração não mudam; botão envia somente a página |
+| Outros displays físicos | Somente em montagem própria compatível, seguir a matriz de ativação do administrador | Orientação/texto/contraste/cores e navegação conferidos no módulo real; permanece experimental até registro |
 
 Não cadastre URLs ou credenciais fictícias de teste como se fossem seus serviços reais. Não é necessário instalar Docker, Pi-hole, Home Assistant ou Node-RED apenas para homologar o display. Use os módulos de interesse que já possui.
+
+MQTT não é coleta contínua de eventos: mensagens transitórias entre duas assinaturas podem não ser recebidas. Não o use como teste de alarmes de segurança. Drivers extras não devem ser habilitados na montagem ST7789 só para testar simulação. Consulte [MQTT](MQTT_MONITOR.md) e [compatibilidade](DISPLAY_COMPATIBILITY.md).
 
 ## 3. Regressão curta
 

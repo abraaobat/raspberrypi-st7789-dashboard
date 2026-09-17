@@ -4,7 +4,7 @@ Dashboard compacto para Raspberry Pi com display TFT ST7789 1.3" 240×240 via SP
 
 ![Raspberry Pi ST7789 Dashboard](docs/images/hero.jpg)
 
-O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.7.0 acrescenta monitor Docker local opcional, com filtros, contêineres em execução/parados e saúde. Mantém os seis modelos HTTP/JSON e conferência offline da v0.6.0, Relógio/Pomodoro, Pi-hole 6/Home Assistant, credenciais privadas, backup, Clima e SysOps.
+O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.8.0 acrescenta MQTT somente de leitura, sensores de texto/JSON e drivers opcionais experimentais SSD1306/ILI9341, com simulação segura no painel e layout OLED nativo. Mantém Docker local, seis modelos HTTP/JSON, Relógio/Pomodoro, Pi-hole 6/Home Assistant, credenciais privadas, backup, Clima e SysOps.
 
 ## Visão do produto
 
@@ -18,6 +18,8 @@ Pelo computador ou celular, o usuário pode:
 - configurar previsão do tempo por latitude e longitude;
 - monitorar disco, gateway, alimentação e serviços `systemd` permitidos;
 - acompanhar contêineres Docker locais, sem iniciar/reiniciar nada nem conceder permissões;
+- exibir até quatro sensores MQTT, com tópicos exatos e credenciais privadas, sem publicar comandos;
+- simular telas monocromáticas/retangulares sem trocar o display físico;
 - criar páginas para APIs HTTP/JSON sem alterar o código;
 - configurar Pi-hole 6 e até quatro entidades do Home Assistant com credenciais separadas dos ajustes;
 - exportar e restaurar a configuração sem alterar PIN ou credenciais locais;
@@ -32,6 +34,8 @@ A instalação ativa v0.6.0 foi confirmada no Raspberry em 17/09/2026, com SPI, 
 
 ### Modelos para seu próprio app
 
+Na v0.8.0, 145 testes locais passaram, além do fluxo completo de navegador com serviços isolados e simulações SSD1306/ILI9341. Três testes de interoperabilidade com Mosquitto estão preparados para o CI. MQTT usa consultas curtas, favorecendo valores retidos: não é um assinante contínuo, não garante eventos transitórios e não infere a hora da medição. Drivers extras são experimentais e ainda não foram homologados em módulos reais. A instalação ativa permanece v0.6.0; atualização e testes físicos ficam para o [checklist final](docs/FINAL_VALIDATION.md).
+
 Em **Adicionar fonte**, escolha Métrica, Status, Temperatura, Energia, Node-RED ou Item de uma lista. Use **Usar modelo**, adapte os campos e confira os caminhos em um exemplo JSON sem consultar a API. Depois teste a URL real, guarde no rascunho e aplique. A lista de apps não é fixa: qualquer endpoint GET/JSON compatível pode alimentar uma das oito páginas personalizadas, respeitando os limites de segurança. [Guia completo](docs/CUSTOM_TEMPLATES.md).
 
 - [Roadmap do produto](ROADMAP.md)
@@ -40,6 +44,8 @@ Em **Adicionar fonte**, escolha Métrica, Status, Temperatura, Energia, Node-RED
 - [Backup, credenciais e atualização](docs/BACKUP_AND_CREDENTIALS.md)
 - [Relógio e Pomodoro offline](docs/DESK_MODE.md)
 - [Docker local: contêineres e saúde](docs/DOCKER_MONITOR.md)
+- [MQTT: sensores retidos e limites](docs/MQTT_MONITOR.md)
+- [Compatibilidade: drivers opcionais e simulação](docs/DISPLAY_COMPATIBILITY.md)
 - [Checklist final dos testes manuais adiados](docs/FINAL_VALIDATION.md)
 - [Página pública do projeto](https://abraaobat.github.io/raspberrypi-st7789-dashboard/)
 
@@ -153,6 +159,21 @@ Veja [uso, persistência e checklist físico](docs/DESK_MODE.md). Alterar duraç
 - socket Unix já autorizado; sem controle, instalação, `sudo` ou mudança de permissões.
 
 O acesso ao socket Docker pode ser privilegiado, mesmo com consultas somente de leitura. Não execute o painel como administrador nem conceda acesso automaticamente. [Guia e limites](docs/DOCKER_MONITOR.md).
+
+### 11. MQTT — módulo opcional
+
+- até quatro tópicos exatos, texto simples ou escalares JSON, nome e unidade;
+- assinaturas curtas MQTT 3.1.1 / QoS 0, preferindo valores retidos;
+- TLS validado ou MQTT sem TLS explicitamente autorizado apenas na LAN/tailnet;
+- usuário/senha em cofre privado vinculado ao broker, fora do backup JSON;
+- sem PUBLISH, will, controle ou sessão persistente; não é captura contínua de eventos;
+- SEM DADOS não inventa desligado/zero; RETIDO não informa a hora da medição; CACHE fica identificado.
+
+[Guia e limites MQTT](docs/MQTT_MONITOR.md). A fonte não instala broker nem adiciona dependências obrigatórias.
+
+### Compatibilidade e simulação
+
+Escolha uma simulação em **Visualização do display**: ST7789 240×240, SSD1306 128×64 monocromático ou ILI9341 320×240. O OLED tem resumo nativo; o ILI9341 centraliza a arte sem distorção. Simulação não muda hardware, PIN ou configuração. Drivers físicos adicionais são opcionais/experimentais, selecionados pelo administrador e ainda sem homologação em módulo real. [Matriz e ativação segura](docs/DISPLAY_COMPATIBILITY.md).
 
 ## Hardware usado
 
@@ -351,8 +372,8 @@ O projeto não grava configuração nem credenciais dentro do repositório. Por 
 
 - homologar uma página HTTP/JSON personalizada no ST7789 real;
 - homologar Pi-hole 6/Home Assistant reais, Relógio/Pomodoro e Docker onde já autorizado;
-- implementar MQTT nativo opcional, mantendo credenciais privadas e contrato somente de leitura;
-- implementar drivers físicos para SSD1306 e ILI9341 sobre os perfis já definidos;
+- homologar MQTT com broker/sensores reais e verificar a nova página no TFT;
+- homologar os drivers opcionais SSD1306/ILI9341 em suas montagens próprias;
 - expandir contratos de apps e distribuição/rollback, preservando backup/restauração já entregues.
 
 ## Comandos úteis

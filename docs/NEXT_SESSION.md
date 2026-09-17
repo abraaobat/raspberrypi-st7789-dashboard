@@ -87,20 +87,34 @@ A revisão `b339eab` está preparada em `~/.cache/st7789-dashboard-update-v0.7.0
 
 Na revisão `b339eab`, [CI de testes/navegador](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35226090881) e [publicação GitHub Pages](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35226090871) concluíram com sucesso. A landing local passou em oito combinações de idioma/tamanho, mantendo cinco imagens proporcionais e QR/Pix confirmado; a página publicada já apresenta v0.7.0.
 
+## Entregas adicionais da v0.8.0
+
+- 11ª página opcional MQTT, com até quatro tópicos exatos e sensores de texto/JSON;
+- assinaturas curtas MQTT 3.1.1 / QoS 0, sem PUBLISH, will ou sessão persistente, preferindo mensagens retidas;
+- TLS validado/destinos fixados, consentimento de MQTT sem TLS somente na LAN/tailnet, limites de tempo/tamanho/pacotes;
+- credenciais no cofre vinculado ao broker, fora do backup JSON, sem retorno de usuário/senha;
+- simulação de perfis no painel sem trocar configuração física ou abrir barramentos;
+- drivers opcionais experimentais SSD1306/I2C e ILI9341/SPI, selecionados somente pelo ambiente do administrador;
+- renderização OLED 128×64 nativa; ILI9341 mantém o quadro quadrado centralizado e sem distorção;
+- testes de software e navegador com brokers fictícios; interoperabilidade Mosquitto isolada no CI, não no instalador do Raspberry;
+- a instalação ativa v0.6.0 permanece limpa/saudável, sem mudança de botões, serviços, configuração, PIN ou dependências.
+
+Veja [MQTT_MONITOR.md](MQTT_MONITOR.md) e [DISPLAY_COMPATIBILITY.md](DISPLAY_COMPATIBILITY.md). MQTT não garante captura de eventos transitórios; RETIDO/recebido não informa hora da medição. Drivers adicionais e novas páginas no TFT continuam sem homologação física. A instalação final pode ir direto à versão mais recente, sem instalar v0.7.0 primeiro.
+
 ## Próximas implementações
 
 1. Homologar Pi-hole 6/Home Assistant reais e as duas novas páginas no TFT quando o usuário puder configurar suas credenciais.
 2. Homologar Relógio/Pomodoro no TFT com um ciclo de 1 minuto, pausa e retomada; não alterar os dois gestos físicos existentes.
-3. MQTT nativo em etapa independente; Docker local possui monitor de software v0.7.0, com Engine real/TFT pendentes. Node-RED via GET/JSON já tem modelo/roteiro, com teste real pendente.
+3. Homologar MQTT v0.8.0 com broker/sensores reais e Docker v0.7.0 com Engine real/TFT quando conveniente. Node-RED via GET/JSON já tem modelo/roteiro, com teste real pendente.
 4. Contratos específicos de outros apps, além dos seis modelos genéricos, mantendo contrato fechado e sem execução remota.
-5. Drivers físicos adicionais e matriz de compatibilidade por módulo/resolução.
+5. Homologar drivers experimentais SSD1306/ILI9341 da v0.8.0 por módulo/placa, sem habilitá-los na montagem ST7789 só para simular.
 
 ## Limites a preservar
 
 - O display deve continuar operando sem o painel web e sem internet.
 - Fontes personalizadas genéricas consultam somente HTTP/JSON, sem headers de autenticação arbitrários; os dois conectores guiados usam o cofre.
 - Não adicionar endpoints de shell ou instalação arbitrária.
-- SSD1306/ILI9341 continuam experimentais até existir driver e evidência física.
+- SSD1306/ILI9341 têm drivers opcionais implementados, mas continuam experimentais até haver evidência física do módulo/placa.
 - O painel permanece restrito à rede local ou tailnet; a landing page pública não expõe a API do Raspberry Pi.
 - Docker não pode adicionar endpoints de controle, socket arbitrário vindo do navegador, TCP remoto, `sudo`, execução como root ou concessão automática de grupo/permissões.
 
@@ -140,4 +154,4 @@ git pull --ff-only
 
 Se o comando de status mostrar alterações próprias, não as descarte: preserve-as antes de atualizar. Informe a senha somente no terminal quando `sudo` pedir, nunca nesta conversa. O instalador usa o usuário/caminhos existentes e executa os testes antes de reiniciar os serviços; ele também reconfere dependências. O backup privado v0.5.0 já foi preparado nesta retomada; se houver novos ajustes antes da instalação, faça outra cópia. Os módulos existentes mantêm suas escolhas e o PIN não precisa ser recriado. Os modelos não adicionam páginas automaticamente.
 
-Confira API com versão `0.6.0`, atualize o navegador e use o mesmo PIN. Veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md) para criar uma fonte com exemplo, aplicar e conferir no TFT. Esse roteiro foi concluído pelo mantenedor e confirmado automaticamente; a próxima atualização é v0.7.0, descrita no [guia Docker](DOCKER_MONITOR.md), podendo ser agrupada com próximas entregas. Os testes manuais permanecem para o final. Tetris foi cancelado e não foi implementado.
+Confira API com versão `0.6.0`, atualize o navegador e use o mesmo PIN. Veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md) para criar uma fonte com exemplo, aplicar e conferir no TFT. Esse roteiro foi concluído pelo mantenedor e confirmado automaticamente; a próxima atualização pode ir direto à v0.8.0, incluindo [Docker](DOCKER_MONITOR.md), [MQTT](MQTT_MONITOR.md) e [compatibilidade experimental](DISPLAY_COMPATIBILITY.md), sem versões intermediárias. Os testes manuais permanecem para o final. Tetris foi cancelado e não foi implementado.
