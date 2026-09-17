@@ -1,5 +1,7 @@
 # Continuidade do projeto
 
+**Atualizações atuais:** siga [SAFE_UPDATES.md](SAFE_UPDATES.md). Comandos antigos abaixo são registros históricos, não instruções para repetir `git pull`/`install.sh` na instalação ativa.
+
 ## Estado validado em 16/09/2026
 
 - versão 0.3.0 implantada no Raspberry Pi 3 Model B V1.2;
@@ -179,3 +181,9 @@ git pull --ff-only
 Se o comando de status mostrar alterações próprias, não as descarte: preserve-as antes de atualizar. Informe a senha somente no terminal quando `sudo` pedir, nunca nesta conversa. O instalador usa o usuário/caminhos existentes e executa os testes antes de reiniciar os serviços; ele também reconfere dependências. O backup privado v0.5.0 já foi preparado nesta retomada; se houver novos ajustes antes da instalação, faça outra cópia. Os módulos existentes mantêm suas escolhas e o PIN não precisa ser recriado. Os modelos não adicionam páginas automaticamente.
 
 Confira API com versão `0.6.0`, atualize o navegador e use o mesmo PIN. Veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md) para criar uma fonte com exemplo, aplicar e conferir no TFT. Esse roteiro foi concluído pelo mantenedor e confirmado automaticamente; a próxima atualização pode ir direto à v0.8.0, incluindo [Docker](DOCKER_MONITOR.md), [MQTT](MQTT_MONITOR.md) e [compatibilidade experimental](DISPLAY_COMPATIBILITY.md), sem versões intermediárias. Os testes manuais permanecem para o final. Tetris foi cancelado e não foi implementado.
+
+## Atualização segura v0.10.0 — implementação de software
+
+A v0.10.0 acrescenta atualização por SHA, ambiente isolado e backup privado, troca explícita verificada e retorno de código/ambiente com journal. Não restaura configuração/cofre antigos, não altera grupos/pacotes do sistema e recusa serviços personalizados ou downgrade incompatível. 195 testes passaram no computador (19,344 s); três opcionais Mosquitto foram ignorados. Fluxo completo do painel isolado e landing em oito combinações aprovados; fotos/Pix preservados. ARM e CI desta versão serão conferidos após publicação. Troca/retorno reais ficam no checklist final; v0.6.0 continua ativa e saudável.
+
+[Contrato e roteiro](SAFE_UPDATES.md). Ferramenta somente no terminal, sem endpoint de instalação no painel. O instalador agora recusa serviços existentes. Não faça pull do checkout ativo. Novos passos preparatórios não substituem ativação/homologação físicas.

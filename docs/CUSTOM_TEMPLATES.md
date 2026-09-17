@@ -1,5 +1,7 @@
 # Modelos para fontes personalizadas — desde v0.6.0
 
+**Atualizações atuais:** siga [SAFE_UPDATES.md](SAFE_UPDATES.md). Comandos antigos abaixo são registros históricos, não instruções para repetir `git pull`/`install.sh` na instalação ativa.
+
 A lista não é fechada: as 11 páginas integradas continuam disponíveis, e o usuário pode criar até oito páginas HTTP/JSON sem editar o código. A v0.9.0 oferece nove modelos: seis genéricos e três contratos específicos de leitura, baseados nas documentações oficiais dos apps. Não são plugins instaláveis, não descobrem dispositivos nem instalam serviços. Compatibilidade com o firmware/serviço real ainda deve ser conferida.
 
 ## Modelos incluídos

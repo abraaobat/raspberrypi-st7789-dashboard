@@ -1,5 +1,7 @@
 # Concluir a atualização para v0.5.0
 
+**Atualizações atuais:** siga [SAFE_UPDATES.md](SAFE_UPDATES.md). Comandos antigos abaixo são registros históricos, não instruções para repetir `git pull`/`install.sh` na instalação ativa.
+
 **Atualização concluída:** API `0.5.0`, serviços, SPI e estado do display foram confirmados em 17/09/2026. Este roteiro é histórico; para os modelos da v0.6.0, veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md). Observação visual das novas páginas continua pendente.
 
 ## Preparação concluída

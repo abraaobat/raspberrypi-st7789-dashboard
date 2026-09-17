@@ -4,9 +4,11 @@ O mantenedor optou por adiar os testes manuais. Este documento reúne os gates r
 
 ## 1. Uma atualização, quando for conveniente
 
-Use a versão mais recente publicada, que já inclui as anteriores. Confira checkout limpo e faça backup privado recente do diretório de estado, sem enviar PIN/cofre à conversa. Execute `scripts/install.sh` e depois `scripts/validate_install.sh` no terminal do Raspberry. A senha de administrador, se solicitada, fica somente no terminal. Atualize o navegador e entre com o mesmo PIN.
+Use a versão mais recente, que inclui as anteriores. Siga [SAFE_UPDATES.md](SAFE_UPDATES.md): ferramenta em cópia separada → preflight → preparação por SHA → ativação explícita no terminal. Não faça `git pull` no código ativo nem repita `install.sh`, agora exclusivo da primeira instalação. Backup privado é feito na preparação e novamente com serviços parados na ativação. Senha somente no terminal; PIN/cofre nunca na conversa. Atualize navegador e entre com o mesmo PIN.
 
-A auditoria de 17/09/2026 confirmou v0.6.0 ativa e saudável. A v0.9.0 já inclui os nove modelos, MQTT, Docker e as entregas anteriores; não houve instalação da atualização nos serviços ativos durante o desenvolvimento. A instalação pode ser agrupada com outras entregas, sem atualizar versão por versão. Para manter o ST7789 atual, não instale extras Luma nem defina perfil experimental. [Testes ARM/CI e backup preparados](NEXT_SESSION.md).
+**Gate novo v0.10.0:** observar preparação com serviços v0.6.0 intactos; ativar quando conveniente e conferir versão esperada/quadro fresco e regressão curta. Retorno real continua não homologado; não provoque falha/reboot para testar. Após salvar campos/credenciais novos, downgrade pode ser incompatível e será recusado, sem apagar dados.
+
+A auditoria de 17/09/2026 confirmou v0.6.0 ativa e saudável. A v0.10.0 já inclui os nove modelos, MQTT, Docker e as entregas anteriores; não houve instalação da atualização nos serviços ativos durante o desenvolvimento. A instalação pode ser agrupada com outras entregas, sem atualizar versão por versão. Para manter o ST7789 atual, não instale extras Luma nem defina perfil experimental. [Testes ARM/CI e backup preparados](NEXT_SESSION.md).
 
 ## 2. Novos recursos, só os que pretende usar
 

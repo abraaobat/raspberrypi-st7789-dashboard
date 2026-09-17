@@ -4,9 +4,13 @@ Dashboard compacto para Raspberry Pi com display TFT ST7789 1.3" 240×240 via SP
 
 ![Raspberry Pi ST7789 Dashboard](docs/images/hero.jpg)
 
-O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.9.0 amplia a biblioteca para nove modelos HTTP/JSON: sensores ESPHome, potência Shelly Gen2+ e métricas escalares Prometheus agora têm montagem de URL sem conexão e exemplos próprios. Mantém MQTT somente leitura, Docker local, drivers experimentais SSD1306/ILI9341, simulação segura, Relógio/Pomodoro, Pi-hole 6/Home Assistant, credenciais privadas, backup, Clima e SysOps. Os modelos não instalam apps nem removem sua autenticação.
+O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.10.0 acrescenta atualização isolada, backup privado, troca verificada e retorno de código/ambiente pelo terminal do operador. Mantém nove modelos HTTP/JSON, incluindo ESPHome, Shelly Gen2+ e Prometheus. Mantém MQTT somente leitura, Docker local, drivers experimentais SSD1306/ILI9341, simulação segura, Relógio/Pomodoro, Pi-hole 6/Home Assistant, credenciais privadas, backup, Clima e SysOps. Os modelos não instalam apps nem removem sua autenticação.
+
+**v0.10.0:** A v0.10.0 acrescenta atualização por SHA, ambiente isolado e backup privado, troca explícita verificada e retorno de código/ambiente com journal. Não restaura configuração/cofre antigos, não altera grupos/pacotes do sistema e recusa serviços personalizados ou downgrade incompatível. 195 testes passaram no computador (19,344 s); três opcionais Mosquitto foram ignorados. Fluxo completo do painel isolado e landing em oito combinações aprovados; fotos/Pix preservados. ARM e CI desta versão serão conferidos após publicação. Troca/retorno reais ficam no checklist final; v0.6.0 continua ativa e saudável. [Roteiro seguro](docs/SAFE_UPDATES.md).
 
 ## Visão do produto
+
+**Instalação existente:** não faça `git pull` no código usado pelos serviços nem repita o instalador. Use [preparação e ativação separadas](docs/SAFE_UPDATES.md); `install.sh` fica restrito à primeira instalação. Atualização não é executada pelo painel web.
 
 O projeto combina um **microdashboard modular, offline-first e controlado por dois botões** com um painel web local. O display continua funcional sem navegador e sem internet; a interface web apenas configura o conteúdo e o comportamento.
 

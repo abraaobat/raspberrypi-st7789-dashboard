@@ -31,6 +31,12 @@ VENV_DIR="${DASHBOARD_HOME_DIR}/st7789-env"
 STATE_DIR="${DASHBOARD_HOME_DIR}/.config/raspberrypi-st7789-dashboard"
 SERVICE_DIR="/etc/systemd/system"
 
+if [[ -e "${SERVICE_DIR}/bench-display.service" || -L "${SERVICE_DIR}/bench-display.service" || -e "${SERVICE_DIR}/bench-display-web.service" || -L "${SERVICE_DIR}/bench-display-web.service" ]]; then
+  echo "Instalação já existente: este script é somente para a primeira instalação." >&2
+  echo "Use scripts/update_dashboard.py em uma cópia separada; consulte docs/SAFE_UPDATES.md." >&2
+  exit 1
+fi
+
 echo "==> Instalando dependências do sistema"
 "${SUDO[@]}" apt-get update
 "${SUDO[@]}" apt-get install -y \

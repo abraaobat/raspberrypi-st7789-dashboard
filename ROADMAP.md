@@ -118,7 +118,8 @@ Critério de saída: módulos podem ser instalados e removidos sem aumentar a su
 
 ### D6 — Distribuição e compatibilidade
 
-- instalador e atualização segura;
+- instalador inicial com recusa de serviços existentes; ✅ software v0.10.0
+- atualização por SHA/ambiente isolado, backup privado e gates de compatibilidade/versão/frescura; ✅ software v0.10.0; troca real pendente
 - landing page bilíngue no GitHub Pages, preparada para indexação e apoio via Pix; ✅
 - proteção da publicação contra fotos vazias, proporções incorretas e transbordamento em telas de computador/celular; ✅ testes automatizados
 - configuração inicial assistida;
@@ -130,7 +131,8 @@ Critério de saída: módulos podem ser instalados e removidos sem aumentar a su
 - layout 128×64 nativo e simulação segura no painel; ✅ software v0.8.0
 - drivers opcionais Luma SSD1306/I2C e ILI9341/SPI escolhidos pelo administrador; ✅ software v0.8.0; homologação física pendente
 - documentação de migração e troubleshooting;
-- releases versionadas e rollback.
+- retorno de código/ambiente e journal de recuperação, sem apagar cofre/configuração incompatíveis; ✅ software v0.10.0; retorno real pendente
+- releases assinadas, retenção/limpeza e migrações de esquemas; futuro
 
 Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuais fora da documentação.
 
@@ -138,7 +140,7 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A instalação v0.6.0 foi confirmada ativa e saudável no Raspberry em 17/09/2026. Isso não substitui observação visual das novas páginas. Por decisão do mantenedor, os testes manuais ficam para o final e não bloqueiam as expansões independentes. A v0.7.0 acrescenta Docker local somente de leitura, filtros, contagem de saúde e cache. São 118 testes de software e fluxo completo de navegador isolado aprovados. O socket padrão Docker não existe no Pi; não houve instalação nem autorização de acesso. A biblioteca v0.9.0 oferece nove modelos HTTP/JSON, incluindo ESPHome, Shelly e Prometheus escalar, com montagem offline de URL. Não instala código de terceiros nem cria fontes automaticamente. A página bilíngue e o Pix confirmado são preservados. Search Console aguarda login. MQTT e drivers opcionais SSD1306/ILI9341 têm implementação v0.8.0, ainda sem homologação dos serviços/módulos reais. OLED tem resumo nativo, e simulação no painel não troca hardware. Gestos físicos do Pomodoro continuam futuros; Docker real e novas páginas ainda não estão homologados no TFT.
 
-O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
+Na v0.10.0, `install.sh` fica restrito à primeira instalação. Atualização existente usa `scripts/update_dashboard.py`, sem alterar checkout/venv ativos na preparação. Troca e retorno reais são gates finais; serviços personalizados/perfis experimentais não são sobrescritos. [Contrato e limites](docs/SAFE_UPDATES.md).
 
 **Evidência v0.8.0:** 145 testes passaram no computador e no ARM em checkout separado; os três casos opcionais com Mosquitto foram ignorados nesses hosts. No [CI](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35229790027), todos os 148 passaram, assim como o fluxo completo do painel. Backup privado recente e auditoria posterior confirmaram a instalação ativa v0.6.0 preservada. Simulação/layouts e construtores dos drivers extras têm testes de software, não homologação física. [Detalhes da preparação](docs/NEXT_SESSION.md).
 
@@ -146,7 +148,7 @@ O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/va
 
 **Evidência v0.9.0 (`8108307`):** 162 testes passaram no computador/ARM em cópia separada; três opcionais ignorados nesses hosts. Todos os 165 passaram no [CI](https://github.com/abraaobat/raspberrypi-st7789-dashboard/actions/runs/35258059111), com fluxo completo do painel. Landing local/publicada aprovada em oito combinações, fotos/Pix preservados. Backup privado e auditoria posterior confirmaram a v0.6.0 ativa inalterada. Extração/renderização nos três perfis é prova de software, não teste de equipamentos reais. [Contratos](docs/APP_RECIPES.md) e [preparo](docs/NEXT_SESSION.md).
 
-0. **Continuar o desenvolvimento:** distribuição/rollback, outros contratos de apps e refinamentos após os gates de uso real. MQTT e drivers extras têm implementação de software v0.8.0. Os testes abaixo ficam no checklist final, sem serem marcados como aprovados antes de execução real. A v0.6.0 já está instalada; a versão mais recente inclui as anteriores, sem atualizações intermediárias.
+0. **Continuar o desenvolvimento:** atualização/retorno foram implementados em software na v0.10.0. Próximos cortes incluem retenção, migrações, outros contratos e refinamentos após os gates reais. MQTT e drivers extras têm implementação de software v0.8.0. Os testes abaixo ficam no checklist final, sem serem marcados como aprovados antes de execução real. A v0.6.0 já está instalada; a versão mais recente inclui as anteriores, sem atualizações intermediárias.
 1. **Fonte personalizada no hardware:** criar pelo painel uma página HTTP/JSON de interesse real e confirmar sua legibilidade no ST7789. O núcleo, a extração e a API já possuem testes; esse gate é somente físico.
 2. **Homologar integrações reais:** configurar Pi-hole 6 e Home Assistant pelos assistentes já implementados, comparar dados e observar estados de falha/legibilidade no TFT.
 3. **Desk no hardware:** ativar Relógio/Pomodoro pelo painel, executar um ciclo curto, pausar/retomar e observar contagem/legibilidade no TFT. Os botões continuam anterior/próxima; não há novos gestos para homologar nesta versão.
@@ -165,3 +167,9 @@ O cofre é armazenamento protegido por permissões, não criptografia de disco. 
 - exposição direta do painel à internet;
 - dependência obrigatória de React, Node.js ou banco de dados;
 - armazenamento de tokens e senhas no repositório.
+
+## Corte v0.10.0 — atualização isolada
+
+A v0.10.0 acrescenta atualização por SHA, ambiente isolado e backup privado, troca explícita verificada e retorno de código/ambiente com journal. Não restaura configuração/cofre antigos, não altera grupos/pacotes do sistema e recusa serviços personalizados ou downgrade incompatível. 195 testes passaram no computador (19,344 s); três opcionais Mosquitto foram ignorados. Fluxo completo do painel isolado e landing em oito combinações aprovados; fotos/Pix preservados. ARM e CI desta versão serão conferidos após publicação. Troca/retorno reais ficam no checklist final; v0.6.0 continua ativa e saudável.
+
+[Contrato e limites](docs/SAFE_UPDATES.md). Retenção/limpeza, releases assinadas, migração de dados e suportar serviços personalizados continuam futuros.

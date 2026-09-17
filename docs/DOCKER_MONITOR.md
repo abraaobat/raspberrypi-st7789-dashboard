@@ -59,16 +59,6 @@ A revisão `b339eab` foi preparada em `~/.cache/st7789-dashboard-update-v0.7.0`;
 
 Na auditoria de 17/09/2026, a instalação v0.6.0 do Raspberry estava ativa e saudável, e o socket padrão do Docker não existia. Nenhuma instalação ou mudança de privilégio foi feita. É possível continuar usando todas as páginas anteriores sem Docker. **Não é necessário instalar Docker apenas para testar o display.**
 
-Quando o mantenedor optar por instalar a nova versão:
-
-```bash
-cd ~/raspberrypi-st7789-dashboard
-git status --short
-git pull --ff-only
-./scripts/install.sh
-./scripts/validate_install.sh
-```
-
-Preserve alterações próprias caso o status não esteja limpo. Faça um backup privado recente antes de atualizar. Informe senhas somente no terminal/painel privado, nunca na conversa. A v0.7.0 inclui todos os modelos da v0.6.0, portanto não exige uma instalação intermediária. Depois confira a API `0.7.0` e use o mesmo PIN.
+Atualização atual: siga [SAFE_UPDATES.md](SAFE_UPDATES.md), com ferramenta/código/ambiente separados e ativação explícita. Não faça pull do checkout ativo nem repita o instalador. Não exige versões intermediárias; mantenha PIN e credenciais no terminal/painel privados.
 
 Checklist para o final: fonte HTTP/JSON de interesse real; PI-HOLE/CASA com credenciais privadas; ciclo de Pomodoro de um minuto; Docker real somente onde já autorizado; prévia, legibilidade, seleção, carrossel e os dois botões. A v0.8.0 implementa [MQTT somente leitura](MQTT_MONITOR.md) e [drivers opcionais experimentais](DISPLAY_COMPATIBILITY.md), ainda pendentes de homologação com sensores/módulos reais.

@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-17T18:23:17Z",
-  "status": "v0.9.0 • software OK",
+  "updatedAt": "2026-09-17T18:45:45.820Z",
+  "status": "v0.10.0 • software local OK",
   "statusClass": "ops",
   "progress": 92,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "v0.9.0: nove modelos HTTP/JSON, com sensores ESPHome (nomes YAML/UTF-8), potência Shelly Gen2+ somente Switch.GetStatus e métricas escalares Prometheus. Montagem de URL offline autenticada/CSRF, sem DNS/HTTP à fonte ou gravação; modelo, teste, rascunho e aplicação separados. 162 testes aprovados no computador e no ARM em checkout separado (67,427 s); três opcionais Mosquitto ignorados nesses hosts. Todos os 165 passaram no CI (19,051 s), com fluxo completo do painel e regressão MQTT/Docker/Desk. Landing local/publicada aprovada em oito combinações; fotos/Pix preservados. Backup privado e auditoria posterior confirmaram PIN/configuração/chave de sessão/cofre e instalação ativa v0.6.0 limpa/saudável inalterados. Nenhum app, broker, driver extra ou privilégio instalado no Pi. Apps reais/TFT e atualização ativa ficam no checklist final.",
-  "architecture": "Browser → Auth API → Config/Registry + 9 Templates/closed offline URL recipes/Desk → bounded GET-only HTTP + Docker/MQTT read providers → Pillow + native OLED → ST7789 / optional SSD1306+ILI9341 / safe Preview",
-  "next": "Distribuição/rollback e outros contratos de apps. Atualizar diretamente a versão mais recente e homologar apenas fontes/apps de interesse no checklist final; não instalar serviços nem remover autenticação só para testar. Search Console depende de login.",
-  "action": "Checklist único em docs/FINAL_VALIDATION.md; modelos/URLs e limites em docs/APP_RECIPES.md. Credenciais apenas no painel privado; instalar versão mais recente quando conveniente, sem versões intermediárias.",
+  "current": "A v0.10.0 acrescenta atualização por SHA, ambiente isolado e backup privado, troca explícita verificada e retorno de código/ambiente com journal. Não restaura configuração/cofre antigos, não altera grupos/pacotes do sistema e recusa serviços personalizados ou downgrade incompatível. 195 testes passaram no computador (19,344 s); três opcionais Mosquitto foram ignorados. Fluxo completo do painel isolado e landing em oito combinações aprovados; fotos/Pix preservados. ARM e CI desta versão serão conferidos após publicação. Troca/retorno reais ficam no checklist final; v0.6.0 continua ativa e saudável.",
+  "architecture": "Browser → Auth API → Config/Registry + 9 Templates/closed offline URL recipes/Desk → bounded GET-only HTTP + Docker/MQTT read providers → Pillow + native OLED → ST7789 / optional SSD1306+ILI9341 / safe Preview; Operator CLI → immutable Git archive / per-release venv / private snapshots → health-gated unit switch / compatible code rollback",
+  "next": "Validar ARM/CI e preparação isolada; ativação/retorno reais e integrações/TFT no checklist final. Próximos cortes: retenção, migrações e outros contratos. Search Console depende de login.",
+  "action": "Atualizações atuais em docs/SAFE_UPDATES.md; não fazer pull do código ativo nem repetir instalador. Preparar sem sudo; ativação/retorno somente no terminal quando conveniente. Checklist físico em docs/FINAL_VALIDATION.md.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
@@ -63,17 +63,21 @@
     "162 v0.9 tests ✓ local + ARM staged / all 165 ✓ CI; full isolated browser flow ✓",
     "v0.9.0 deployment + real app sources/TFT — deferred final checklist",
     "Private pre-v0.9 backup + unchanged active v0.6 PIN/config/session/vault and health audit ✓",
-    "v0.9 local/public landing ✓ 8 language/viewport combinations; confirmed photos/PIX unchanged"
+    "v0.9 local/public landing ✓ 8 language/viewport combinations; confirmed photos/PIX unchanged",
+    "Isolated SHA release + per-release venv + private snapshots ✓ software",
+    "Operator-only health-gated activation + compatible code rollback + recovery journal ✓ simulated services",
+    "195 v0.10 tests ✓ local / 3 optional skipped; ARM/CI verification pending",
+    "v0.10 real activation/rollback + TFT regression — final deferred checklist"
   ],
   "runtime": {
     "label": "Página pública do projeto",
     "url": "https://abraaobat.github.io/raspberrypi-st7789-dashboard/",
     "status": "available",
-    "note": "Landing v0.9.0 e Pix publicados/verificados. Painel Raspberry continua local/tailnet v0.6.0 saudável; atualização/testes reais finais pendentes."
+    "note": "Landing v0.10.0 preparada para publicação, fotos/Pix preservados. Painel Raspberry permanece v0.6.0 saudável; troca/retorno reais finais pendentes."
   },
   "activity": {
     "date": "2026-09-17",
     "type": "update",
-    "text": "v0.9.0: nove modelos HTTP/JSON, com sensores ESPHome (nomes YAML/UTF-8), potência Shelly Gen2+ somente Switch.GetStatus e métricas escalares Prometheus. Montagem de URL offline autenticada/CSRF, sem DNS/HTTP à fonte ou gravação; modelo, teste, rascunho e aplicação separados. 162 testes aprovados no computador e no ARM em checkout separado (67,427 s); três opcionais Mosquitto ignorados nesses hosts. Todos os 165 passaram no CI (19,051 s), com fluxo completo do painel e regressão MQTT/Docker/Desk. Landing local/publicada aprovada em oito combinações; fotos/Pix preservados. Backup privado e auditoria posterior confirmaram PIN/configuração/chave de sessão/cofre e instalação ativa v0.6.0 limpa/saudável inalterados. Nenhum app, broker, driver extra ou privilégio instalado no Pi. Apps reais/TFT e atualização ativa ficam no checklist final."
+    "text": "A v0.10.0 acrescenta atualização por SHA, ambiente isolado e backup privado, troca explícita verificada e retorno de código/ambiente com journal. Não restaura configuração/cofre antigos, não altera grupos/pacotes do sistema e recusa serviços personalizados ou downgrade incompatível. 195 testes passaram no computador (19,344 s); três opcionais Mosquitto foram ignorados. Fluxo completo do painel isolado e landing em oito combinações aprovados; fotos/Pix preservados. ARM e CI desta versão serão conferidos após publicação. Troca/retorno reais ficam no checklist final; v0.6.0 continua ativa e saudável."
   }
 }

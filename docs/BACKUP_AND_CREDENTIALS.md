@@ -32,7 +32,7 @@ Abra `http://127.0.0.1:8081` enquanto a conexão estiver ativa. Também é poss�
 
 Atualizações preservam o diretório de estado. Integrações novas permanecem opt-in e não exigem credenciais para o núcleo iniciar. Antes de atualizar, guarde uma cópia privada do diretório completo fora do Git; ela inclui segredos e deve continuar com acesso restrito. Não envie essa cópia ao suporte nem à página pública.
 
-O backup pelo navegador serve para ajustes; o backup local completo serve para recuperação do dispositivo. Se precisar restaurar a versão anterior, pare os serviços, volte à revisão conhecida e recupere o estado a partir da cópia local validada. Não execute rollback destrutivo em um checkout com alterações próprias.
+O backup pelo navegador serve para ajustes; backup local completo é privado e destinado à recuperação administrada. Na v0.10.0, [SAFE_UPDATES.md](SAFE_UPDATES.md) separa preparação/ativação e oferece retorno de código/ambiente sem restaurar estado antigo. Configuração/cofre atuais são conferidos antes do retorno; incompatibilidade bloqueia downgrade em vez de apagar dados novos. Recuperação de estado é uma decisão local explícita, nunca automática. Não execute rollback destrutivo em checkout com alterações próprias.
 
 Na preparação da atualização v0.3.0 → v0.5.0 em 16/09/2026, foi criado no próprio Pi um backup completo com acesso privado, fora do Git. PIN, configuração e chave de sessão foram comparados sem exibir conteúdos e não mudaram. Os 84 testes rodaram em checkout separado. A instalação v0.5.0 foi confirmada em 17/09/2026; o roteiro anterior fica como referência em [UPDATE_TO_V05.md](UPDATE_TO_V05.md).
 

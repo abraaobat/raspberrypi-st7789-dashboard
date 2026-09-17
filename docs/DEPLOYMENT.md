@@ -2,7 +2,9 @@
 
 Este roteiro instala o display físico e o Web Control Panel como serviços independentes. O instalador detecta o usuário, a home e o caminho real do clone; não depende de `/home/pi`.
 
-## 1. Atualizar o clone no Raspberry Pi
+**Instalação existente:** use [SAFE_UPDATES.md](SAFE_UPDATES.md), sem alterar o checkout ativo. O roteiro abaixo é somente para primeira instalação; `install.sh` recusa serviços existentes.
+
+## 1. Preparar o clone para primeira instalação
 
 ```bash
 cd ~/raspberrypi-st7789-dashboard
@@ -20,7 +22,7 @@ Execute como usuário normal, não com `sudo`:
 O instalador:
 
 - instala os pacotes do sistema necessários;
-- cria ou atualiza `~/st7789-env`;
+- cria `~/st7789-env` para a primeira instalação;
 - instala as dependências Python;
 - executa os testes que não exigem hardware;
 - cria o diretório privado de configuração;
@@ -60,7 +62,7 @@ O resultado esperado é `PASS` para SPI, os dois serviços, a API e o estado pub
 - a página escolhida no navegador aparece no ST7789;
 - alterações de ordem e carrossel entram em vigor sem reiniciar;
 - o painel continua acessível pelo celular;
-- após `sudo reboot`, os dois serviços voltam a `active (running)`.
+- conferir autostart em uma reinicialização necessária ao uso normal; não reinicie só para este checklist adiado.
 
 ## Diagnóstico
 
@@ -71,7 +73,7 @@ journalctl -u bench-display.service -n 50 --no-pager
 journalctl -u bench-display-web.service -n 50 --no-pager
 ```
 
-Se o usuário do Raspberry Pi mudar, execute novamente `./scripts/install.sh`; ele regenera os serviços sem apagar o PIN ou a configuração.
+Migração de usuário/unidades personalizadas exige roteiro administrado próprio. Não repita o instalador sobre serviços existentes; o atualizador também recusa migração de usuário ou personalizações.
 
 ## Homologação registrada
 
