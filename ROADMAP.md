@@ -105,6 +105,8 @@ Critério de saída: falhas de serviços e rede são visíveis sem comprometer o
 - página Casa para sensores, portas, luzes e energia; ✅ software; notificações pendentes
 - ticker financeiro opcional, com limites e indicação de atualização.
 - páginas HTTP/JSON criadas pelo usuário a partir de modelos seguros; ✅ software
+- seis modelos HTTP/JSON, conferência offline de caminhos e isolamento rascunho/aplicação; ✅ software v0.6.0
+- Node-RED via endpoint HTTP/JSON; ✅ modelo e roteiro; MQTT nativo continua pendente
 
 Critério de saída: módulos podem ser instalados e removidos sem aumentar a superfície obrigatória do núcleo.
 
@@ -126,17 +128,17 @@ Critério de saída: uma nova instalação reproduz o sistema sem ajustes manuai
 
 ## Foco atual
 
-D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A v0.5.0 soma Relógio/Pomodoro offline ao cofre, Pi-hole 6/Home Assistant e backup/restauração da v0.4.0. São 84 testes automatizados aprovados no computador e no ARM, mais fluxo de navegador isolado, incluindo comandos do timer e persistência. No Pi, os testes usaram uma cópia separada, sem substituir a instalação ativa. A página bilíngue e o Pix confirmado permanecem publicados. O Raspberry voltou a responder por SSH; backup privado e auditoria da instalação atual estão aprovados. A implantação da v0.5.0 aguarda execução local do instalador com senha de administrador; os serviços ativos continuam na v0.3.0. Search Console aguarda login do mantenedor; conectores reais, fonte personalizada e novas páginas aguardam observação física. MQTT, Docker detalhado, gestos físicos do Pomodoro e drivers adicionais continuam como evoluções, não como recursos prontos.
+D0–D3 estão concluídos e homologados. SysOps e Clima da v0.3.0 estão homologados no ST7789 real. A instalação v0.5.0 está ativa e passou na auditoria do Raspberry em 17/09/2026; isso não substitui observação visual de Relógio/Pomodoro e conectores. A v0.6.0 acrescenta seis modelos HTTP/JSON, conferência de caminhos com exemplos sem conexão e status desconhecidos neutros. São 100 testes de software e fluxo de navegador isolado. A biblioteca não instala código de terceiros, não inventa URLs e não cria fontes automaticamente. A página bilíngue e o Pix confirmado permanecem publicados. A instalação da v0.6.0 é uma etapa separada; Search Console aguarda login do mantenedor. Conectores reais, fonte personalizada e novas páginas aguardam observação física. MQTT, Docker detalhado, gestos físicos do Pomodoro e drivers adicionais continuam como evoluções, não como recursos prontos.
 
 O deploy permanece automatizado por `scripts/install.sh`, seguido de `scripts/validate_install.sh` e da checagem manual dos dois botões físicos.
 
 ## Sequência de retomada
 
-0. **Concluir atualização:** executar o [roteiro v0.5.0](docs/UPDATE_TO_V05.md) no terminal do Pi, informando a senha de administrador somente quando o instalador pedir. Confirmar versão `0.5.0` na API e auditoria aprovada antes dos testes abaixo.
+0. **Instalar os modelos:** executar o [roteiro v0.6.0](docs/CUSTOM_TEMPLATES.md) no terminal do Pi, informando a senha de administrador somente quando o instalador pedir. Confirmar versão `0.6.0` na API e auditoria aprovada antes dos testes abaixo. A atualização anterior v0.5.0 já foi confirmada.
 1. **Fonte personalizada no hardware:** criar pelo painel uma página HTTP/JSON de interesse real e confirmar sua legibilidade no ST7789. O núcleo, a extração e a API já possuem testes; esse gate é somente físico.
 2. **Homologar integrações reais:** configurar Pi-hole 6 e Home Assistant pelos assistentes já implementados, comparar dados e observar estados de falha/legibilidade no TFT.
 3. **Desk no hardware:** ativar Relógio/Pomodoro pelo painel, executar um ciclo curto, pausar/retomar e observar contagem/legibilidade no TFT. Os botões continuam anterior/próxima; não há novos gestos para homologar nesta versão.
-4. **Expansões independentes:** MQTT/Node-RED, Docker detalhado e templates para outros apps. Tokens arbitrários no assistente HTTP/JSON não estão habilitados.
+4. **Expansões independentes:** MQTT nativo, Docker detalhado e contratos/templates específicos de outros apps. Node-RED já tem modelo GET/JSON e roteiro; não foi homologado com fluxo real. Tokens arbitrários no assistente HTTP/JSON não estão habilitados.
 5. **Outros displays:** implementar e homologar drivers SSD1306 e ILI9341. Os perfis e a adaptação do framebuffer não substituem o teste físico de cada módulo.
 
 O roteiro de continuidade e os gates pendentes estão em [docs/NEXT_SESSION.md](docs/NEXT_SESSION.md).

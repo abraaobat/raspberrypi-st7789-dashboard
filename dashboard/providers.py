@@ -374,8 +374,12 @@ def fetch_weather(settings: dict) -> dict:
 def fetch_custom_page(definition: dict) -> dict:
     source = definition["source"]
     payload = fetch_json(source["url"])
-    secondary_path = source.get("secondaryPath")
-    value = json_path(payload, source["valuePath"])
+    return extract_custom_values(payload, source["valuePath"], source.get("secondaryPath"))
+
+
+def extract_custom_values(payload, value_path: str, secondary_path: str | None = None) -> dict:
+    """Shared scalar extraction for real responses and offline examples."""
+    value = json_path(payload, value_path)
     secondary = json_path(payload, secondary_path) if secondary_path else None
 
     def bounded(item):

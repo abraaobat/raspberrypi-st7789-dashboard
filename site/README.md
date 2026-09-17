@@ -46,5 +46,5 @@ The optional support section uses the same public PIX key and validated QR code 
 - Do not advertise experimental SSD1306 or ILI9341 profiles as physical drivers.
 - Keep the local web panel described as LAN/tailnet software, not an Internet-facing service.
 - Generic HTTP/JSON sources still do not accept arbitrary auth headers. Only the closed Pi-hole 6/Home Assistant connectors use the v0.4.0 vault; its private file is not disk encryption.
-- Keep the v0.3.0 physical-validation badge separate from the v0.5.0 software additions. Fake-service browser tests do not establish real Pi-hole/Home Assistant or TFT validation. Clock/Pomodoro are implemented and tested in software; the Raspberry Pi update is still connectivity-pending.
+- Keep the v0.3.0 physical-validation badge separate from newer software additions. The v0.5.0 installation and health checks on the Raspberry Pi were confirmed on 17/09/2026, not the visual validation of Clock/Pomodoro or real connectors. v0.6.0 adds six HTTP/JSON templates and offline JSON path inspection, with separate deployment and real-source/TFT validation. Fake-service browser tests do not establish real Pi-hole/Home Assistant, Node-RED or TFT validation. Preserve all photos and the confirmed Pix destination.
 - Update the displayed version and physical-validation statements together with `project-status.json`.

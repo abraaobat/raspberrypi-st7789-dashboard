@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from flask import jsonify
 from waitress import serve
 from web_app import create_app
+from dashboard.source_templates import public_source_templates
 
 FAKE_SECRET = "browser-fixture-only"
 
@@ -22,6 +23,7 @@ def main():
     parser.add_argument("--port", type=int, default=8093)
     args = parser.parse_args()
     calls = []
+    samples = {item["id"]: item["sample"] for item in public_source_templates()}
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
@@ -47,7 +49,9 @@ def main():
 
         def do_GET(self):
             calls.append({"method": "GET", "path": self.path})
-            if self.path == "/api/stats/summary":
+            if self.path.startswith("/examples/") and self.path.removeprefix("/examples/") in samples:
+                self.reply(samples[self.path.removeprefix("/examples/")])
+            elif self.path == "/api/stats/summary":
                 self.reply({"queries": {"total": 1000, "blocked": 245, "percent_blocked": 24.5},
                             "clients": {"active": 8}, "gravity": {"domains_being_blocked": 100000}})
             elif self.path.startswith("/api/states/") and self.headers.get("Authorization") == "Bearer " + FAKE_SECRET:

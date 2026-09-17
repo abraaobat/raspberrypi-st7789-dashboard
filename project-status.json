@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "projectId": "raspberrypi-st7789-dashboard",
-  "updatedAt": "2026-09-17T03:55:51Z",
-  "status": "v0.5.0 testada no ARM • instalação final aguarda senha",
+  "updatedAt": "2026-09-17T04:53:42Z",
+  "status": "v0.6.0 pronta • modelos HTTP/JSON • Pi ativo na v0.5.0",
   "statusClass": "ops",
   "progress": 92,
   "roadmap": "D0–D6 • D0–D3 concluídos • D4–D6 antecipados parcialmente",
-  "current": "Pi acessível por SSH; backup privado criado e 84 testes da v0.5.0 aprovados no ARM em checkout separado. Instalação ativa v0.3.0 saudável, PIN/configuração preservados. Relógio/Pomodoro, cofre, Pi-hole 6/Home Assistant e backup/restauração prontos em software, com navegador isolado aprovado. Instalação final aguarda senha de administrador no terminal. Landing bilíngue e Pix preservados.",
-  "architecture": "Browser → API autenticada → Config/Registry + shared monotonic Pomodoro → System/async providers → Pillow → Display Profile → ST7789/Preview",
-  "next": "Concluir instalação v0.5.0 no Pi com senha de administrador e verificar versão/API; depois ciclo curto de Relógio/Pomodoro, conectores reais e fonte HTTP/JSON no TFT. Search Console depende de login. MQTT, Docker detalhado, templates e novos drivers permanecem futuros.",
-  "action": "No terminal do Pi, executar git pull --ff-only, scripts/install.sh e scripts/validate_install.sh; senha somente no terminal. Confirmar API 0.5.0, ativar páginas e conferir TFT. O roteiro está em docs/UPDATE_TO_V05.md; PIN e navegação permanecem.",
+  "current": "Instalação v0.5.0 confirmada no Raspberry: serviços/API/SPI/estado aprovados. v0.6.0 soma seis modelos HTTP/JSON, conferência offline de caminhos, rascunho separado de aplicação, respostas antigas descartadas e status desconhecidos neutros. 100 testes locais e fluxo completo de navegador isolado aprovados. ARM v0.6 e instalação final são etapas separadas. Landing bilíngue, fotos e Pix preservados.",
+  "architecture": "Browser → Auth API → Config/Registry + Source Templates/Offline JSON + shared Pomodoro → async providers → Pillow → ST7789/Preview",
+  "next": "Validar a v0.6.0 no ARM em cópia separada e concluir instalação com senha de administrador; depois fonte real no TFT, ciclo curto de Relógio/Pomodoro e conectores reais. Search Console depende de login. MQTT nativo, Docker detalhado e novos drivers permanecem futuros.",
+  "action": "Instalar v0.6.0 pelo terminal do Pi, atualizar o painel, escolher modelo em Adicionar fonte, conferir exemplo sem conexão, informar URL real e guardar/aplicar. Credenciais somente no painel privado. Roteiro: docs/CUSTOM_TEMPLATES.md.",
   "subprojects": [
     "ST7789 240×240 physical MVP ✓",
     "STATUS / REDE / HARDWARE pages ✓",
@@ -34,9 +34,13 @@
     "Clock timezone + 12/24h + seconds ✓ software",
     "Pomodoro panel controls + process persistence + reboot safety ✓ software",
     "RELÓGIO / POMODORO — physical validation pending",
-    "84 automated tests ✓ local + ARM staged checkout",
+    "100 automated tests ✓ local",
     "Private pre-update backup + active v0.3 audit ✓",
-    "v0.5.0 Raspberry Pi deployment — administrator password pending",
+    "v0.5.0 Raspberry Pi deployment + health audit ✓",
+    "Six safe HTTP/JSON templates ✓ software",
+    "Offline JSON path inspection + draft/apply separation ✓ browser",
+    "Neutral unknown custom statuses + details ✓ software",
+    "v0.6.0 ARM validation / deployment — pending",
     "Display profiles foundation ✓ software",
     "Public landing page + Google indexing foundation ✓",
     "Google Search Console — login/verification pending",
@@ -50,8 +54,8 @@
     "note": "Landing page e Pix publicados; o painel de controle do Raspberry Pi permanece restrito à rede local/tailnet."
   },
   "activity": {
-    "date": "2026-09-16",
-    "type": "validation",
-    "text": "Raspberry acessível; backup privado completo criado, 84 testes v0.5.0 aprovados no ARM em checkout separado e auditoria da instalação ativa v0.3.0 aprovada. PIN/configuração preservados; código ativo e serviços não foram trocados. Implantação final exige senha de administrador no terminal; docs, roadmap e Command Dashboard atualizados com roteiro e checklist TFT. Tetris cancelado."
+    "date": "2026-09-17",
+    "type": "update",
+    "text": "v0.5.0 confirmada ativa no Raspberry com auditoria aprovada. v0.6.0: seis modelos HTTP/JSON, conferência de exemplos sem conexão, confirmação/rascunho separados da aplicação, respostas antigas descartadas e status desconhecidos neutros; 100 testes locais e navegador isolado aprovados. Landing em oito cenários aprovada, fotos/Pix preservados. MQTT nativo e drivers adicionais continuam futuros; ARM/implantação v0.6 e TFT pendentes."
   }
 }

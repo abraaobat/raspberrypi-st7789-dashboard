@@ -3,6 +3,9 @@ const state = {
   config: null,
   catalog: [],
   displays: [],
+  sourceTemplates: [],
+  sourceTestController: null,
+  sourceGeneration: 0,
   previewIndex: 0,
   dirty: false,
   authConfigured: false,
@@ -100,6 +103,7 @@ async function loadApplication() {
   ]);
   state.catalog = catalog.pages;
   state.displays = catalog.displays || [];
+  state.sourceTemplates = catalog.sourceTemplates || [];
   state.config = config;
   state.authConfigured = true;
   state.integrationsStatus = integrations;
@@ -112,6 +116,7 @@ async function loadApplication() {
   $("#connectionBadge").classList.add("online");
   $("#connectionBadge").innerHTML = "<span></span> Conectado";
   renderSettings();
+  renderSourceTemplates();
   refreshPreview();
   refreshDisplayState();
   refreshPomodoro();
@@ -440,15 +445,11 @@ function renderCustomPages() {
   const list = $("#customPageList");
   list.textContent = "";
   $("#customEmpty").hidden = state.config.customPages.length > 0;
-  const accentVariables = {
-    blue: "var(--blue)", cyan: "var(--cyan)", green: "var(--green)",
-    orange: "var(--orange)", purple: "#af78ff", red: "var(--danger)",
-  };
   state.config.customPages.forEach((definition) => {
     const row = document.createElement("div");
     row.className = "custom-source-row";
     row.innerHTML = `
-      <span class="accent-dot" style="background:${accentVariables[definition.accent] || "var(--cyan)"}"></span>
+      <span class="accent-dot accent-${escapeHTML(definition.accent)}"></span>
       <div class="source-copy"><strong>${escapeHTML(definition.title)}</strong><small>${escapeHTML(definition.source.url)} · ${escapeHTML(definition.source.valuePath)}</small></div>
       <div class="row-buttons">
         <button class="edit-source" type="button">Editar</button>
@@ -612,10 +613,70 @@ function makeCustomId(title) {
   return candidate;
 }
 
-function openCustomDialog(definition = null) {
-  $("#customForm").reset();
+function renderSourceTemplates() {
+  const select = $("#sourceTemplate");
+  select.replaceChildren();
+  const blank = document.createElement("option");
+  blank.value = "";
+  blank.textContent = "Configuração livre";
+  select.appendChild(blank);
+  state.sourceTemplates.forEach((template) => {
+    const option = document.createElement("option");
+    option.value = template.id;
+    option.textContent = template.name;
+    select.appendChild(option);
+  });
+}
+
+function invalidateSourceTest() {
+  state.sourceTestController?.abort();
+  state.sourceTestController = null;
+  state.sourceGeneration++;
+  $("#testCustomSource").disabled = false;
+  $("#inspectSourceSample").disabled = false;
   $("#sourceTestResult").textContent = "";
   $("#sourceTestResult").className = "source-test-result";
+}
+
+function selectedSourceTemplate() {
+  return state.sourceTemplates.find((template) => template.id === $("#sourceTemplate").value);
+}
+
+function showSourceTemplateExample() {
+  invalidateSourceTest();
+  const template = selectedSourceTemplate();
+  $("#sourceTemplateDescription").textContent = template
+    ? `${template.description} Clique em Usar modelo para preencher os campos; URL e identificação serão preservadas.`
+    : "Escolha um modelo ou preencha livremente. Os caminhos dependem do JSON que seu app fornece.";
+  $("#applySourceTemplate").disabled = !template;
+  $("#sourceSample").value = JSON.stringify(template?.sample || {}, null, 2);
+}
+
+$("#sourceTemplate").addEventListener("change", showSourceTemplateExample);
+$("#applySourceTemplate").addEventListener("click", () => {
+  const template = selectedSourceTemplate();
+  if (!template) return;
+  if ([$("#customTitle"), $("#customValuePath"), $("#customSecondaryPath"), $("#customUnit"), $("#customValueLabel")].some((input) => input.value)
+      && !confirm("Substituir título, rótulo, caminhos, unidade, layout e cor pelo modelo? A URL e a identificação da fonte serão preservadas. Nada será aplicado ao display agora.")) return;
+  const fields = {
+    title: "#customTitle", valueLabel: "#customValueLabel", unit: "#customUnit",
+    layout: "#customLayout", accent: "#customAccent", valuePath: "#customValuePath", secondaryPath: "#customSecondaryPath",
+  };
+  for (const [field, selector] of Object.entries(fields)) $(selector).value = template.fields[field];
+  invalidateSourceTest();
+  $("#sourceSampleDetails").open = true;
+  $("#customUrl").focus();
+});
+
+$("#customForm").addEventListener("input", invalidateSourceTest);
+$("#customForm").addEventListener("change", invalidateSourceTest);
+
+function openCustomDialog(definition = null) {
+  $("#customForm").reset();
+  invalidateSourceTest();
+  $("#sourceTemplate").value = "";
+  showSourceTemplateExample();
+  $("#sourceSampleDetails").open = false;
   $("#customDialogTitle").textContent = definition ? "Editar fonte" : "Adicionar fonte";
   $("#customId").value = definition?.id || "";
   $("#customTitle").value = definition?.title || "";
@@ -634,6 +695,11 @@ function closeCustomDialog() {
   $("#customDialog").close();
 }
 
+$("#customDialog").addEventListener("close", () => {
+  invalidateSourceTest();
+  $("#sourceSample").value = "";
+});
+
 function removeCustomPage(id) {
   state.config.customPages = state.config.customPages.filter((item) => item.id !== id);
   state.config.pages = state.config.pages.filter((item) => item.id !== id);
@@ -648,22 +714,48 @@ $("#addCustomPage").addEventListener("click", () => openCustomDialog());
 $("#closeCustomDialog").addEventListener("click", closeCustomDialog);
 $("#cancelCustomSource").addEventListener("click", closeCustomDialog);
 
-$("#testCustomSource").addEventListener("click", async () => {
+async function runSourceTest(offline) {
+  if (!offline && !$("#customForm").reportValidity()) return;
+  invalidateSourceTest();
+  const generation = state.sourceGeneration;
+  const controller = new AbortController();
+  state.sourceTestController = controller;
+  $("#testCustomSource").disabled = true;
+  $("#inspectSourceSample").disabled = true;
   const result = $("#sourceTestResult");
   result.className = "source-test-result";
-  result.textContent = "Testando…";
+  result.textContent = offline ? "Conferindo exemplo…" : "Testando conexão…";
   try {
-    const payload = await requestJSON("/api/sources/test", {
+    let candidate;
+    if (offline) {
+      const sample = $("#sourceSample").value;
+      if (new TextEncoder().encode(sample).length > 32 * 1024) throw new Error("O exemplo deve ter no máximo 32 KiB.");
+      try { candidate = {sample: JSON.parse(sample), valuePath: $("#customValuePath").value.trim(), secondaryPath: $("#customSecondaryPath").value.trim()}; }
+      catch (_) { throw new Error("O exemplo não é um JSON válido."); }
+    } else candidate = customFormValue();
+    const payload = await requestJSON(offline ? "/api/sources/inspect" : "/api/sources/test", {
       method: "POST",
-      body: JSON.stringify(customFormValue()),
+      body: JSON.stringify(candidate),
+      signal: controller.signal,
     });
+    if (generation !== state.sourceGeneration) return;
     const detail = payload.secondary == null ? "" : ` · ${payload.secondary}`;
-    result.textContent = `Conexão aprovada: ${payload.value}${detail}`;
+    result.textContent = `${offline ? "Exemplo conferido, sem conexão" : "Conexão aprovada"}: ${payload.value}${detail}`;
   } catch (error) {
+    if (generation !== state.sourceGeneration || error.name === "AbortError") return;
     result.className = "source-test-result error";
     result.textContent = error.message;
+  } finally {
+    if (generation === state.sourceGeneration) {
+      state.sourceTestController = null;
+      $("#testCustomSource").disabled = false;
+      $("#inspectSourceSample").disabled = false;
+    }
   }
-});
+}
+
+$("#testCustomSource").addEventListener("click", () => runSourceTest(false));
+$("#inspectSourceSample").addEventListener("click", () => runSourceTest(true));
 
 $("#customForm").addEventListener("submit", (event) => {
   event.preventDefault();
@@ -681,6 +773,7 @@ $("#customForm").addEventListener("submit", (event) => {
   closeCustomDialog();
   renderSettings();
   refreshPreview();
+  toast("Fonte guardada no rascunho. Use Aplicar alterações para enviar ao display.");
 });
 
 $("#saveButton").addEventListener("click", async () => {
@@ -744,6 +837,7 @@ $("#logoutButton").addEventListener("click", async () => {
     await requestJSON("/api/auth/logout", {method: "POST", body: "{}"});
   } finally {
     state.csrf = null;
+    closeCustomDialog();
     closeIntegrationDialog();
     state.integrationsStatus = {};
     state.pomodoro = null;

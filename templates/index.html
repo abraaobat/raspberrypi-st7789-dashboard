@@ -206,7 +206,7 @@
             </div>
             <button id="addCustomPage" class="button secondary compact" type="button">+ Adicionar fonte</button>
           </div>
-          <p class="muted custom-intro">Conecte uma URL HTTP/JSON e transforme um campo da resposta em uma página. O display não executa scripts ou comandos da fonte.</p>
+          <p class="muted custom-intro">Escolha um modelo ou conecte sua própria URL HTTP/JSON. Confira os caminhos em um exemplo antes de consultar a API. O display não executa scripts ou comandos da fonte.</p>
           <div id="customPageList" class="custom-page-list"></div>
           <div id="customEmpty" class="empty-state">Nenhuma fonte personalizada. Você pode conectar sensores, automações ou serviços do homelab.</div>
         </article>
@@ -272,6 +272,11 @@
         <button id="closeCustomDialog" class="dialog-close" type="button" aria-label="Fechar">×</button>
       </div>
       <input id="customId" type="hidden">
+      <section class="source-template-box" aria-label="Modelos de fontes">
+        <label class="select-field"><span>Começar com um modelo</span><select id="sourceTemplate"><option value="">Configuração livre</option></select></label>
+        <p id="sourceTemplateDescription" class="source-note"></p>
+        <button id="applySourceTemplate" class="button secondary compact" type="button" disabled>Usar modelo</button>
+      </section>
       <div class="dialog-grid">
         <label class="compact-field"><span>Título</span><input id="customTitle" class="text-input" maxlength="22" required placeholder="Energia"></label>
         <label class="compact-field"><span>Rótulo do valor</span><input id="customValueLabel" class="text-input" maxlength="18" placeholder="CONSUMO"></label>
@@ -287,12 +292,18 @@
         <label class="select-field"><span>Cor</span><select id="customAccent"><option value="cyan">Ciano</option><option value="blue">Azul</option><option value="green">Verde</option><option value="orange">Laranja</option><option value="purple">Roxo</option><option value="red">Vermelho</option></select></label>
       </div>
       <p class="source-note">Use caminhos separados por ponto, como <code>sensor.energy.value</code> ou <code>items.0.status</code>. Respostas têm limite de 128 KiB.</p>
+      <details id="sourceSampleDetails" class="source-sample">
+        <summary>Conferir caminhos em um exemplo JSON</summary>
+        <label class="compact-field"><span>Exemplo ou resposta sem segredos (até 32 KiB)</span><textarea id="sourceSample" class="text-input source-json" rows="7" spellcheck="false" maxlength="32768" aria-describedby="sourceSampleNote"></textarea></label>
+        <p id="sourceSampleNote" class="source-note">Dados fictícios dos modelos. Você pode colar uma resposta sem tokens ou dados sensíveis. Este teste não acessa a URL nem salva ajustes; ele verifica somente os campos selecionados.</p>
+        <button id="inspectSourceSample" class="button ghost compact" type="button">Conferir exemplo, sem conexão</button>
+      </details>
       <div id="sourceTestResult" class="source-test-result" aria-live="polite"></div>
       <div class="dialog-actions">
         <button id="testCustomSource" class="button ghost" type="button">Testar conexão</button>
         <span></span>
         <button id="cancelCustomSource" class="button ghost" type="button">Cancelar</button>
-        <button class="button primary" type="submit">Adicionar ao display</button>
+        <button id="saveCustomSource" class="button primary" type="submit">Guardar no rascunho</button>
       </div>
     </form>
   </dialog>

@@ -40,12 +40,28 @@ Não é necessário repetir os testes já aprovados de Clima e SysOps. Esse test
 
 Veja [DESK_MODE.md](DESK_MODE.md) para o checklist de um ciclo curto e os limites implementados.
 
+## Retomada em 17/09/2026
+
+A instalação v0.5.0 foi confirmada no Raspberry: checkout limpo `54bef83`, API `0.5.0`, dois serviços ativos, SPI disponível e estado do display sem erro. O usuário informou sucesso na atualização. Isso comprova implantação/saúde automática, não observação visual de PI-HOLE/CASA/RELÓGIO/POMODORO.
+
+## Entregas adicionais da v0.6.0
+
+- seis modelos para fontes HTTP/JSON: Métrica, Status, Temperatura, Energia, Node-RED e Item de uma lista;
+- exemplos fictícios sem URLs/segredos/scripts, com aplicação explícita e preservação de URL/identificação ao editar;
+- conferência de campos em JSON fornecido pelo usuário, sem consulta à fonte nem gravação, com sessão/CSRF, limite de 32 KiB e retorno somente dos escalares selecionados;
+- confirmação antes de substituir campos, rascunho separado de aplicação e descarte do exemplo ao fechar;
+- respostas antigas de testes descartadas após edição/fechamento;
+- status desconhecidos/null neutros e detalhe visível no layout Status;
+- 100 testes de software e fluxo de navegador com serviços fictícios; sem novas dependências nem mudanças de botões/driver.
+
+Veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md) para modelos, Node-RED via GET/JSON, limites e atualização da biblioteca. MQTT nativo não foi implementado por esse modelo.
+
 ## Próximas implementações
 
 1. Homologar Pi-hole 6/Home Assistant reais e as duas novas páginas no TFT quando o usuário puder configurar suas credenciais.
 2. Homologar Relógio/Pomodoro no TFT com um ciclo de 1 minuto, pausa e retomada; não alterar os dois gestos físicos existentes.
-3. MQTT/Node-RED em etapa independente e Docker detalhado.
-4. Templates de integrações adicionais, mantendo contrato fechado e sem execução remota.
+3. MQTT nativo em etapa independente e Docker detalhado; Node-RED via GET/JSON já tem modelo/roteiro, com teste real pendente.
+4. Contratos específicos de outros apps, além dos seis modelos genéricos, mantendo contrato fechado e sem execução remota.
 5. Drivers físicos adicionais e matriz de compatibilidade por módulo/resolução.
 
 ## Limites a preservar
@@ -66,7 +82,7 @@ O Search Console exige login no navegador disponível. Essa é a única etapa de
 
 Abra o painel existente com o mesmo PIN. Em **Integrações guiadas**, configure o serviço desejado, teste, marque a ativação, guarde os ajustes e aplique. Depois confirme PI-HOLE/CASA com os botões. Nenhuma dessas etapas exige enviar credenciais nesta conversa. Veja [checklist e backup](BACKUP_AND_CREDENTIALS.md).
 
-## Raspberry acessível — instalação final aguarda senha de administrador
+## Histórico da preparação v0.3.0 → v0.5.0
 
 Em 16/09/2026, o Pi respondeu por SSH nos dois IPs conhecidos (`192.168.100.94` e `192.168.100.11`). A instalação ativa está limpa na revisão `6618be8`, a API responde `0.3.0`, os dois serviços estão ativos e a auditoria de SPI/estado/API foi aprovada.
 
@@ -74,7 +90,11 @@ Foi criada uma cópia privada completa do estado, fora do Git, com diretório `0
 
 A revisão v0.5.0 `04fce39` foi preparada em `~/.cache/st7789-dashboard-update-v0.5.0`, como checkout separado. Os 84 testes passaram no ARM. Dependências e unidades de serviço não mudaram entre as duas revisões, e o ambiente Python não apresenta dependências quebradas. Esses resultados não representam implantação da v0.5.0 nem homologação visual no TFT.
 
-O Raspberry exige senha para `sudo`; não houve alteração do checkout ativo, reinício dos serviços, cadastro de credenciais ou tentativa de contornar essa exigência. Execute no próprio Raspberry Pi, como usuário `pi`:
+Naquela preparação, o Raspberry exigiu senha para `sudo`; não houve alteração do checkout ativo, reinício dos serviços, cadastro de credenciais ou tentativa de contornar essa exigência. A instalação v0.5.0 foi concluída depois pelo usuário e confirmada nesta retomada.
+
+## Instalar a biblioteca v0.6.0
+
+O instalador continua exigindo senha de administrador no terminal, quando necessária. Como usuário `pi`:
 
 ```bash
 cd ~/raspberrypi-st7789-dashboard
@@ -86,4 +106,4 @@ git pull --ff-only
 
 Se o comando de status mostrar alterações próprias, não as descarte: preserve-as antes de atualizar. Informe a senha somente no terminal quando `sudo` pedir, nunca nesta conversa. O instalador usa o usuário/caminhos existentes e executa os testes antes de reiniciar os serviços; ele também reconfere dependências. O backup privado já foi preparado nesta retomada; se houver novos ajustes antes da instalação, faça outra cópia. Os novos módulos entram desativados e o PIN existente não precisa ser recriado.
 
-Veja [UPDATE_TO_V05.md](UPDATE_TO_V05.md) para conferir a versão implantada, ativar as páginas e realizar o checklist final. Tetris foi cancelado e não foi implementado.
+Confira API com versão `0.6.0`, atualize o navegador e use o mesmo PIN. Veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md) para criar uma fonte com exemplo, aplicar e conferir no TFT. Tetris foi cancelado e não foi implementado.

@@ -161,11 +161,92 @@ try {
   await page.locator("#pomodoroReset").click();
   await page.waitForFunction(() => document.querySelector("#pomodoroStatus").textContent === "Pronto para focar"
     && document.querySelector("#pomodoroCountdown").textContent === "02:00");
+  // Templates only fill the dialog after explicit consent; offline checks never query the source.
+  await page.locator("#addCustomPage").click();
+  assert.equal(await page.locator("#sourceTemplate option").count(), 7);
+  await page.locator("#sourceTemplate").selectOption("node-red");
+  assert.equal(await page.locator("#customTitle").inputValue(), "");
+  await page.locator("#applySourceTemplate").click();
+  assert.equal(await page.locator("#customValuePath").inputValue(), "dashboard.value");
+  assert.equal(await page.locator("#customUrl").inputValue(), "");
+  const callsBeforeExample = (await (await context.request.get(origin + "/fixture/status")).json()).calls.filter(call => call.path.startsWith("/examples/")).length;
+  await page.locator("#inspectSourceSample").click();
+  await page.waitForFunction(() => document.querySelector("#sourceTestResult").textContent.includes("Exemplo conferido, sem conexão: 23"));
+  assert.equal((await (await context.request.get(origin + "/fixture/status")).json()).calls.filter(call => call.path.startsWith("/examples/")).length, callsBeforeExample);
+  assert.equal((await (await context.request.get(origin + "/api/config")).json()).customPages.length, 0);
+  await page.locator("#customValuePath").fill("dashboard.missing");
+  await page.locator("#inspectSourceSample").click();
+  await page.waitForFunction(() => document.querySelector("#sourceTestResult").textContent.includes("não encontrado"));
+  await page.locator("#customValuePath").fill("dashboard.value");
+  let releaseExample;
+  let seeExample;
+  let finishExample;
+  const exampleSeen = new Promise(resolve => { seeExample = resolve; });
+  const oldExampleWait = new Promise(resolve => { releaseExample = resolve; });
+  const oldExampleFinished = new Promise(resolve => { finishExample = resolve; });
+  await page.route("**/api/sources/inspect", async route => {
+    seeExample();
+    await oldExampleWait;
+    try { await route.fulfill({status: 200, contentType: "application/json", body: JSON.stringify({ok: true, value: "OLD-EXAMPLE", secondary: null})}); }
+    finally { finishExample(); }
+  }, {times: 1});
+  await page.locator("#inspectSourceSample").click();
+  await exampleSeen;
+  await page.locator("#customValuePath").fill("dashboard.changed");
+  releaseExample();
+  await oldExampleFinished;
+  assert.equal(await page.locator("#sourceTestResult").innerText(), "", "An old test must not overwrite changed fields");
+  await page.locator("#customValuePath").fill("dashboard.value");
+  await page.locator("#sourceSample").fill('{"dashboard":{"value":0,"detail":"<img src=x onerror=alert(1)>"}}');
+  await page.locator("#inspectSourceSample").click();
+  await page.waitForFunction(() => document.querySelector("#sourceTestResult").textContent.includes("sem conexão: 0"));
+  assert.equal(await page.locator("#sourceTestResult img").count(), 0);
+  await page.locator("#sourceSample").fill("not json");
+  await page.locator("#inspectSourceSample").click();
+  assert.match(await page.locator("#sourceTestResult").innerText(), /não é um JSON válido/);
+  await page.locator("#customUrl").fill(fixture.baseUrl + "/examples/node-red");
+  await page.locator("#testCustomSource").click();
+  await page.waitForFunction(() => document.querySelector("#sourceTestResult").textContent.includes("Conexão aprovada: 23"));
+  await page.locator("#saveCustomSource").click();
+  await page.locator("#customDialog").waitFor({state: "hidden"});
+  assert.equal((await (await context.request.get(origin + "/api/config")).json()).customPages.length, 0,
+    "Guarding in the draft must not apply to the display");
+  await page.locator("#saveButton").click();
+  await page.waitForFunction(() => document.querySelector("#saveState").textContent === "Configuração aplicada");
+  const customConfig = await (await context.request.get(origin + "/api/config")).json();
+  const custom = customConfig.customPages[0];
+  assert.equal(custom.id, "custom:node-red");
+  const oldUrl = custom.source.url;
+  await page.locator(".custom-source-row .edit-source").click();
+  await page.locator("#sourceTemplate").selectOption("energy");
+  await page.locator("#applySourceTemplate").click();
+  assert.equal(await page.locator("#customUrl").inputValue(), oldUrl);
+  assert.equal(await page.locator("#customId").inputValue(), custom.id);
+  await page.locator("#cancelCustomSource").click();
+  assert.equal((await (await context.request.get(origin + "/api/config")).json()).customPages[0].title, "Node-RED");
+  for (const width of [1440, 980, 390, 320]) {
+    await page.setViewportSize({width, height: 1000});
+    await page.locator("#addCustomPage").click();
+    await page.locator("#sourceTemplate").selectOption("service");
+    await page.locator("#applySourceTemplate").click();
+    assert(await page.locator("#customDialog").evaluate(element => element.scrollWidth <= element.clientWidth + 1));
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+    if (output) await page.screenshot({path: `${output}/source-templates-${width}.png`});
+    await page.keyboard.press("Escape");
+    await page.locator("#customDialog").waitFor({state: "hidden"});
+    await page.waitForFunction(() => document.querySelector("#sourceSample").value === "");
+    assert.equal(await page.locator("#sourceSample").inputValue(), "");
+  }
+  const frame = await context.request.get(origin + `/api/preview?page=${encodeURIComponent(custom.id)}`);
+  assert.equal(frame.status(), 200);
+  assert.match(frame.headers()["content-type"], /image\/png/);
+  await page.waitForFunction(async () => (await (await fetch("/fixture/status")).json()).calls.filter(call => call.path === "/examples/node-red").length >= 2);
+  if (output) await fs.writeFile(`${output}/node-red-preview.png`, await (await context.request.get(origin + `/api/preview?page=${encodeURIComponent(custom.id)}`)).body());
   const calls = (await (await context.request.get(origin + "/fixture/status")).json()).calls;
   assert(calls.filter(call => call.path.startsWith("/api/states/")).every(call => call.method === "GET"));
   assert(calls.every(call => call.method === "GET" || call.path === "/api/auth"));
   assert.deepEqual(errors, []);
-  console.log("PASS: connectors, clock, Pomodoro start/pause/resume/reset, stale-poll protection, reload/login persistence, backup/restore, responsive UI and preserved PIN. Fake services only.");
+  console.log("PASS: source templates, offline JSON inspection, scalar-safe feedback, draft/apply isolation, preserved edit URL/ID, responsive dialogs; connectors, clock, Pomodoro, backup/restore and preserved PIN. Fake services only.");
 } catch (error) {
   if (output) {
     await fs.mkdir(output, {recursive: true});

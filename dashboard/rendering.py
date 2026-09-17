@@ -386,6 +386,17 @@ def draw_sysops_page(snapshot: dict, config: dict, page_number: int, page_count:
     return image
 
 
+def custom_status(value):
+    if value is None:
+        return "SEM DADOS", GRAY
+    normalized = str(value).strip().lower()
+    if normalized in {"1", "true", "on", "ok", "online", "active", "ativo", "healthy", "up", "operacional"}:
+        return "OPERACIONAL", GREEN
+    if normalized in {"0", "false", "off", "error", "erro", "offline", "inactive", "inativo", "unhealthy", "down", "failed", "falha"}:
+        return "ATENÇÃO", RED
+    return "VERIFICAR", GRAY
+
+
 def draw_custom_page(snapshot: dict, config: dict, page_id: str, page_number: int, page_count: int):
     definition = next(item for item in config["customPages"] if item["id"] == page_id)
     custom = snapshot.get("custom") or {}
@@ -405,19 +416,21 @@ def draw_custom_page(snapshot: dict, config: dict, page_id: str, page_number: in
     label = definition.get("valueLabel") or "VALOR"
     draw.text((14, 59), label.upper(), font=load_font(14, True), fill=accent)
     value = custom.get("value")
+    status, status_color = custom_status(value)
     if isinstance(value, bool):
         value = "ON" if value else "OFF"
-    shown = f"{value}{definition.get('unit') or ''}"
+    shown = "-" if value is None else f"{value}{definition.get('unit') or ''}"
     shown, value_font = fit_text(draw, shown, 212, 46, 22, True)
     draw.text((14, 88), shown, font=value_font, fill=WHITE)
 
     secondary = custom.get("secondary")
     card(draw, (8, 157, 232, 226))
     if definition["layout"] == "status":
-        active = str(value).strip().lower() in {"1", "true", "on", "ok", "online", "active", "ativo"}
-        draw.ellipse((20, 177, 50, 207), fill=GREEN if active else RED)
-        status = "OPERACIONAL" if active else "ATENÇÃO"
-        draw.text((65, 178), status, font=load_font(18, True), fill=GREEN if active else RED)
+        draw.ellipse((18, 169, 38, 189), fill=status_color)
+        draw.text((47, 169), status, font=load_font(15, True), fill=status_color)
+        if secondary is not None:
+            detail, detail_font = fit_text(draw, secondary, 202, 14, 10, True)
+            draw.text((18, 201), detail, font=detail_font, fill=accent)
     elif secondary is not None:
         draw.text((18, 168), "DETALHE", font=load_font(11, True), fill=GRAY)
         detail, detail_font = fit_text(draw, secondary, 202, 22, 14, True)

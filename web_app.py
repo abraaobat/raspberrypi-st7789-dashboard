@@ -21,6 +21,7 @@ from dashboard.providers import DataHub, fetch_custom_page
 from dashboard.rendering import render_page
 from dashboard.runtime import RuntimeStore
 from dashboard.desk import DeskError
+from dashboard.source_templates import inspect_source_sample, public_source_templates
 
 
 def create_app(test_config=None):
@@ -140,7 +141,8 @@ def create_app(test_config=None):
     @require_auth
     def catalog():
         config = load_config(state_override)
-        return jsonify({"pages": public_catalog(config["customPages"]), "displays": public_profiles()})
+        return jsonify({"pages": public_catalog(config["customPages"]), "displays": public_profiles(),
+                        "sourceTemplates": public_source_templates()})
 
     @app.get("/api/config")
     @require_auth
@@ -193,6 +195,18 @@ def create_app(test_config=None):
         except (ConfigError, ValueError) as exc:
             return jsonify({"error": str(exc)}), 400
         return jsonify({"ok": True, "value": result["value"], "secondary": result["secondary"]})
+
+    @app.post("/api/sources/inspect")
+    @require_auth
+    @require_csrf
+    def inspect_source():
+        try:
+            result = inspect_source_sample(request.get_json(silent=True))
+        except RecursionError:
+            return jsonify({"error": "exemplo JSON excede a profundidade permitida"}), 400
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify({"ok": True, **result})
 
     @app.get("/api/integrations/status")
     @require_auth

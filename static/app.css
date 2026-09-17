@@ -124,6 +124,11 @@ select option:disabled { color: #59606d; }
 .custom-page-list { display: grid; gap: 9px; }
 .custom-source-row { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 14px; padding: 12px 13px; background: rgba(255,255,255,.018); }
 .custom-source-row .accent-dot { width: 8px; height: 36px; border-radius: 99px; background: var(--cyan); }
+.custom-source-row .accent-dot.accent-blue { background: var(--blue); }
+.custom-source-row .accent-dot.accent-green { background: var(--green); }
+.custom-source-row .accent-dot.accent-orange { background: var(--orange); }
+.custom-source-row .accent-dot.accent-purple { background: #af78ff; }
+.custom-source-row .accent-dot.accent-red { background: var(--danger); }
 .custom-source-row .source-copy { min-width: 0; display: grid; gap: 3px; }
 .custom-source-row .source-copy small { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row-buttons { display: flex; gap: 6px; }
@@ -142,6 +147,14 @@ select option:disabled { color: #59606d; }
 .dialog-grid.three { grid-template-columns: .7fr 1fr 1fr; margin-top: 12px; }
 .source-note { color: var(--muted); font-size: 11px; line-height: 1.5; margin: 14px 0 0; }
 .source-note code { color: #b9d6ff; }
+.source-template-box { padding: 14px; margin-bottom: 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(60,210,235,.035); }
+.source-template-box .source-note { margin: 0 0 12px; }
+.source-sample { margin-top: 16px; border: 1px solid var(--line); border-radius: 12px; padding: 12px; min-width: 0; }
+.source-sample summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+.source-sample[open] summary { margin-bottom: 12px; }
+.source-sample .source-note { margin: 0 0 12px; }
+.source-json { width: 100%; resize: vertical; min-height: 110px; font-family: monospace; font-size: 12px; line-height: 1.5; }
+.source-test-result { overflow-wrap: anywhere; }
 .source-test-result { min-height: 20px; margin-top: 12px; font-size: 12px; color: var(--green); }
 .source-test-result.error { color: var(--danger); }
 .dialog-actions { display: grid; grid-template-columns: auto 1fr auto auto; gap: 9px; align-items: center; margin-top: 10px; }

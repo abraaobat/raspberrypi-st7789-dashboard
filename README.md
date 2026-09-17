@@ -4,7 +4,7 @@ Dashboard compacto para Raspberry Pi com display TFT ST7789 1.3" 240×240 via SP
 
 ![Raspberry Pi ST7789 Dashboard](docs/images/hero.jpg)
 
-O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.5.0 acrescenta relógio e Pomodoro offline aos assistentes de Pi-hole 6/Home Assistant, credenciais locais privadas, backup/restauração, clima, SysOps e fontes HTTP/JSON.
+O projeto foi desenvolvido e validado em um **Raspberry Pi 3 Model B V1.2**, usando Raspberry Pi OS Lite 32-bit. A versão 0.6.0 acrescenta seis modelos para fontes HTTP/JSON e conferência de caminhos com exemplos, sem conexão. Mantém Relógio/Pomodoro offline, assistentes Pi-hole 6/Home Assistant, credenciais locais privadas, backup/restauração, Clima e SysOps.
 
 ## Visão do produto
 
@@ -27,7 +27,11 @@ Pelo computador ou celular, o usuário pode:
 
 O MVP físico, o Web Control Panel e as páginas Clima e SysOps da versão 0.3.0 estão homologados no Raspberry Pi 3. A atualização preservou a configuração anterior e adicionou as integrações de forma opt-in, sem regressão nos botões, na prévia ou no carrossel.
 
-O software da versão 0.5.0 possui 84 testes automatizados, aprovados também no ARM do Raspberry em uma cópia separada, e verificação de ponta a ponta no navegador com serviços simulados. Pi-hole/Home Assistant reais e legibilidade de PI-HOLE/CASA/RELÓGIO/POMODORO no ST7789 aguardam homologação manual. Os novos módulos permanecem desativados na atualização. O Pi está acessível, com backup privado preparado; os serviços ativos continuam na v0.3.0, pois o instalador exige senha de administrador. Veja o [roteiro para concluir a atualização](docs/UPDATE_TO_V05.md).
+A instalação ativa v0.5.0 foi confirmada no Raspberry em 17/09/2026, com SPI, serviços, API e estado do display aprovados. A v0.6.0 tem 100 testes automatizados e fluxo de navegador com serviços fictícios; a nova biblioteca precisa ser instalada separadamente. Pi-hole/Home Assistant reais e legibilidade de PI-HOLE/CASA/RELÓGIO/POMODORO/fontes personalizadas no ST7789 aguardam homologação manual. Os novos módulos permanecem desativados na migração; nenhuma fonte é criada automaticamente. Veja [modelos e atualização](docs/CUSTOM_TEMPLATES.md).
+
+### Modelos para seu próprio app
+
+Em **Adicionar fonte**, escolha Métrica, Status, Temperatura, Energia, Node-RED ou Item de uma lista. Use **Usar modelo**, adapte os campos e confira os caminhos em um exemplo JSON sem consultar a API. Depois teste a URL real, guarde no rascunho e aplique. A lista de apps não é fixa: qualquer endpoint GET/JSON compatível pode alimentar uma das oito páginas personalizadas, respeitando os limites de segurança. [Guia completo](docs/CUSTOM_TEMPLATES.md).
 
 - [Roadmap do produto](ROADMAP.md)
 - [Especificação do Web Control Panel](docs/WEB_CONTROL_PANEL.md)

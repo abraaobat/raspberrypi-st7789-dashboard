@@ -1,5 +1,7 @@
 # Concluir a atualização para v0.5.0
 
+**Atualização concluída:** API `0.5.0`, serviços, SPI e estado do display foram confirmados em 17/09/2026. Este roteiro é histórico; para os modelos da v0.6.0, veja [CUSTOM_TEMPLATES.md](CUSTOM_TEMPLATES.md). Observação visual das novas páginas continua pendente.
+
 ## Preparação concluída
 
 Em 16/09/2026, o Raspberry respondeu por SSH. Os 84 testes da revisão `04fce39` passaram no ARM em uma cópia separada, e a instalação atual v0.3.0 passou na auditoria automática. Foi criado backup privado completo do estado; PIN, configuração e chave de sessão foram preservados. Não houve troca do código ativo nem reinício dos serviços.
